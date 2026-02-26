@@ -8,6 +8,15 @@ on:
   pull_request:
     branches: ["main", "master"]
 
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -32,7 +41,7 @@ jobs:
       - name: Run tests
         run: python -m pytest tests/ -v --tb=short
 
-  publish:
+  publish-pypi:
     needs: test
     runs-on: ubuntu-latest
 
@@ -41,8 +50,6 @@ jobs:
     permissions:
       id-token: write
       contents: read
-
-    environment: hprx
 
     steps:
       - uses: actions/checkout@v4
@@ -59,3 +66,62 @@ jobs:
 
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
+
+  deploy-pages:
+    needs: test
+    runs-on: ubuntu-latest
+
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Create docs folder
+        run: |
+          mkdir -p _site
+          cp -r docs/* _site/ 2>/dev/null || echo "No docs folder, creating from README"
+          if [ ! -f _site/index.html ]; then
+            python -m pip install markdown
+            python -c "
+import markdown
+with open('README.md', 'r') as f:
+    html = markdown.markdown(f.read(), extensions=['tables', 'fenced_code'])
+with open('_site/index.html', 'w') as f:
+    f.write(f'''<!DOCTYPE html>
+<html>
+<head>
+    <meta charset=\"UTF-8\">
+    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
+    <title>HyperPress</title>
+    <style>
+        body {{ font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.6; }}
+        pre {{ background: #f4f4f4; padding: 1rem; border-radius: 8px; overflow-x: auto; }}
+        code {{ background: #f4f4f4; padding: 0.2rem 0.4rem; border-radius: 4px; }}
+        h1, h2, h3 {{ color: #00f0ff; }}
+        table {{ border-collapse: collapse; width: 100%; margin: 1rem 0; }}
+        th, td {{ border: 1px solid #ddd; padding: 0.5rem; text-align: left; }}
+        th {{ background: #0a0a0f; color: #00f0ff; }}
+    </style>
+</head>
+<body>
+{html}
+</body>
+</html>''')
+            
+          fi
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '_site'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
