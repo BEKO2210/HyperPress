@@ -3,6 +3,8 @@ name: CI
 on:
   push:
     branches: ["main", "master"]
+    tags:
+      - "v*"
   pull_request:
     branches: ["main", "master"]
 
@@ -29,3 +31,31 @@ jobs:
 
       - name: Run tests
         run: python -m pytest tests/ -v --tb=short
+
+  publish:
+    needs: test
+    runs-on: ubuntu-latest
+
+    if: startsWith(github.ref, 'refs/tags/')
+
+    permissions:
+      id-token: write
+      contents: read
+
+    environment: HPRX
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install build
+        run: pip install build
+
+      - name: Build package
+        run: python -m build
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
