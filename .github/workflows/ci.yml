@@ -42,7 +42,7 @@ jobs:
       id-token: write
       contents: read
 
-    environment: HPRX
+    environment: hprx
 
     steps:
       - uses: actions/checkout@v4
