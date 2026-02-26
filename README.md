@@ -203,11 +203,11 @@ python -m pytest tests/ -v
 
 ## License
 
-MIT License — Copyright 2025 Belkis / BEL KI (AI Consultancy)
+MIT License — Copyright 2025 Belkis Aslani
 
 ---
 
 <p align="center">
-  Built by <strong>BEL KI</strong> — AI Consultancy<br>
+  Built by <strong>Belkis Aslani</strong><br>
   <a href="https://beko2210.github.io/HyperPress/">Live Demo</a> · <a href="https://github.com/BEKO2210/HyperPress">GitHub</a>
 </p>
