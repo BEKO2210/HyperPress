@@ -94,6 +94,7 @@ section {
   letter-spacing: 3px;
   margin-bottom: 10px;
   opacity: 0.8;
+  text-align: center;
 }
 
 .section-title {
@@ -102,6 +103,7 @@ section {
   color: var(--text-bright);
   margin-bottom: 16px;
   line-height: 1.2;
+  text-align: center;
 }
 
 .section-desc {
@@ -109,6 +111,17 @@ section {
   font-size: 0.92rem;
   max-width: 600px;
   line-height: 1.6;
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.section-subtitle {
+  font-size: 1.05rem;
+  color: var(--text-bright);
+  text-align: center;
+  margin-top: 48px;
+  margin-bottom: 4px;
 }
 
 /* ── Inline SVG Icons ─────────────────────────────── */
@@ -348,14 +361,16 @@ nav .container {
   display: flex;
   flex-direction: column;
   gap: 0;
-  margin: 40px 0;
+  margin: 40px auto;
   max-width: 520px;
 }
 
 .pipe-step {
   display: flex;
-  align-items: flex-start;
-  gap: 16px;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0;
   position: relative;
   padding-bottom: 0;
 }
@@ -397,10 +412,11 @@ nav .container {
 .pipe-step:last-child .pipe-step-connector { display: none; }
 
 .pipe-step-body {
-  padding-top: 8px;
+  padding-top: 10px;
   padding-bottom: 24px;
   flex: 1;
   min-width: 0;
+  text-align: center;
 }
 
 .pipe-step-num {
@@ -433,11 +449,7 @@ nav .container {
     max-width: 100%;
   }
   .pipe-step {
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
     flex: 1;
-    padding-bottom: 0;
   }
   .pipe-step-line {
     flex-direction: row;
@@ -454,7 +466,6 @@ nav .container {
     padding-top: 16px;
     padding-bottom: 0;
   }
-  /* horizontal connecting line between steps */
   .pipe-step:not(:last-child)::after {
     content: '';
     position: absolute;
@@ -471,14 +482,24 @@ nav .container {
   display: grid;
   grid-template-columns: 1fr;
   gap: 12px;
-  margin-top: 32px;
+  margin-top: 20px;
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 @media (min-width: 500px) {
   .cards-grid { grid-template-columns: repeat(2, 1fr); }
 }
 @media (min-width: 900px) {
-  .cards-grid { grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .cards-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+  }
+  /* Center the 7th card (alone in last row of 3-col grid) */
+  .cards-grid .prep-card:last-child:nth-child(3n+1) {
+    grid-column: 2;
+  }
 }
 
 .prep-card {
@@ -487,6 +508,7 @@ nav .container {
   border-radius: 10px;
   padding: 16px;
   transition: border-color 0.3s, box-shadow 0.3s;
+  text-align: center;
 }
 
 .prep-card:hover {
@@ -515,7 +537,12 @@ nav .container {
 }
 
 /* Racing lanes */
-.racing-container { margin-top: 40px; }
+.racing-container {
+  margin-top: 20px;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+}
 
 .race-lane {
   display: flex;
@@ -576,6 +603,9 @@ nav .container {
   grid-template-columns: repeat(3, 1fr);
   gap: 12px;
   margin-bottom: 48px;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .summary-card {
@@ -624,7 +654,14 @@ nav .container {
 .summary-card.highlight .card-suffix { color: var(--cyan-dim); }
 
 /* Benchmark cards (mobile-friendly, no table) */
-.bench-list { display: flex; flex-direction: column; gap: 16px; }
+.bench-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+}
 
 .bench-item {
   background: var(--bg-card);
@@ -712,7 +749,8 @@ nav .container {
   align-items: center;
   gap: 0;
   margin: 40px auto;
-  max-width: 480px;
+  max-width: 500px;
+  text-align: center;
 }
 
 .arch-node {
@@ -783,6 +821,8 @@ nav .container {
   border-radius: 12px;
   overflow: hidden;
   max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .code-header {
@@ -854,7 +894,11 @@ nav .container {
   background: linear-gradient(180deg, var(--bg) 0%, #0e0e18 100%);
 }
 
-.demo-container { max-width: 600px; }
+.demo-container {
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
 
 .demo-textarea {
   width: 100%;
@@ -1144,7 +1188,7 @@ footer .footer-links a:hover { color: var(--cyan); text-decoration: none; }
       </div>
     </div>
 
-    <h3 class="reveal" style="margin-top:40px;font-size:1.05rem;color:var(--text-bright);">7 Preprocessing Transforms</h3>
+    <h3 class="section-subtitle reveal">7 Preprocessing Transforms</h3>
     <div class="cards-grid">
       <div class="prep-card reveal">
         <span class="card-tag">Transform 1</span>
@@ -1183,7 +1227,7 @@ footer .footer-links a:hover { color: var(--cyan); text-decoration: none; }
       </div>
     </div>
 
-    <h3 class="reveal" style="margin-top:40px;font-size:1.05rem;color:var(--text-bright);">5 Backends Race Per Block</h3>
+    <h3 class="section-subtitle reveal">5 Backends Race Per Block</h3>
     <div class="racing-container reveal reveal-d1">
       <div class="race-lane">
         <span class="race-label">zlib-9</span>
