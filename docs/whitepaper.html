@@ -60,10 +60,8 @@ a:hover { text-decoration: underline; }
 
 /* ── Navigation ──────────────────────────── */
 nav {
-  position: fixed; top: 0; left: 0; width: 100%; z-index: 100;
+  width: 100%; z-index: 100;
   background: rgba(10,10,15,0.92);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid rgba(0,240,255,0.08);
 }
 nav .nav-inner {
@@ -81,7 +79,7 @@ nav .nav-inner {
 @media (max-width: 768px) {
   .nav-links {
     display: none; position: absolute; top: 56px; left: 0; right: 0;
-    background: rgba(10,10,15,0.97); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    background: rgba(10,10,15,0.97);
     flex-direction: column; padding: 16px 24px; gap: 14px; border-bottom: 1px solid var(--border);
   }
   .nav-links.open { display: flex; }
@@ -90,7 +88,7 @@ nav .nav-inner {
 }
 
 /* ── Paper container ─────────────────────── */
-.paper { max-width: 820px; margin: 0 auto; padding: 100px 28px 80px; }
+.paper { max-width: 820px; margin: 0 auto; padding: 40px 28px 80px; }
 
 /* ── Title block ─────────────────────────── */
 .paper-header { text-align: center; margin-bottom: 64px; padding-bottom: 40px; border-bottom: 1px solid var(--border); }
@@ -111,7 +109,6 @@ nav .nav-inner {
 
 /* ── Section headings ────────────────────── */
 .sec-num { font-family: var(--font-mono); font-size: 0.7rem; color: var(--cyan); text-transform: uppercase; letter-spacing: 2px; display: block; margin-bottom: 8px; }
-section[id] { scroll-margin-top: 72px; }
 h2 { font-size: clamp(1.3rem, 4vw, 1.8rem); font-weight: 700; color: var(--text-bright); margin-bottom: 20px; padding-top: 48px; }
 h3 { font-size: 1.1rem; font-weight: 600; color: var(--text-bright); margin: 32px 0 12px; }
 p { margin-bottom: 16px; font-size: 0.92rem; color: var(--text); }
