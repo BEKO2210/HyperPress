@@ -11,7 +11,6 @@
 :root {
   --bg: #0a0a0f;
   --bg-card: #12121a;
-  --bg-card-hover: #1a1a28;
   --cyan: #00f0ff;
   --cyan-dim: #00a0aa;
   --cyan-glow: rgba(0,240,255,0.15);
@@ -27,7 +26,6 @@
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
 html { scroll-behavior: smooth; font-size: 16px; overflow-x: hidden; }
 
 body {
@@ -52,273 +50,75 @@ a:hover { text-decoration: underline; }
   pointer-events: none;
 }
 
-/* ── Content overlay ─────────────────────── */
-.page-content {
-  position: relative;
-  z-index: 1;
-}
+.page-content { position: relative; z-index: 1; }
 
 /* ── Navigation ──────────────────────────── */
 nav {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%;
-  z-index: 100;
+  position: fixed; top: 0; left: 0; width: 100%; z-index: 100;
   background: rgba(10,10,15,0.92);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid rgba(0,240,255,0.08);
 }
-
 nav .nav-inner {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 0 24px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 56px;
+  max-width: 900px; margin: 0 auto; padding: 0 24px;
+  display: flex; align-items: center; justify-content: space-between; height: 56px;
 }
-
 .nav-logo {
-  font-family: var(--font-mono);
-  font-weight: 700;
-  font-size: 0.95rem;
-  color: var(--cyan);
-  letter-spacing: 2px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  font-family: var(--font-mono); font-weight: 700; font-size: 0.95rem;
+  color: var(--cyan); letter-spacing: 2px; display: flex; align-items: center; gap: 8px;
 }
-
-.nav-links {
-  display: flex;
-  gap: 20px;
-  list-style: none;
-}
-
-.nav-links a {
-  font-size: 0.78rem;
-  color: var(--text-dim);
-  font-weight: 500;
-  transition: color 0.3s;
-}
-
+.nav-links { display: flex; gap: 20px; list-style: none; }
+.nav-links a { font-size: 0.78rem; color: var(--text-dim); font-weight: 500; transition: color 0.3s; }
 .nav-links a:hover { color: var(--cyan); text-decoration: none; }
-
-.nav-toggle {
-  display: none;
-  background: none;
-  border: none;
-  color: var(--text-dim);
-  cursor: pointer;
-  padding: 4px;
-}
-
+.nav-toggle { display: none; background: none; border: none; color: var(--text-dim); cursor: pointer; padding: 4px; }
 @media (max-width: 768px) {
   .nav-links {
-    display: none;
-    position: absolute;
-    top: 56px; left: 0; right: 0;
-    background: rgba(10,10,15,0.97);
-    backdrop-filter: blur(20px);
-    flex-direction: column;
-    padding: 16px 24px;
-    gap: 14px;
-    border-bottom: 1px solid var(--border);
+    display: none; position: absolute; top: 56px; left: 0; right: 0;
+    background: rgba(10,10,15,0.97); backdrop-filter: blur(20px);
+    flex-direction: column; padding: 16px 24px; gap: 14px; border-bottom: 1px solid var(--border);
   }
   .nav-links.open { display: flex; }
   .nav-toggle { display: block; }
 }
 
 /* ── Paper container ─────────────────────── */
-.paper {
-  max-width: 820px;
-  margin: 0 auto;
-  padding: 100px 28px 80px;
-}
+.paper { max-width: 820px; margin: 0 auto; padding: 100px 28px 80px; }
 
 /* ── Title block ─────────────────────────── */
-.paper-header {
-  text-align: center;
-  margin-bottom: 64px;
-  padding-bottom: 40px;
-  border-bottom: 1px solid var(--border);
-}
-
-.paper-tag {
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  color: var(--cyan);
-  text-transform: uppercase;
-  letter-spacing: 3px;
-  margin-bottom: 16px;
-}
-
-.paper-title {
-  font-size: clamp(1.6rem, 5vw, 2.6rem);
-  font-weight: 700;
-  color: var(--text-bright);
-  line-height: 1.2;
-  margin-bottom: 12px;
-}
-
-.paper-subtitle {
-  font-size: clamp(0.9rem, 3vw, 1.15rem);
-  color: var(--text-dim);
-  margin-bottom: 20px;
-}
-
-.paper-meta {
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  color: var(--text-dim);
-  display: flex;
-  justify-content: center;
-  gap: 24px;
-  flex-wrap: wrap;
-}
-
+.paper-header { text-align: center; margin-bottom: 64px; padding-bottom: 40px; border-bottom: 1px solid var(--border); }
+.paper-tag { font-family: var(--font-mono); font-size: 0.7rem; color: var(--cyan); text-transform: uppercase; letter-spacing: 3px; margin-bottom: 16px; }
+.paper-title { font-size: clamp(1.6rem, 5vw, 2.6rem); font-weight: 700; color: var(--text-bright); line-height: 1.2; margin-bottom: 12px; }
+.paper-subtitle { font-size: clamp(0.9rem, 3vw, 1.15rem); color: var(--text-dim); margin-bottom: 20px; }
+.paper-meta { font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-dim); display: flex; justify-content: center; gap: 24px; flex-wrap: wrap; }
 .paper-meta span { white-space: nowrap; }
 
 /* ── Table of Contents ───────────────────── */
-.toc {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 28px 32px;
-  margin-bottom: 56px;
-}
-
-.toc-title {
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  color: var(--cyan);
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  margin-bottom: 16px;
-}
-
-.toc ol {
-  list-style: none;
-  counter-reset: toc;
-}
-
-.toc ol li {
-  counter-increment: toc;
-  margin-bottom: 8px;
-}
-
-.toc ol li a {
-  font-size: 0.88rem;
-  color: var(--text);
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  transition: color 0.3s;
-}
-
-.toc ol li a::before {
-  content: counter(toc, decimal-leading-zero);
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  color: var(--cyan-dim);
-  width: 22px;
-  flex-shrink: 0;
-}
-
+.toc { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 28px 32px; margin-bottom: 56px; }
+.toc-title { font-family: var(--font-mono); font-size: 0.72rem; color: var(--cyan); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 16px; }
+.toc ol { list-style: none; counter-reset: toc; }
+.toc ol li { counter-increment: toc; margin-bottom: 8px; }
+.toc ol li a { font-size: 0.88rem; color: var(--text); display: flex; align-items: center; gap: 10px; transition: color 0.3s; }
+.toc ol li a::before { content: counter(toc, decimal-leading-zero); font-family: var(--font-mono); font-size: 0.7rem; color: var(--cyan-dim); width: 22px; flex-shrink: 0; }
 .toc ol li a:hover { color: var(--cyan); text-decoration: none; }
 
 /* ── Section headings ────────────────────── */
-.sec-num {
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  color: var(--cyan);
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  display: block;
-  margin-bottom: 8px;
-}
-
-h2 {
-  font-size: clamp(1.3rem, 4vw, 1.8rem);
-  font-weight: 700;
-  color: var(--text-bright);
-  margin-bottom: 20px;
-  padding-top: 48px;
-}
-
-h3 {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: var(--text-bright);
-  margin: 32px 0 12px;
-}
-
-p {
-  margin-bottom: 16px;
-  font-size: 0.92rem;
-  color: var(--text);
-}
+.sec-num { font-family: var(--font-mono); font-size: 0.7rem; color: var(--cyan); text-transform: uppercase; letter-spacing: 2px; display: block; margin-bottom: 8px; }
+h2 { font-size: clamp(1.3rem, 4vw, 1.8rem); font-weight: 700; color: var(--text-bright); margin-bottom: 20px; padding-top: 48px; }
+h3 { font-size: 1.1rem; font-weight: 600; color: var(--text-bright); margin: 32px 0 12px; }
+p { margin-bottom: 16px; font-size: 0.92rem; color: var(--text); }
 
 /* ── Highlight box ───────────────────────── */
-.highlight-box {
-  background: rgba(0,240,255,0.04);
-  border: 1px solid rgba(0,240,255,0.15);
-  border-radius: 10px;
-  padding: 20px 24px;
-  margin: 24px 0;
-  font-size: 0.88rem;
-  line-height: 1.7;
-}
-
+.highlight-box { background: rgba(0,240,255,0.04); border: 1px solid rgba(0,240,255,0.15); border-radius: 10px; padding: 20px 24px; margin: 24px 0; font-size: 0.88rem; line-height: 1.7; }
 .highlight-box strong { color: var(--cyan); }
 
-/* ── Formula / Equation ──────────────────── */
-.equation {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 16px 24px;
-  margin: 20px 0;
-  text-align: center;
-  font-family: var(--font-mono);
-  font-size: 0.85rem;
-  color: var(--cyan);
-  overflow-x: auto;
-}
+/* ── Equation ────────────────────────────── */
+.equation { background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 16px 24px; margin: 20px 0; text-align: center; font-family: var(--font-mono); font-size: 0.85rem; color: var(--cyan); overflow-x: auto; }
+.equation .label { font-size: 0.68rem; color: var(--text-dim); margin-top: 8px; font-family: var(--font-sans); }
 
-.equation .label {
-  font-size: 0.68rem;
-  color: var(--text-dim);
-  margin-top: 8px;
-  font-family: var(--font-sans);
-}
-
-/* ── Inline code ─────────────────────────── */
-code {
-  font-family: var(--font-mono);
-  font-size: 0.82rem;
-  background: rgba(0,240,255,0.06);
-  color: var(--cyan);
-  padding: 2px 6px;
-  border-radius: 4px;
-}
-
-/* ── Code block ──────────────────────────── */
-pre {
-  background: #0d0d14;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 16px 20px;
-  margin: 20px 0;
-  overflow-x: auto;
-  font-family: var(--font-mono);
-  font-size: 0.8rem;
-  line-height: 1.7;
-  color: var(--text);
-}
-
+/* ── Inline code & code block ────────────── */
+code { font-family: var(--font-mono); font-size: 0.82rem; background: rgba(0,240,255,0.06); color: var(--cyan); padding: 2px 6px; border-radius: 4px; }
+pre { background: #0d0d14; border: 1px solid var(--border); border-radius: 8px; padding: 16px 20px; margin: 20px 0; overflow-x: auto; font-family: var(--font-mono); font-size: 0.8rem; line-height: 1.7; color: var(--text); }
 pre .kw { color: var(--magenta); }
 pre .fn { color: var(--cyan); }
 pre .cm { color: var(--text-dim); font-style: italic; }
@@ -326,346 +126,215 @@ pre .st { color: var(--green); }
 pre .num { color: var(--yellow); }
 
 /* ── Data table ──────────────────────────── */
-.data-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin: 24px 0;
-  font-size: 0.82rem;
-}
-
-.data-table th {
-  background: var(--bg-card);
-  color: var(--text-bright);
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  padding: 12px 14px;
-  text-align: left;
-  border-bottom: 2px solid var(--border);
-}
-
-.data-table td {
-  padding: 10px 14px;
-  border-bottom: 1px solid rgba(42,42,58,0.5);
-  color: var(--text);
-}
-
+.data-table { width: 100%; border-collapse: collapse; margin: 24px 0; font-size: 0.82rem; }
+.data-table th { background: var(--bg-card); color: var(--text-bright); font-family: var(--font-mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 1px; padding: 12px 14px; text-align: left; border-bottom: 2px solid var(--border); }
+.data-table td { padding: 10px 14px; border-bottom: 1px solid rgba(42,42,58,0.5); color: var(--text); }
 .data-table tr:hover td { background: rgba(0,240,255,0.02); }
-
 .data-table .num-col { text-align: right; font-family: var(--font-mono); }
 .data-table .best { color: var(--cyan); font-weight: 700; }
+.table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 24px 0; }
 
-/* ── Diagram containers ──────────────────── */
-.diagram {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 32px 24px;
-  margin: 32px 0;
+/* ═══════════════════════════════════════════
+   VISUAL FLOWCHART (CSS/SVG)
+   ═══════════════════════════════════════════ */
+.diagram { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 32px 24px; margin: 32px 0; overflow-x: auto; }
+.diagram-title { font-family: var(--font-mono); font-size: 0.68rem; color: var(--cyan); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 24px; text-align: center; }
+
+/* Flowchart */
+.flow { display: flex; flex-direction: column; align-items: center; gap: 0; }
+.flow-node {
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 24px;
   text-align: center;
-  overflow-x: auto;
+  width: 100%;
+  max-width: 340px;
+  transition: border-color 0.3s, box-shadow 0.3s;
+  position: relative;
 }
+.flow-node:hover { border-color: var(--cyan); box-shadow: 0 0 20px var(--cyan-glow); }
+.flow-node.accent-cyan { border-color: var(--cyan); }
+.flow-node.accent-cyan .flow-node-title { color: var(--cyan); }
+.flow-node.accent-magenta { border-color: var(--magenta); }
+.flow-node.accent-magenta .flow-node-title { color: var(--magenta); }
+.flow-node.accent-yellow { border-color: var(--yellow); }
+.flow-node.accent-yellow .flow-node-title { color: var(--yellow); }
+.flow-node.accent-green { border-color: var(--green); }
+.flow-node.accent-green .flow-node-title { color: var(--green); }
+.flow-node-title { font-family: var(--font-mono); font-weight: 600; font-size: 0.85rem; color: var(--text-bright); margin-bottom: 4px; }
+.flow-node-desc { font-size: 0.75rem; color: var(--text-dim); line-height: 1.4; }
+.flow-node-detail { font-family: var(--font-mono); font-size: 0.65rem; color: var(--cyan-dim); margin-top: 4px; }
 
-.diagram-title {
-  font-family: var(--font-mono);
-  font-size: 0.68rem;
-  color: var(--cyan);
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  margin-bottom: 20px;
+.flow-arrow { display: flex; align-items: center; justify-content: center; height: 32px; }
+.flow-arrow svg { width: 16px; height: 16px; color: var(--cyan-dim); }
+
+/* Branching row */
+.flow-branch {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  width: 100%;
+  max-width: 520px;
+  position: relative;
 }
+.flow-branch::before {
+  content: '';
+  position: absolute;
+  top: -16px;
+  left: 25%;
+  right: 25%;
+  height: 1px;
+  background: var(--border);
+}
+.flow-branch .flow-node { max-width: 100%; }
 
-/* ASCII flow diagram */
-.ascii-flow {
+.flow-branch-label {
   font-family: var(--font-mono);
-  font-size: clamp(0.55rem, 1.8vw, 0.78rem);
-  line-height: 1.6;
+  font-size: 0.6rem;
   color: var(--text-dim);
-  white-space: pre;
-  display: inline-block;
-  text-align: left;
+  text-align: right;
+  padding-right: 8px;
+  letter-spacing: 1px;
 }
 
-.ascii-flow .node {
-  color: var(--text-bright);
-  font-weight: 600;
+/* Merge arrow */
+.flow-merge { position: relative; width: 100%; max-width: 520px; height: 32px; }
+.flow-merge::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 25%;
+  right: 25%;
+  height: 1px;
+  background: var(--border);
+}
+.flow-merge::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 1px;
+  height: 100%;
+  background: var(--border);
 }
 
-.ascii-flow .hl { color: var(--cyan); }
-.ascii-flow .mg { color: var(--magenta); }
-.ascii-flow .yw { color: var(--yellow); }
-.ascii-flow .gn { color: var(--green); }
-
-/* ── Bar chart (CSS-only) ────────────────── */
-.bar-chart {
+/* ── Two-stage flow (BWT pipeline) ───────── */
+.flow-two {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  max-width: 600px;
-  margin: 0 auto;
-}
-
-.bar-row {
-  display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 0;
 }
 
-.bar-label {
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  color: var(--text-dim);
-  width: 100px;
-  text-align: right;
-  flex-shrink: 0;
+.flow-stage {
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 20px 28px;
+  width: 100%;
+  max-width: 480px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px 20px;
+  align-items: start;
 }
 
-.bar-track {
-  flex: 1;
-  height: 24px;
-  background: rgba(255,255,255,0.03);
-  border-radius: 4px;
-  overflow: hidden;
+.flow-stage.hl-cyan { border-color: var(--cyan); }
+.flow-stage.hl-magenta { border-color: var(--magenta); }
+
+.flow-stage-main { min-width: 0; }
+.flow-stage-title { font-family: var(--font-mono); font-weight: 600; font-size: 0.85rem; color: var(--cyan); margin-bottom: 4px; }
+.flow-stage.hl-magenta .flow-stage-title { color: var(--magenta); }
+.flow-stage-io { font-family: var(--font-mono); font-size: 0.72rem; color: var(--green); margin-top: 6px; }
+.flow-stage-side { font-size: 0.7rem; color: var(--text-dim); line-height: 1.5; text-align: right; white-space: nowrap; }
+
+@media (max-width: 500px) {
+  .flow-stage { grid-template-columns: 1fr; }
+  .flow-stage-side { text-align: left; }
 }
 
+/* ── Bar chart (CSS-only) ────────────────── */
+.bar-chart { display: flex; flex-direction: column; gap: 10px; max-width: 600px; margin: 0 auto; }
+.bar-row { display: flex; align-items: center; gap: 10px; }
+.bar-label { font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-dim); width: 100px; text-align: right; flex-shrink: 0; }
+.bar-track { flex: 1; height: 28px; background: rgba(255,255,255,0.03); border-radius: 6px; overflow: hidden; }
 .bar-fill {
-  height: 100%;
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  padding-right: 8px;
-  font-family: var(--font-mono);
-  font-size: 0.65rem;
-  font-weight: 700;
-  color: var(--bg);
-  transition: width 1.5s cubic-bezier(0.25,0.46,0.45,0.94);
-  width: 0;
+  height: 100%; border-radius: 6px;
+  display: flex; align-items: center; justify-content: flex-end; padding-right: 10px;
+  font-family: var(--font-mono); font-size: 0.68rem; font-weight: 700; color: var(--bg);
+  transition: width 1.5s cubic-bezier(0.25,0.46,0.45,0.94); width: 0;
 }
-
 .bar-fill.cyan { background: var(--cyan); }
 .bar-fill.dim { background: var(--text-dim); }
 .bar-fill.yellow { background: var(--yellow); }
 .bar-fill.magenta { background: var(--magenta); }
 .bar-fill.green { background: var(--green); }
 
-/* ── Comparison grid ─────────────────────── */
-.compare-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
-  margin: 24px 0;
-}
-
-@media (max-width: 600px) {
-  .compare-grid { grid-template-columns: 1fr; }
-}
-
-.compare-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 20px;
-  text-align: center;
-}
-
+/* ── Compare cards ───────────────────────── */
+.compare-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 24px 0; }
+@media (max-width: 600px) { .compare-grid { grid-template-columns: 1fr; } }
+.compare-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 20px; text-align: center; }
 .compare-card.winner { border-color: var(--cyan); box-shadow: 0 0 20px var(--cyan-glow); }
-
-.compare-card .cc-label {
-  font-family: var(--font-mono);
-  font-size: 0.65rem;
-  color: var(--text-dim);
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-  margin-bottom: 8px;
-}
-
-.compare-card .cc-value {
-  font-family: var(--font-mono);
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--text-dim);
-}
-
+.compare-card .cc-label { font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 8px; }
+.compare-card .cc-value { font-family: var(--font-mono); font-size: 2rem; font-weight: 700; color: var(--text-dim); }
 .compare-card.winner .cc-value { color: var(--cyan); }
-
-.compare-card .cc-suffix {
-  font-size: 0.8rem;
-  color: var(--text-dim);
-}
-
+.compare-card .cc-suffix { font-size: 0.8rem; color: var(--text-dim); }
 .compare-card.winner .cc-suffix { color: var(--cyan-dim); }
 
-/* ── Feature block ───────────────────────── */
-.feature-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 14px;
-  margin: 24px 0;
-}
-
-@media (max-width: 600px) {
-  .feature-grid { grid-template-columns: 1fr; }
-}
-
-.feature-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 16px 20px;
-}
-
-.feature-card .fc-tag {
-  font-family: var(--font-mono);
-  font-size: 0.62rem;
-  color: var(--magenta);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  margin-bottom: 4px;
-}
-
-.feature-card h4 {
-  font-size: 0.9rem;
-  color: var(--text-bright);
-  margin-bottom: 6px;
-}
-
-.feature-card p {
-  font-size: 0.78rem;
-  color: var(--text-dim);
-  margin-bottom: 0;
-  line-height: 1.5;
-}
+/* ── Feature cards ───────────────────────── */
+.feature-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin: 24px 0; }
+@media (max-width: 600px) { .feature-grid { grid-template-columns: 1fr; } }
+.feature-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 16px 20px; }
+.feature-card .fc-tag { font-family: var(--font-mono); font-size: 0.62rem; color: var(--magenta); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+.feature-card h4 { font-size: 0.9rem; color: var(--text-bright); margin-bottom: 6px; }
+.feature-card p { font-size: 0.78rem; color: var(--text-dim); margin-bottom: 0; line-height: 1.5; }
 
 /* ── HPRX format diagram ────────────────── */
-.format-box {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 0;
-  margin: 20px 0;
-}
-
-.fmt-field {
-  border: 1px solid var(--border);
-  padding: 10px 14px;
-  text-align: center;
-  min-width: 80px;
-}
-
+.format-box { display: flex; flex-wrap: wrap; justify-content: center; gap: 0; margin: 20px 0; }
+.fmt-field { border: 1px solid var(--border); padding: 12px 16px; text-align: center; min-width: 80px; background: var(--bg); }
 .fmt-field:first-child { border-radius: 8px 0 0 8px; }
 .fmt-field:last-child { border-radius: 0 8px 8px 0; }
+.fmt-field .ff-name { font-family: var(--font-mono); font-size: 0.7rem; color: var(--cyan); font-weight: 600; }
+.fmt-field .ff-size { font-size: 0.62rem; color: var(--text-dim); margin-top: 2px; }
 
-.fmt-field .ff-name {
-  font-family: var(--font-mono);
-  font-size: 0.68rem;
-  color: var(--cyan);
-  font-weight: 600;
-}
-
-.fmt-field .ff-size {
-  font-size: 0.62rem;
-  color: var(--text-dim);
-  margin-top: 2px;
-}
-
-/* ── Ordered list ────────────────────────── */
-ol.steps {
-  margin: 16px 0 16px 20px;
-  font-size: 0.9rem;
-}
-
-ol.steps li {
-  margin-bottom: 10px;
-  padding-left: 4px;
-}
-
-ol.steps li::marker {
-  color: var(--cyan);
-  font-family: var(--font-mono);
-  font-weight: 700;
-}
-
-/* ── Unordered list ──────────────────────── */
-ul.bullets {
-  margin: 16px 0 16px 20px;
-  font-size: 0.9rem;
-}
-
-ul.bullets li {
-  margin-bottom: 8px;
-  padding-left: 4px;
-}
-
+/* ── Lists ───────────────────────────────── */
+ol.steps { margin: 16px 0 16px 20px; font-size: 0.9rem; }
+ol.steps li { margin-bottom: 10px; padding-left: 4px; }
+ol.steps li::marker { color: var(--cyan); font-family: var(--font-mono); font-weight: 700; }
+ul.bullets { margin: 16px 0 16px 20px; font-size: 0.9rem; }
+ul.bullets li { margin-bottom: 8px; padding-left: 4px; }
 ul.bullets li::marker { color: var(--cyan); }
 
 /* ── Footer ──────────────────────────────── */
-.paper-footer {
-  margin-top: 64px;
-  padding-top: 32px;
-  border-top: 1px solid var(--border);
-  text-align: center;
-  font-size: 0.82rem;
-  color: var(--text-dim);
-}
-
+.paper-footer { margin-top: 64px; padding-top: 32px; border-top: 1px solid var(--border); text-align: center; font-size: 0.82rem; color: var(--text-dim); }
 .paper-footer strong { color: var(--cyan); }
-
-.paper-footer .back-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  margin-top: 16px;
-  font-family: var(--font-mono);
-  font-size: 0.8rem;
-  color: var(--cyan);
-  border: 1px solid rgba(0,240,255,0.25);
-  padding: 8px 20px;
-  border-radius: 6px;
-  transition: all 0.3s;
-}
-
-.paper-footer .back-link:hover {
-  background: rgba(0,240,255,0.1);
-  text-decoration: none;
-}
+.paper-footer .back-link { display: inline-flex; align-items: center; gap: 6px; margin-top: 16px; font-family: var(--font-mono); font-size: 0.8rem; color: var(--cyan); border: 1px solid rgba(0,240,255,0.25); padding: 8px 20px; border-radius: 6px; transition: all 0.3s; }
+.paper-footer .back-link:hover { background: rgba(0,240,255,0.1); text-decoration: none; }
 
 /* ── Reveal animation ────────────────────── */
-.reveal {
-  opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 0.6s ease, transform 0.6s ease;
-}
+.reveal { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease, transform 0.6s ease; }
+.reveal.visible { opacity: 1; transform: translateY(0); }
 
-.reveal.visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* ── Responsive table scroll ─────────────── */
-.table-wrap {
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  margin: 24px 0;
-}
-
+/* ── Responsive ──────────────────────────── */
 @media (max-width: 600px) {
   .bar-label { width: 70px; font-size: 0.65rem; }
   .data-table { font-size: 0.75rem; }
   .data-table th, .data-table td { padding: 8px 10px; }
   .fmt-field { min-width: 60px; padding: 8px 10px; }
+  .flow-branch { grid-template-columns: 1fr; gap: 12px; }
+  .flow-branch::before { display: none; }
+  .flow-node { padding: 12px 16px; }
 }
 </style>
 </head>
 <body>
 
-<!-- ═══ MATRIX RAIN CANVAS ═══ -->
 <canvas id="matrix-canvas"></canvas>
 
 <div class="page-content">
 
-<!-- ═══ NAVIGATION ═══ -->
 <nav>
   <div class="nav-inner">
     <a href="index.html" class="nav-logo">
@@ -687,7 +356,6 @@ ul.bullets li::marker { color: var(--cyan); }
   </div>
 </nav>
 
-<!-- ═══ PAPER CONTENT ═══ -->
 <article class="paper">
 
   <!-- Title -->
@@ -770,51 +438,80 @@ ul.bullets li::marker { color: var(--cyan); }
     <p>HyperPress operates as a 5-stage pipeline, processing data in variable-sized blocks:</p>
 
     <div class="diagram">
-      <div class="diagram-title">Figure 1 — Processing Pipeline</div>
-      <div class="ascii-flow"><span class="node">INPUT DATA</span>
-    │
-    ▼
-┌───────────────────────┐
-│  <span class="hl">Block Splitter</span>        │
-│  4KB–128KB adaptive   │
-└───────────┬───────────┘
-            │
-            ▼
-┌───────────────────────┐
-│  <span class="hl">Block Profiler</span>        │
-│  entropy, delta-ent,  │
-│  null-ratio, struct   │
-└───────────┬───────────┘
-            │
-    ┌───────┴───────┐
-    ▼               ▼
-┌─────────┐   ┌─────────┐
-│<span class="mg"> Preproc </span>│   │<span class="mg"> Preproc </span>│  ... × 7 transforms
-│<span class="mg"> Delta   </span>│   │<span class="mg"> BWT+MTF </span>│
-└────┬────┘   └────┬────┘
-     │              │
-     ▼              ▼
-┌─────────┐   ┌─────────┐
-│<span class="yw"> zlib-9  </span>│   │<span class="yw"> LZMA    </span>│  ... × 5 backends
-│<span class="yw"> LZMA    </span>│   │<span class="yw"> bz2-9   </span>│
-│<span class="yw"> bz2-9   </span>│   │<span class="yw"> zlib+LZ </span>│
-└────┬────┘   └────┬────┘
-     │              │
-     └──────┬───────┘
-            ▼
-┌───────────────────────┐
-│  <span class="gn">Winner Selection</span>      │
-│  min(output_size)     │
-│  CRC32 verification   │
-└───────────┬───────────┘
-            │
-            ▼
-    <span class="node">HPRX OUTPUT</span></div>
+      <div class="diagram-title">Figure 1 &mdash; Processing Pipeline</div>
+      <div class="flow">
+
+        <div class="flow-node accent-cyan">
+          <div class="flow-node-title">Input Data</div>
+          <div class="flow-node-desc">Raw bytes of any type &mdash; text, binary, JSON, sensor data</div>
+        </div>
+
+        <div class="flow-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg></div>
+
+        <div class="flow-node">
+          <div class="flow-node-title">Block Splitter</div>
+          <div class="flow-node-desc">Entropy-guided variable block sizing</div>
+          <div class="flow-node-detail">4 KB &ndash; 128 KB per block</div>
+        </div>
+
+        <div class="flow-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg></div>
+
+        <div class="flow-node">
+          <div class="flow-node-title">Block Profiler</div>
+          <div class="flow-node-desc">Computes 6 features per block</div>
+          <div class="flow-node-detail">entropy &bull; delta-ent &bull; null-ratio &bull; text &bull; struct &bull; uniq</div>
+        </div>
+
+        <div class="flow-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg></div>
+
+        <!-- Branching: preprocessing -->
+        <div class="flow-branch">
+          <div class="flow-node accent-magenta">
+            <div class="flow-node-title">Preprocessing A</div>
+            <div class="flow-node-desc">Delta, Delta-16, RLE, Transpose, Nibble-Split</div>
+          </div>
+          <div class="flow-node accent-magenta">
+            <div class="flow-node-title">Preprocessing B</div>
+            <div class="flow-node-desc">BWT+MTF, Identity (no-op)</div>
+          </div>
+        </div>
+
+        <div class="flow-arrow" style="margin-top:-4px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg></div>
+
+        <!-- Branching: backends -->
+        <div class="flow-branch">
+          <div class="flow-node accent-yellow">
+            <div class="flow-node-title">Backend Group 1</div>
+            <div class="flow-node-desc">zlib-9, LZMA-extreme</div>
+          </div>
+          <div class="flow-node accent-yellow">
+            <div class="flow-node-title">Backend Group 2</div>
+            <div class="flow-node-desc">bz2-9, zlib+LZMA chain, Stored</div>
+          </div>
+        </div>
+
+        <div class="flow-merge"></div>
+
+        <div class="flow-node accent-green">
+          <div class="flow-node-title">Winner Selection</div>
+          <div class="flow-node-desc">Smallest output wins &bull; CRC32 integrity verification</div>
+          <div class="flow-node-detail">min(output_size) across all candidates</div>
+        </div>
+
+        <div class="flow-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg></div>
+
+        <div class="flow-node accent-cyan">
+          <div class="flow-node-title">HPRX Output</div>
+          <div class="flow-node-desc">Self-contained compressed stream</div>
+          <div class="flow-node-detail">16 B header + 14 B per block + data</div>
+        </div>
+
+      </div>
     </div>
 
     <h3>Stage Details</h3>
     <ol class="steps">
-      <li><strong>Block Splitting:</strong> Input data is divided into blocks of 4KB to 128KB. Block boundaries are guided by entropy variance to avoid splitting homogeneous regions.</li>
+      <li><strong>Block Splitting:</strong> Input data is divided into blocks of 4 KB to 128 KB. Block boundaries are guided by entropy variance to avoid splitting homogeneous regions.</li>
       <li><strong>Block Profiling:</strong> Each block is analyzed for 6 features: Shannon entropy, delta-entropy, null-ratio, text-ratio, structure-score, and unique-byte-count.</li>
       <li><strong>Preprocessing:</strong> Based on the profile, 3 to 7 candidate transforms are selected and applied to the block data.</li>
       <li><strong>Backend Racing:</strong> Each preprocessed variant is compressed through up to 5 backends. The smallest output wins.</li>
@@ -857,18 +554,18 @@ ul.bullets li::marker { color: var(--cyan); }
       <div class="feature-card">
         <div class="fc-tag">Feature 6</div>
         <h4>Unique Bytes</h4>
-        <p>Count of distinct byte values (0–256). Low unique count enables efficient Huffman/arithmetic coding.</p>
+        <p>Count of distinct byte values (0&ndash;256). Low unique count enables efficient Huffman/arithmetic coding.</p>
       </div>
     </div>
 
     <div class="equation">
       H(X) = -&sum;<sub>i=0</sub><sup>255</sup> p(x<sub>i</sub>) &middot; log<sub>2</sub>(p(x<sub>i</sub>))
-      <div class="label">Equation 1 — Shannon entropy calculation per block</div>
+      <div class="label">Equation 1 &mdash; Shannon entropy calculation per block</div>
     </div>
 
     <div class="equation">
       H<sub>&Delta;</sub>(X) = H(x<sub>i</sub> - x<sub>i-1</sub> mod 256) &nbsp;&nbsp; for i = 1..n
-      <div class="label">Equation 2 — Delta entropy for sequential correlation detection</div>
+      <div class="label">Equation 2 &mdash; Delta entropy for sequential correlation detection</div>
     </div>
   </section>
 
@@ -881,64 +578,16 @@ ul.bullets li::marker { color: var(--cyan); }
     <div class="table-wrap">
       <table class="data-table">
         <thead>
-          <tr>
-            <th>ID</th>
-            <th>Transform</th>
-            <th>Best For</th>
-            <th>Mechanism</th>
-            <th>Complexity</th>
-          </tr>
+          <tr><th>ID</th><th>Transform</th><th>Best For</th><th>Mechanism</th><th>Complexity</th></tr>
         </thead>
         <tbody>
-          <tr>
-            <td class="num-col">0</td>
-            <td>Identity</td>
-            <td>Already compressible data</td>
-            <td>Pass-through, no modification</td>
-            <td class="num-col">O(1)</td>
-          </tr>
-          <tr>
-            <td class="num-col">1</td>
-            <td>Delta Encoding</td>
-            <td>Sensor signals, time-series</td>
-            <td>Store byte-to-byte differences</td>
-            <td class="num-col">O(n)</td>
-          </tr>
-          <tr>
-            <td class="num-col">2</td>
-            <td>Delta-16</td>
-            <td>16-bit structured data</td>
-            <td>2-byte aligned delta encoding</td>
-            <td class="num-col">O(n)</td>
-          </tr>
-          <tr>
-            <td class="num-col">3</td>
-            <td>BWT + MTF</td>
-            <td>Natural language text</td>
-            <td>Burrows-Wheeler + Move-to-Front</td>
-            <td class="num-col">O(n log n)</td>
-          </tr>
-          <tr>
-            <td class="num-col">4</td>
-            <td>Run-Length (RLE)</td>
-            <td>Sparse binaries</td>
-            <td>Collapse zero-runs with count</td>
-            <td class="num-col">O(n)</td>
-          </tr>
-          <tr>
-            <td class="num-col">5</td>
-            <td>Transpose</td>
-            <td>Structured records</td>
-            <td>Column-wise byte reordering</td>
-            <td class="num-col">O(n)</td>
-          </tr>
-          <tr>
-            <td class="num-col">6</td>
-            <td>Nibble Split</td>
-            <td>Mixed binary data</td>
-            <td>Separate high/low 4-bit nibbles</td>
-            <td class="num-col">O(n)</td>
-          </tr>
+          <tr><td class="num-col">0</td><td>Identity</td><td>Already compressible data</td><td>Pass-through, no modification</td><td class="num-col">O(1)</td></tr>
+          <tr><td class="num-col">1</td><td>Delta Encoding</td><td>Sensor signals, time-series</td><td>Store byte-to-byte differences</td><td class="num-col">O(n)</td></tr>
+          <tr><td class="num-col">2</td><td>Delta-16</td><td>16-bit structured data</td><td>2-byte aligned delta encoding</td><td class="num-col">O(n)</td></tr>
+          <tr><td class="num-col">3</td><td>BWT + MTF</td><td>Natural language text</td><td>Burrows-Wheeler + Move-to-Front</td><td class="num-col">O(n log n)</td></tr>
+          <tr><td class="num-col">4</td><td>Run-Length (RLE)</td><td>Sparse binaries</td><td>Collapse zero-runs with count</td><td class="num-col">O(n)</td></tr>
+          <tr><td class="num-col">5</td><td>Transpose</td><td>Structured records</td><td>Column-wise byte reordering</td><td class="num-col">O(n)</td></tr>
+          <tr><td class="num-col">6</td><td>Nibble Split</td><td>Mixed binary data</td><td>Separate high/low 4-bit nibbles</td><td class="num-col">O(n)</td></tr>
         </tbody>
       </table>
     </div>
@@ -947,7 +596,7 @@ ul.bullets li::marker { color: var(--cyan); }
     <p>Delta encoding stores the difference between consecutive bytes. For data with sequential correlation (sensor readings, audio samples), the delta stream has significantly lower entropy than the original.</p>
     <div class="equation">
       d[i] = (x[i] - x[i-1]) mod 256 &nbsp;&nbsp; for i = 1..n, &nbsp; d[0] = x[0]
-      <div class="label">Equation 3 — Delta encoding formula</div>
+      <div class="label">Equation 3 &mdash; Delta encoding formula</div>
     </div>
     <pre><span class="kw">def</span> <span class="fn">delta_enc</span>(data):
     out = bytearray(len(data))
@@ -960,30 +609,65 @@ ul.bullets li::marker { color: var(--cyan); }
     <p>The Burrows-Wheeler Transform sorts all rotations of the input, grouping similar contexts together. Move-to-Front then converts the BWT output into a stream dominated by small integers, which compresses exceptionally well with entropy coders.</p>
 
     <div class="diagram">
-      <div class="diagram-title">Figure 2 — BWT + MTF Pipeline</div>
-      <div class="ascii-flow"><span class="node">Input Text</span>: <span class="st">"BANANA"</span>
-         │
-         ▼
-┌──────────────────────┐
-│ <span class="hl">Burrows-Wheeler</span>      │    All rotations sorted:
-│ <span class="hl">Transform</span>            │    ABANAN → ANABAN → ANANAB
-│                      │    BANANA → NABANA → NANABA
-│ Output: <span class="gn">"NNBAAA"</span>     │    Primary index: 3
-└──────────┬───────────┘
-           │
-           ▼
-┌──────────────────────┐
-│ <span class="mg">Move-to-Front</span>        │    Alphabet: [A,B,C,...,N,...]
-│                      │    N→13, N→0, B→2, A→2, A→0, A→0
-│ Output: <span class="gn">[13,0,2,2,0,0]</span>│    Low integers dominate!
-└──────────────────────┘</div>
+      <div class="diagram-title">Figure 2 &mdash; BWT + MTF Pipeline</div>
+      <div class="flow-two">
+
+        <div class="flow-node accent-cyan" style="max-width:200px;">
+          <div class="flow-node-title">Input</div>
+          <div class="flow-node-detail" style="color:var(--green)">"BANANA"</div>
+        </div>
+
+        <div class="flow-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg></div>
+
+        <div class="flow-stage hl-cyan">
+          <div class="flow-stage-main">
+            <div class="flow-stage-title">Burrows-Wheeler Transform</div>
+            <div class="flow-node-desc">Sort all rotations of the input string. The last column of the sorted rotation matrix forms the BWT output.</div>
+            <div class="flow-stage-io">Output: "NNBAAA" &nbsp; index: 3</div>
+          </div>
+          <div class="flow-stage-side">
+            ABANAN<br>
+            ANABAN<br>
+            ANANAB<br>
+            BANANA<br>
+            NABANA<br>
+            NANABA
+          </div>
+        </div>
+
+        <div class="flow-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg></div>
+
+        <div class="flow-stage hl-magenta">
+          <div class="flow-stage-main">
+            <div class="flow-stage-title">Move-to-Front</div>
+            <div class="flow-node-desc">Maintain alphabet list. For each symbol, output its index and move it to position 0. Repeated symbols produce zeros.</div>
+            <div class="flow-stage-io">Output: [13, 0, 2, 2, 0, 0]</div>
+          </div>
+          <div class="flow-stage-side">
+            N &rarr; 13<br>
+            N &rarr; 0<br>
+            B &rarr; 2<br>
+            A &rarr; 2<br>
+            A &rarr; 0<br>
+            A &rarr; 0
+          </div>
+        </div>
+
+        <div class="flow-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg></div>
+
+        <div class="flow-node accent-green" style="max-width:320px;">
+          <div class="flow-node-title">Result</div>
+          <div class="flow-node-desc">Low integers dominate the output &mdash; ideal for entropy coding</div>
+        </div>
+
+      </div>
     </div>
 
     <h3>Transform 6: Nibble Split</h3>
     <p>Nibble splitting separates each byte into its high and low 4-bit nibbles, stored in two contiguous halves. This reduces entropy when high and low nibbles have different distributions, which is common in encoded data formats.</p>
     <div class="equation">
       high[i] = x[i] &gt;&gt; 4, &nbsp;&nbsp; low[i] = x[i] &amp; 0x0F &nbsp;&nbsp;&nbsp; output = high || low
-      <div class="label">Equation 4 — Nibble split operation</div>
+      <div class="label">Equation 4 &mdash; Nibble split operation</div>
     </div>
   </section>
 
@@ -996,56 +680,45 @@ ul.bullets li::marker { color: var(--cyan); }
     <div class="table-wrap">
       <table class="data-table">
         <thead>
-          <tr>
-            <th>ID</th>
-            <th>Backend</th>
-            <th>Algorithm</th>
-            <th>Level</th>
-            <th>Strength</th>
-          </tr>
+          <tr><th>ID</th><th>Backend</th><th>Algorithm</th><th>Level</th><th>Strength</th></tr>
         </thead>
         <tbody>
-          <tr>
-            <td class="num-col">0</td>
-            <td>zlib-9</td>
-            <td>DEFLATE (LZ77 + Huffman)</td>
-            <td class="num-col">9</td>
-            <td>Fast, good general-purpose</td>
-          </tr>
-          <tr>
-            <td class="num-col">1</td>
-            <td>LZMA</td>
-            <td>Lempel-Ziv-Markov (range coding)</td>
-            <td class="num-col">extreme</td>
-            <td>Best ratio for structured data</td>
-          </tr>
-          <tr>
-            <td class="num-col">2</td>
-            <td>bz2-9</td>
-            <td>Burrows-Wheeler (block sorting)</td>
-            <td class="num-col">9</td>
-            <td>Excellent for redundant text</td>
-          </tr>
-          <tr>
-            <td class="num-col">3</td>
-            <td>zlib+LZMA</td>
-            <td>Chain: DEFLATE then LZMA</td>
-            <td class="num-col">9+extreme</td>
-            <td>Extracts residual redundancy</td>
-          </tr>
-          <tr>
-            <td class="num-col">4</td>
-            <td>Stored</td>
-            <td>No compression</td>
-            <td class="num-col">—</td>
-            <td>Incompressible data fallback</td>
-          </tr>
+          <tr><td class="num-col">0</td><td>zlib-9</td><td>DEFLATE (LZ77 + Huffman)</td><td class="num-col">9</td><td>Fast, good general-purpose</td></tr>
+          <tr><td class="num-col">1</td><td>LZMA</td><td>Lempel-Ziv-Markov (range coding)</td><td class="num-col">extreme</td><td>Best ratio for structured data</td></tr>
+          <tr><td class="num-col">2</td><td>bz2-9</td><td>Burrows-Wheeler (block sorting)</td><td class="num-col">9</td><td>Excellent for redundant text</td></tr>
+          <tr><td class="num-col">3</td><td>zlib+LZMA</td><td>Chain: DEFLATE then LZMA</td><td class="num-col">9+ext</td><td>Extracts residual redundancy</td></tr>
+          <tr><td class="num-col">4</td><td>Stored</td><td>No compression</td><td class="num-col">&mdash;</td><td>Incompressible data fallback</td></tr>
         </tbody>
       </table>
     </div>
 
     <h3>Chain Compression: zlib + LZMA</h3>
-    <p>The chain backend first compresses with zlib-9, then compresses the zlib output with LZMA. This two-pass approach can extract additional redundancy that neither backend finds alone — the DEFLATE pass reorganizes data in ways that benefit LZMA's dictionary matching.</p>
+    <p>The chain backend first compresses with zlib-9, then compresses the zlib output with LZMA. This two-pass approach can extract additional redundancy that neither backend finds alone &mdash; the DEFLATE pass reorganizes data in ways that benefit LZMA's dictionary matching.</p>
+
+    <div class="diagram">
+      <div class="diagram-title">Figure 3 &mdash; Chain Compression Flow</div>
+      <div class="flow" style="flex-direction:row;flex-wrap:wrap;justify-content:center;gap:12px;">
+        <div class="flow-node" style="max-width:160px;flex:none;">
+          <div class="flow-node-title">Raw Block</div>
+          <div class="flow-node-detail">n bytes</div>
+        </div>
+        <div class="flow-arrow" style="height:auto;transform:rotate(-90deg)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg></div>
+        <div class="flow-node accent-yellow" style="max-width:160px;flex:none;">
+          <div class="flow-node-title">zlib-9</div>
+          <div class="flow-node-detail">DEFLATE pass</div>
+        </div>
+        <div class="flow-arrow" style="height:auto;transform:rotate(-90deg)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg></div>
+        <div class="flow-node accent-cyan" style="max-width:160px;flex:none;">
+          <div class="flow-node-title">LZMA</div>
+          <div class="flow-node-detail">Range coding pass</div>
+        </div>
+        <div class="flow-arrow" style="height:auto;transform:rotate(-90deg)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg></div>
+        <div class="flow-node accent-green" style="max-width:160px;flex:none;">
+          <div class="flow-node-title">Output</div>
+          <div class="flow-node-detail">Smallest result</div>
+        </div>
+      </div>
+    </div>
   </section>
 
   <!-- 7. Racing Algorithm -->
@@ -1072,7 +745,7 @@ ul.bullets li::marker { color: var(--cyan); }
     <span class="kw">return</span> best_result</pre>
 
     <h3>Candidate Selection Strategy</h3>
-    <p>Not all 35 (7 transforms x 5 backends) combinations are tried for every block. The block profile guides selection:</p>
+    <p>Not all 35 (7 transforms &times; 5 backends) combinations are tried for every block. The block profile guides selection:</p>
     <ul class="bullets">
       <li><strong>Low delta-entropy:</strong> Delta and Delta-16 transforms are prioritized</li>
       <li><strong>High text-ratio:</strong> BWT+MTF is prioritized</li>
@@ -1091,180 +764,96 @@ ul.bullets li::marker { color: var(--cyan); }
 
     <h3>Global Header (16 bytes)</h3>
     <div class="format-box">
-      <div class="fmt-field">
-        <div class="ff-name">MAGIC</div>
-        <div class="ff-size">4 bytes</div>
-      </div>
-      <div class="fmt-field">
-        <div class="ff-name">VERSION</div>
-        <div class="ff-size">1 byte</div>
-      </div>
-      <div class="fmt-field">
-        <div class="ff-name">FLAGS</div>
-        <div class="ff-size">1 byte</div>
-      </div>
-      <div class="fmt-field">
-        <div class="ff-name">BLOCK_COUNT</div>
-        <div class="ff-size">2 bytes</div>
-      </div>
-      <div class="fmt-field">
-        <div class="ff-name">ORIG_SIZE</div>
-        <div class="ff-size">8 bytes</div>
-      </div>
+      <div class="fmt-field"><div class="ff-name">MAGIC</div><div class="ff-size">4 bytes</div></div>
+      <div class="fmt-field"><div class="ff-name">VERSION</div><div class="ff-size">1 byte</div></div>
+      <div class="fmt-field"><div class="ff-name">FLAGS</div><div class="ff-size">1 byte</div></div>
+      <div class="fmt-field"><div class="ff-name">BLOCK_CNT</div><div class="ff-size">2 bytes</div></div>
+      <div class="fmt-field"><div class="ff-name">ORIG_SIZE</div><div class="ff-size">8 bytes</div></div>
     </div>
 
     <h3>Per-Block Header (14 bytes)</h3>
     <div class="format-box">
-      <div class="fmt-field">
-        <div class="ff-name">PREPROC</div>
-        <div class="ff-size">1 byte</div>
-      </div>
-      <div class="fmt-field">
-        <div class="ff-name">BACKEND</div>
-        <div class="ff-size">1 byte</div>
-      </div>
-      <div class="fmt-field">
-        <div class="ff-name">ORIG_LEN</div>
-        <div class="ff-size">4 bytes</div>
-      </div>
-      <div class="fmt-field">
-        <div class="ff-name">COMP_LEN</div>
-        <div class="ff-size">4 bytes</div>
-      </div>
-      <div class="fmt-field">
-        <div class="ff-name">CRC32</div>
-        <div class="ff-size">4 bytes</div>
-      </div>
+      <div class="fmt-field"><div class="ff-name">PREPROC</div><div class="ff-size">1 byte</div></div>
+      <div class="fmt-field"><div class="ff-name">BACKEND</div><div class="ff-size">1 byte</div></div>
+      <div class="fmt-field"><div class="ff-name">ORIG_LEN</div><div class="ff-size">4 bytes</div></div>
+      <div class="fmt-field"><div class="ff-name">COMP_LEN</div><div class="ff-size">4 bytes</div></div>
+      <div class="fmt-field"><div class="ff-name">CRC32</div><div class="ff-size">4 bytes</div></div>
     </div>
 
     <div class="highlight-box">
-      <strong>Overhead analysis:</strong> For a 1 MB file split into 16 blocks of 64 KB each, the total overhead is 16 + (16 &times; 14) = 240 bytes — just 0.023% of the original data. This negligible overhead is the price paid for per-block optimization that saves kilobytes or megabytes.
+      <strong>Overhead analysis:</strong> For a 1 MB file split into 16 blocks of 64 KB each, the total overhead is 16 + (16 &times; 14) = 240 bytes &mdash; just 0.023% of the original data. This negligible overhead is the price paid for per-block optimization that saves kilobytes or megabytes.
     </div>
 
     <h3>Decompression Flow</h3>
-    <ol class="steps">
-      <li>Read and validate global header (MAGIC = <code>HPRX</code>, VERSION = 1)</li>
-      <li>For each block: read 14-byte header to determine preprocessing and backend</li>
-      <li>Decompress data using the stored backend identifier</li>
-      <li>Apply inverse preprocessing transform</li>
-      <li>Verify CRC32 checksum against original block data</li>
-      <li>Concatenate all restored blocks to reconstruct original input</li>
-    </ol>
+    <div class="diagram">
+      <div class="diagram-title">Figure 4 &mdash; Decompression Pipeline</div>
+      <div class="flow">
+        <div class="flow-node accent-cyan" style="max-width:380px">
+          <div class="flow-node-title">Read HPRX Stream</div>
+          <div class="flow-node-desc">Validate MAGIC = "HPRX", VERSION = 1</div>
+        </div>
+        <div class="flow-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg></div>
+        <div class="flow-node" style="max-width:380px">
+          <div class="flow-node-title">Read Block Header</div>
+          <div class="flow-node-desc">14 bytes: preproc ID, backend ID, sizes, CRC32</div>
+        </div>
+        <div class="flow-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg></div>
+        <div class="flow-node accent-yellow" style="max-width:380px">
+          <div class="flow-node-title">Decompress Backend</div>
+          <div class="flow-node-desc">Dispatch to zlib/LZMA/bz2/chain based on stored ID</div>
+        </div>
+        <div class="flow-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg></div>
+        <div class="flow-node accent-magenta" style="max-width:380px">
+          <div class="flow-node-title">Inverse Preprocessing</div>
+          <div class="flow-node-desc">Apply reverse transform (delta_dec, bwt_dec, etc.)</div>
+        </div>
+        <div class="flow-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg></div>
+        <div class="flow-node accent-green" style="max-width:380px">
+          <div class="flow-node-title">Verify &amp; Output</div>
+          <div class="flow-node-desc">CRC32 check &rarr; concatenate restored blocks</div>
+        </div>
+      </div>
+    </div>
   </section>
 
   <!-- 9. Benchmarks -->
   <section id="benchmarks" class="reveal">
     <span class="sec-num">Section 09</span>
     <h2>Benchmark Results</h2>
-    <p>All benchmarks measured on the same 8 datasets. Compression ratio is defined as <code>(1 - compressed/original) &times; 100%</code>. Higher is better.</p>
+    <p>All benchmarks measured on the same 8 datasets. Compression ratio = <code>(1 - compressed/original) &times; 100%</code>. Higher is better.</p>
 
     <div class="table-wrap">
       <table class="data-table">
         <thead>
-          <tr>
-            <th>Dataset</th>
-            <th class="num-col">Original</th>
-            <th class="num-col">zlib-6</th>
-            <th class="num-col">LZMA</th>
-            <th class="num-col">HyperPress</th>
-            <th class="num-col">Best Winner</th>
-          </tr>
+          <tr><th>Dataset</th><th class="num-col">Original</th><th class="num-col">zlib-6</th><th class="num-col">LZMA</th><th class="num-col">HyperPress</th><th class="num-col">Winner</th></tr>
         </thead>
         <tbody>
-          <tr>
-            <td>English Text</td>
-            <td class="num-col">21,930 B</td>
-            <td class="num-col">193 B (99.1%)</td>
-            <td class="num-col">240 B (98.9%)</td>
-            <td class="num-col best">211 B (99.0%)</td>
-            <td>zlib-6</td>
-          </tr>
-          <tr>
-            <td>German Text</td>
-            <td class="num-col">31,300 B</td>
-            <td class="num-col">272 B (99.1%)</td>
-            <td class="num-col">284 B (99.1%)</td>
-            <td class="num-col best">256 B (99.2%)</td>
-            <td class="best">HyperPress</td>
-          </tr>
-          <tr>
-            <td>JSON Data</td>
-            <td class="num-col">33,582 B</td>
-            <td class="num-col">3,597 B (89.3%)</td>
-            <td class="num-col">1,764 B (94.7%)</td>
-            <td class="num-col best">1,881 B (94.4%)</td>
-            <td>LZMA</td>
-          </tr>
-          <tr>
-            <td>Sensor Data</td>
-            <td class="num-col">30,000 B</td>
-            <td class="num-col">21,990 B (26.7%)</td>
-            <td class="num-col">17,144 B (42.9%)</td>
-            <td class="num-col best">11,148 B (62.8%)</td>
-            <td class="best">HyperPress</td>
-          </tr>
-          <tr>
-            <td>Sparse Binary</td>
-            <td class="num-col">25,000 B</td>
-            <td class="num-col">1,224 B (95.1%)</td>
-            <td class="num-col">1,032 B (95.9%)</td>
-            <td class="num-col best">758 B (97.0%)</td>
-            <td class="best">HyperPress</td>
-          </tr>
-          <tr>
-            <td>Log File</td>
-            <td class="num-col">77,532 B</td>
-            <td class="num-col">10,704 B (86.2%)</td>
-            <td class="num-col">4,948 B (93.6%)</td>
-            <td class="num-col best">5,109 B (93.4%)</td>
-            <td>LZMA</td>
-          </tr>
-          <tr>
-            <td>Pattern+Noise</td>
-            <td class="num-col">24,000 B</td>
-            <td class="num-col">247 B (99.0%)</td>
-            <td class="num-col">168 B (99.3%)</td>
-            <td class="num-col best">110 B (99.5%)</td>
-            <td class="best">HyperPress</td>
-          </tr>
-          <tr>
-            <td>Source Code</td>
-            <td class="num-col">7,680 B</td>
-            <td class="num-col">104 B (98.6%)</td>
-            <td class="num-col">160 B (97.9%)</td>
-            <td class="num-col best">132 B (98.3%)</td>
-            <td>zlib-6</td>
-          </tr>
+          <tr><td>English Text</td><td class="num-col">21,930 B</td><td class="num-col">193 B (99.1%)</td><td class="num-col">240 B (98.9%)</td><td class="num-col best">211 B (99.0%)</td><td>zlib-6</td></tr>
+          <tr><td>German Text</td><td class="num-col">31,300 B</td><td class="num-col">272 B (99.1%)</td><td class="num-col">284 B (99.1%)</td><td class="num-col best">256 B (99.2%)</td><td class="best">HPRX</td></tr>
+          <tr><td>JSON Data</td><td class="num-col">33,582 B</td><td class="num-col">3,597 B (89.3%)</td><td class="num-col">1,764 B (94.7%)</td><td class="num-col best">1,881 B (94.4%)</td><td>LZMA</td></tr>
+          <tr><td>Sensor Data</td><td class="num-col">30,000 B</td><td class="num-col">21,990 B (26.7%)</td><td class="num-col">17,144 B (42.9%)</td><td class="num-col best">11,148 B (62.8%)</td><td class="best">HPRX</td></tr>
+          <tr><td>Sparse Binary</td><td class="num-col">25,000 B</td><td class="num-col">1,224 B (95.1%)</td><td class="num-col">1,032 B (95.9%)</td><td class="num-col best">758 B (97.0%)</td><td class="best">HPRX</td></tr>
+          <tr><td>Log File</td><td class="num-col">77,532 B</td><td class="num-col">10,704 B (86.2%)</td><td class="num-col">4,948 B (93.6%)</td><td class="num-col best">5,109 B (93.4%)</td><td>LZMA</td></tr>
+          <tr><td>Pattern+Noise</td><td class="num-col">24,000 B</td><td class="num-col">247 B (99.0%)</td><td class="num-col">168 B (99.3%)</td><td class="num-col best">110 B (99.5%)</td><td class="best">HPRX</td></tr>
+          <tr><td>Source Code</td><td class="num-col">7,680 B</td><td class="num-col">104 B (98.6%)</td><td class="num-col">160 B (97.9%)</td><td class="num-col best">132 B (98.3%)</td><td>zlib-6</td></tr>
         </tbody>
       </table>
     </div>
 
     <h3>Visual Comparison: Average Compression Ratio</h3>
     <div class="diagram">
-      <div class="diagram-title">Figure 3 — Average Compression Across All Datasets</div>
+      <div class="diagram-title">Figure 5 &mdash; Average Compression Across All Datasets</div>
       <div class="bar-chart" id="benchChart">
-        <div class="bar-row">
-          <span class="bar-label">zlib-6</span>
-          <div class="bar-track"><div class="bar-fill dim" data-width="84.7%">84.7%</div></div>
-        </div>
-        <div class="bar-row">
-          <span class="bar-label">LZMA</span>
-          <div class="bar-track"><div class="bar-fill yellow" data-width="89.7%">89.7%</div></div>
-        </div>
-        <div class="bar-row">
-          <span class="bar-label">bz2-9</span>
-          <div class="bar-track"><div class="bar-fill magenta" data-width="86.2%">86.2%</div></div>
-        </div>
-        <div class="bar-row">
-          <span class="bar-label">HyperPress</span>
-          <div class="bar-track"><div class="bar-fill cyan" data-width="92.2%">92.2%</div></div>
-        </div>
+        <div class="bar-row"><span class="bar-label">zlib-6</span><div class="bar-track"><div class="bar-fill dim" data-width="84.7%">84.7%</div></div></div>
+        <div class="bar-row"><span class="bar-label">bz2-9</span><div class="bar-track"><div class="bar-fill magenta" data-width="86.2%">86.2%</div></div></div>
+        <div class="bar-row"><span class="bar-label">LZMA</span><div class="bar-track"><div class="bar-fill yellow" data-width="89.7%">89.7%</div></div></div>
+        <div class="bar-row"><span class="bar-label">HyperPress</span><div class="bar-track"><div class="bar-fill cyan" data-width="92.2%">92.2%</div></div></div>
       </div>
     </div>
 
     <h3>Per-Dataset Win Analysis</h3>
     <div class="highlight-box">
-      Out of 8 datasets, <strong>HyperPress achieves the best compression on 4</strong> (Sensor Data, Sparse Binary, Pattern+Noise, German Text). On the remaining 4, it places within 1–3% of the best individual compressor. Critically, on Sensor Data, HyperPress achieves <strong>62.8% compression</strong> where zlib manages only 26.7% — a 2.35&times; improvement — thanks to Delta preprocessing exposing sequential correlation that DEFLATE cannot exploit alone.
+      Out of 8 datasets, <strong>HyperPress achieves the best compression on 4</strong> (Sensor Data, Sparse Binary, Pattern+Noise, German Text). On the remaining 4, it places within 1&ndash;3% of the best individual compressor. Critically, on Sensor Data, HyperPress achieves <strong>62.8% compression</strong> where zlib manages only 26.7% &mdash; a 2.35&times; improvement &mdash; thanks to Delta preprocessing exposing sequential correlation that DEFLATE cannot exploit alone.
     </div>
   </section>
 
@@ -1276,46 +865,20 @@ ul.bullets li::marker { color: var(--cyan); }
     <h3>Time Complexity</h3>
     <div class="table-wrap">
       <table class="data-table">
-        <thead>
-          <tr>
-            <th>Stage</th>
-            <th>Complexity</th>
-            <th>Notes</th>
-          </tr>
-        </thead>
+        <thead><tr><th>Stage</th><th>Complexity</th><th>Notes</th></tr></thead>
         <tbody>
-          <tr>
-            <td>Block Splitting</td>
-            <td class="num-col">O(n)</td>
-            <td>Single pass through input data</td>
-          </tr>
-          <tr>
-            <td>Block Profiling</td>
-            <td class="num-col">O(n)</td>
-            <td>Histogram + entropy calculation per block</td>
-          </tr>
-          <tr>
-            <td>Preprocessing</td>
-            <td class="num-col">O(n log n)</td>
-            <td>BWT is O(n log n); all others O(n)</td>
-          </tr>
-          <tr>
-            <td>Backend Compression</td>
-            <td class="num-col">O(n)</td>
-            <td>DEFLATE, LZMA, bz2 are all O(n) amortized</td>
-          </tr>
-          <tr>
-            <td>Racing Selection</td>
-            <td class="num-col">O(c)</td>
-            <td>c = number of candidates (3–15 per block)</td>
-          </tr>
+          <tr><td>Block Splitting</td><td class="num-col">O(n)</td><td>Single pass through input data</td></tr>
+          <tr><td>Block Profiling</td><td class="num-col">O(n)</td><td>Histogram + entropy calculation per block</td></tr>
+          <tr><td>Preprocessing</td><td class="num-col">O(n log n)</td><td>BWT is O(n log n); all others O(n)</td></tr>
+          <tr><td>Backend Compression</td><td class="num-col">O(n)</td><td>DEFLATE, LZMA, bz2 are all O(n) amortized</td></tr>
+          <tr><td>Racing Selection</td><td class="num-col">O(c)</td><td>c = number of candidates (3&ndash;15 per block)</td></tr>
         </tbody>
       </table>
     </div>
 
     <div class="equation">
       T(n) = O(n log n &middot; c) &nbsp;&nbsp; where c = avg candidates per block
-      <div class="label">Equation 5 — Overall time complexity</div>
+      <div class="label">Equation 5 &mdash; Overall time complexity</div>
     </div>
 
     <h3>Space Complexity</h3>
@@ -1323,20 +886,11 @@ ul.bullets li::marker { color: var(--cyan); }
 
     <h3>Overhead vs. Gains</h3>
     <div class="diagram">
-      <div class="diagram-title">Figure 4 — Format Overhead vs. Compression Gain</div>
+      <div class="diagram-title">Figure 6 &mdash; Format Overhead vs. Compression Gain</div>
       <div class="bar-chart" id="overheadChart">
-        <div class="bar-row">
-          <span class="bar-label">Header</span>
-          <div class="bar-track"><div class="bar-fill magenta" data-width="0.5%">16 B</div></div>
-        </div>
-        <div class="bar-row">
-          <span class="bar-label">Block Hdrs</span>
-          <div class="bar-track"><div class="bar-fill yellow" data-width="2%">~224 B</div></div>
-        </div>
-        <div class="bar-row">
-          <span class="bar-label">Compression</span>
-          <div class="bar-track"><div class="bar-fill cyan" data-width="92%">92.2% saved</div></div>
-        </div>
+        <div class="bar-row"><span class="bar-label">Header</span><div class="bar-track"><div class="bar-fill magenta" data-width="0.5%">16 B</div></div></div>
+        <div class="bar-row"><span class="bar-label">Block Hdrs</span><div class="bar-track"><div class="bar-fill yellow" data-width="2%">~224 B</div></div></div>
+        <div class="bar-row"><span class="bar-label">Saved</span><div class="bar-track"><div class="bar-fill cyan" data-width="92%">92.2%</div></div></div>
       </div>
     </div>
   </section>
@@ -1345,7 +899,7 @@ ul.bullets li::marker { color: var(--cyan); }
   <section id="conclusions" class="reveal">
     <span class="sec-num">Section 11</span>
     <h2>Conclusions</h2>
-    <p>HyperPress demonstrates that meta-compression — the strategy of racing multiple preprocessing transforms and compression backends per data block — consistently outperforms any single static compressor across heterogeneous workloads.</p>
+    <p>HyperPress demonstrates that meta-compression &mdash; the strategy of racing multiple preprocessing transforms and compression backends per data block &mdash; consistently outperforms any single static compressor across heterogeneous workloads.</p>
 
     <div class="highlight-box">
       <strong>Key findings:</strong>
@@ -1354,7 +908,7 @@ ul.bullets li::marker { color: var(--cyan); }
         <li>49% better size reduction than zlib-6, 24% better than LZMA</li>
         <li>Per-block optimization adds only 14 bytes overhead per block</li>
         <li>Delta preprocessing yields 2.35&times; improvement on sensor data</li>
-        <li>Zero external dependencies — Python 3.8+ stdlib only</li>
+        <li>Zero external dependencies &mdash; Python 3.8+ stdlib only</li>
         <li>Self-contained HPRX format with CRC32 integrity per block</li>
       </ul>
     </div>
@@ -1394,7 +948,7 @@ restored = <span class="fn">decompress</span>(compressed)
 </div>
 
 <script>
-/* ═══ MATRIX RAIN EFFECT (stable, no scroll reload) ═══ */
+/* ═══ MATRIX RAIN EFFECT (stable) ═══ */
 (function(){
   var c = document.getElementById('matrix-canvas');
   if (!c) return;
@@ -1404,32 +958,22 @@ restored = <span class="fn">decompress</span>(compressed)
   var last = 0, fps = 20, interval = 1000 / fps;
   var lastW = 0;
 
-  /* Use document height so canvas covers the full scrollable page */
   function getPageHeight() {
-    return Math.max(
-      document.body.scrollHeight,
-      document.documentElement.scrollHeight,
-      window.innerHeight
-    );
+    return Math.max(document.body.scrollHeight, document.documentElement.scrollHeight, window.innerHeight);
   }
 
   function init() {
     var w = window.innerWidth;
     var h = getPageHeight();
-    c.width = w;
-    c.height = h;
-    c.style.height = h + 'px';
-    var fs = 14;
-    cols = Math.floor(w / fs);
+    c.width = w; c.height = h; c.style.height = h + 'px';
+    cols = Math.floor(w / 14);
     drops = [];
     for (var i = 0; i < cols; i++) drops[i] = Math.random() * -100;
     lastW = w;
   }
 
   function onResize() {
-    /* Only reset when width changes (ignore mobile URL-bar height changes) */
-    var w = window.innerWidth;
-    if (w === lastW) return;
+    if (window.innerWidth === lastW) return;
     init();
   }
 
@@ -1438,39 +982,23 @@ restored = <span class="fn">decompress</span>(compressed)
     if (ts - last < interval) return;
     last = ts;
 
-    /* Only draw in the visible viewport region for performance */
     var scrollY = window.pageYOffset || 0;
     var viewH = window.innerHeight;
     var top = Math.max(0, scrollY - 100);
     var bottom = scrollY + viewH + 100;
 
-    /* Fade only the visible strip */
     ctx.fillStyle = 'rgba(10,10,15,0.06)';
     ctx.fillRect(0, top, c.width, bottom - top);
-
     ctx.font = '13px JetBrains Mono, monospace';
 
     for (var i = 0; i < cols; i++) {
       var y = drops[i] * 14;
-
-      /* Only render characters in or near the viewport */
       if (y >= top - 28 && y <= bottom) {
         var bright = Math.random();
-        if (bright > 0.95) {
-          ctx.fillStyle = 'rgba(0,255,136,0.9)';
-        } else if (bright > 0.8) {
-          ctx.fillStyle = 'rgba(0,240,255,0.15)';
-        } else {
-          ctx.fillStyle = 'rgba(0,255,136,0.12)';
-        }
-
-        var ch = chars[Math.floor(Math.random() * chars.length)];
-        ctx.fillText(ch, i * 14, y);
+        ctx.fillStyle = bright > 0.95 ? 'rgba(0,255,136,0.9)' : bright > 0.8 ? 'rgba(0,240,255,0.15)' : 'rgba(0,255,136,0.12)';
+        ctx.fillText(chars[Math.floor(Math.random() * chars.length)], i * 14, y);
       }
-
-      if (y > c.height && Math.random() > 0.98) {
-        drops[i] = 0;
-      }
+      if (y > c.height && Math.random() > 0.98) drops[i] = 0;
       drops[i] += 0.4;
     }
   }
@@ -1482,13 +1010,9 @@ restored = <span class="fn">decompress</span>(compressed)
   window.addEventListener('resize', debouncedResize, {passive: true});
   requestAnimationFrame(draw);
 
-  /* Re-init canvas height when all content is loaded (images, fonts) */
   window.addEventListener('load', function() {
     var h = getPageHeight();
-    if (h !== c.height) {
-      c.height = h;
-      c.style.height = h + 'px';
-    }
+    if (h !== c.height) { c.height = h; c.style.height = h + 'px'; }
   });
 })();
 
@@ -1507,9 +1031,7 @@ restored = <span class="fn">decompress</span>(compressed)
 /* ═══ REVEAL ON SCROLL ═══ */
 (function(){
   var ob = new IntersectionObserver(function(entries){
-    entries.forEach(function(en){
-      if (en.isIntersecting) en.target.classList.add('visible');
-    });
+    entries.forEach(function(en){ if (en.isIntersecting) en.target.classList.add('visible'); });
   }, { threshold: 0.05, rootMargin: '0px 0px -40px 0px' });
   document.querySelectorAll('.reveal').forEach(function(el){ ob.observe(el); });
 })();
@@ -1519,9 +1041,7 @@ restored = <span class="fn">decompress</span>(compressed)
   var ob = new IntersectionObserver(function(entries){
     entries.forEach(function(en){
       if (en.isIntersecting) {
-        en.target.querySelectorAll('[data-width]').forEach(function(bar){
-          bar.style.width = bar.getAttribute('data-width');
-        });
+        en.target.querySelectorAll('[data-width]').forEach(function(bar){ bar.style.width = bar.getAttribute('data-width'); });
       }
     });
   }, { threshold: 0.2 });
