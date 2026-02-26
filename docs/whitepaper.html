@@ -37,6 +37,7 @@ body {
   line-height: 1.8;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
+  position: relative;
 }
 
 a { color: var(--cyan); text-decoration: none; }
@@ -44,9 +45,9 @@ a:hover { text-decoration: underline; }
 
 /* ── Matrix Canvas ───────────────────────── */
 #matrix-canvas {
-  position: fixed;
+  position: absolute;
   top: 0; left: 0;
-  width: 100%; height: 100%;
+  width: 100%;
   z-index: 0;
   pointer-events: none;
 }
@@ -1393,21 +1394,43 @@ restored = <span class="fn">decompress</span>(compressed)
 </div>
 
 <script>
-/* ═══ MATRIX RAIN EFFECT ═══ */
+/* ═══ MATRIX RAIN EFFECT (stable, no scroll reload) ═══ */
 (function(){
   var c = document.getElementById('matrix-canvas');
+  if (!c) return;
   var ctx = c.getContext('2d');
   var cols, drops;
-  var chars = '01HPRXABCDEF0123456789ΔΣΩλμπ∑∏∫≡≈≠∞'.split('');
+  var chars = '01HPRXABCDEF0123456789\u0394\u03A3\u03A9\u03BB\u03BC\u03C0\u2211\u220F\u222B\u2261\u2248\u2260\u221E'.split('');
   var last = 0, fps = 20, interval = 1000 / fps;
+  var lastW = 0;
 
-  function resize() {
-    c.width = window.innerWidth;
-    c.height = window.innerHeight;
+  /* Use document height so canvas covers the full scrollable page */
+  function getPageHeight() {
+    return Math.max(
+      document.body.scrollHeight,
+      document.documentElement.scrollHeight,
+      window.innerHeight
+    );
+  }
+
+  function init() {
+    var w = window.innerWidth;
+    var h = getPageHeight();
+    c.width = w;
+    c.height = h;
+    c.style.height = h + 'px';
     var fs = 14;
-    cols = Math.floor(c.width / fs);
+    cols = Math.floor(w / fs);
     drops = [];
     for (var i = 0; i < cols; i++) drops[i] = Math.random() * -100;
+    lastW = w;
+  }
+
+  function onResize() {
+    /* Only reset when width changes (ignore mobile URL-bar height changes) */
+    var w = window.innerWidth;
+    if (w === lastW) return;
+    init();
   }
 
   function draw(ts) {
@@ -1415,26 +1438,37 @@ restored = <span class="fn">decompress</span>(compressed)
     if (ts - last < interval) return;
     last = ts;
 
+    /* Only draw in the visible viewport region for performance */
+    var scrollY = window.pageYOffset || 0;
+    var viewH = window.innerHeight;
+    var top = Math.max(0, scrollY - 100);
+    var bottom = scrollY + viewH + 100;
+
+    /* Fade only the visible strip */
     ctx.fillStyle = 'rgba(10,10,15,0.06)';
-    ctx.fillRect(0, 0, c.width, c.height);
+    ctx.fillRect(0, top, c.width, bottom - top);
 
     ctx.font = '13px JetBrains Mono, monospace';
 
     for (var i = 0; i < cols; i++) {
-      // Vary green shades for matrix look
-      var bright = Math.random();
-      if (bright > 0.95) {
-        ctx.fillStyle = 'rgba(0,255,136,0.9)';  // bright flash
-      } else if (bright > 0.8) {
-        ctx.fillStyle = 'rgba(0,240,255,0.15)';  // cyan hint
-      } else {
-        ctx.fillStyle = 'rgba(0,255,136,0.12)';  // standard green
+      var y = drops[i] * 14;
+
+      /* Only render characters in or near the viewport */
+      if (y >= top - 28 && y <= bottom) {
+        var bright = Math.random();
+        if (bright > 0.95) {
+          ctx.fillStyle = 'rgba(0,255,136,0.9)';
+        } else if (bright > 0.8) {
+          ctx.fillStyle = 'rgba(0,240,255,0.15)';
+        } else {
+          ctx.fillStyle = 'rgba(0,255,136,0.12)';
+        }
+
+        var ch = chars[Math.floor(Math.random() * chars.length)];
+        ctx.fillText(ch, i * 14, y);
       }
 
-      var ch = chars[Math.floor(Math.random() * chars.length)];
-      ctx.fillText(ch, i * 14, drops[i] * 14);
-
-      if (drops[i] * 14 > c.height && Math.random() > 0.98) {
+      if (y > c.height && Math.random() > 0.98) {
         drops[i] = 0;
       }
       drops[i] += 0.4;
@@ -1442,11 +1476,20 @@ restored = <span class="fn">decompress</span>(compressed)
   }
 
   var rt;
-  function debouncedResize() { clearTimeout(rt); rt = setTimeout(resize, 150); }
+  function debouncedResize() { clearTimeout(rt); rt = setTimeout(onResize, 200); }
 
-  resize();
-  window.addEventListener('resize', debouncedResize);
+  init();
+  window.addEventListener('resize', debouncedResize, {passive: true});
   requestAnimationFrame(draw);
+
+  /* Re-init canvas height when all content is loaded (images, fonts) */
+  window.addEventListener('load', function() {
+    var h = getPageHeight();
+    if (h !== c.height) {
+      c.height = h;
+      c.style.height = h + 'px';
+    }
+  });
 })();
 
 /* ═══ MOBILE NAV ═══ */

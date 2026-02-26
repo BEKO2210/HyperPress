@@ -1444,15 +1444,52 @@ footer .footer-links a:hover { color: var(--cyan); text-decoration: none; }
 </footer>
 
 <script>
-/* ═══ DATA STREAM CANVAS (throttled) ═══ */
+/* ═══ DATA STREAM CANVAS (stable, no scroll reload) ═══ */
 (function(){
-  var c=document.getElementById('hero-canvas'),x=c.getContext('2d'),cols,drops;
+  var c=document.getElementById('hero-canvas');
+  if(!c)return;
+  var x=c.getContext('2d'),cols,drops;
   var ch='01 HPRX DELTA BWT MTF RLE LZMA ZLIB'.split(' ');
   var last=0,fps=24,interval=1000/fps;
-  function rs(){c.width=window.innerWidth;c.height=window.innerHeight;var fs=14;cols=Math.floor(c.width/fs);drops=[];for(var i=0;i<cols;i++)drops[i]=Math.random()*-80;}
-  function dr(ts){requestAnimationFrame(dr);if(ts-last<interval)return;last=ts;x.fillStyle='rgba(10,10,15,0.08)';x.fillRect(0,0,c.width,c.height);x.fillStyle='rgba(0,240,255,0.1)';x.font='13px JetBrains Mono,monospace';for(var i=0;i<cols;i++){x.fillText(ch[Math.floor(Math.random()*ch.length)],i*14,drops[i]*14);if(drops[i]*14>c.height&&Math.random()>0.985)drops[i]=0;drops[i]+=0.35;}}
-  var rt;function drs(){clearTimeout(rt);rt=setTimeout(rs,150);}
-  rs();window.addEventListener('resize',drs);requestAnimationFrame(dr);
+  var lastW=0;
+
+  function init(){
+    var w=window.innerWidth;
+    /* Use max of innerHeight and screen.height to avoid mobile URL-bar flicker */
+    var h=Math.max(window.innerHeight,window.screen?window.screen.height:window.innerHeight);
+    c.width=w;c.height=h;
+    var fs=14;cols=Math.floor(w/fs);
+    drops=[];for(var i=0;i<cols;i++)drops[i]=Math.random()*-80;
+    lastW=w;
+  }
+
+  function onResize(){
+    /* Only reset canvas when width actually changes (ignore mobile URL-bar height changes) */
+    var w=window.innerWidth;
+    if(w===lastW)return;
+    init();
+  }
+
+  function draw(ts){
+    requestAnimationFrame(draw);
+    if(ts-last<interval)return;last=ts;
+    x.fillStyle='rgba(10,10,15,0.08)';
+    x.fillRect(0,0,c.width,c.height);
+    x.fillStyle='rgba(0,240,255,0.1)';
+    x.font='13px JetBrains Mono,monospace';
+    for(var i=0;i<cols;i++){
+      x.fillText(ch[Math.floor(Math.random()*ch.length)],i*14,drops[i]*14);
+      if(drops[i]*14>c.height&&Math.random()>0.985)drops[i]=0;
+      drops[i]+=0.35;
+    }
+  }
+
+  var rt;
+  function drs(){clearTimeout(rt);rt=setTimeout(onResize,200);}
+
+  init();
+  window.addEventListener('resize',drs,{passive:true});
+  requestAnimationFrame(draw);
 })();
 
 /* ═══ INTERSECTION OBSERVER ═══ */
@@ -1511,9 +1548,11 @@ footer .footer-links a:hover { color: var(--cyan); text-decoration: none; }
 
 /* ═══ COPY CODE ═══ */
 function copyCode(){
-  var code='from hyperpress import compress, decompress\n\ncompressed = compress(data)\nrestored = decompress(compressed)';
-  if(navigator.clipboard){navigator.clipboard.writeText(code);}else{var t=document.createElement('textarea');t.value=code;document.body.appendChild(t);t.select();document.execCommand('copy');document.body.removeChild(t);}
-  var b=document.getElementById('copyBtn');b.textContent='Copied!';b.classList.add('copied');setTimeout(function(){b.textContent='Copy';b.classList.remove('copied');},2000);
+  try{
+    var code='from hyperpress import compress, decompress\n\ncompressed = compress(data)\nrestored = decompress(compressed)';
+    if(navigator.clipboard){navigator.clipboard.writeText(code).catch(function(){});}else{var t=document.createElement('textarea');t.value=code;t.style.position='fixed';t.style.opacity='0';document.body.appendChild(t);t.select();document.execCommand('copy');document.body.removeChild(t);}
+    var b=document.getElementById('copyBtn');b.textContent='Copied!';b.classList.add('copied');setTimeout(function(){b.textContent='Copy';b.classList.remove('copied');},2000);
+  }catch(e){}
 }
 
 /* ═══ LIVE DEMO ═══ */
