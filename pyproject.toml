@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=64", "wheel"]
+requires = ["setuptools>=64,<75", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -7,27 +7,31 @@ name = "hyperpress"
 version = "1.0.0"
 description = "Adaptive Meta-Compression Engine — beats zlib-6 and LZMA"
 readme = "README.md"
-license = "MIT"
+license = {text = "MIT"}
 requires-python = ">=3.8"
 authors = [
-    { name = "Belkis / BEL KI", email = "info@belki.dev" },
+    { name = "Belkis Aslani", email = "info@belki.dev" },
 ]
-keywords = ["compression", "lzma", "zlib", "meta-compression", "adaptive"]
+keywords = ["compression", "lzma", "zlib", "meta-compression", "adaptive", "bwt", "hyperpress"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: System :: Archiving :: Compression",
 ]
 
 [project.urls]
-Homepage = "https://github.com/BEKO2210/HyperPress"
+Homepage = "https://beko2210.github.io/HyperPress/"
+Documentation = "https://beko2210.github.io/HyperPress/"
 Repository = "https://github.com/BEKO2210/HyperPress"
+Issues = "https://github.com/BEKO2210/HyperPress/issues"
 
 [tool.setuptools.packages.find]
 where = ["src"]
