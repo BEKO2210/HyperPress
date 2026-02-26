@@ -2,9 +2,10 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
+<meta name="description" content="HyperPress is an adaptive meta-compression engine that achieves 92.2% compression, outperforming zlib-6 and LZMA through per-block preprocessing racing.">
 <title>HyperPress — Adaptive Meta-Compression Engine</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -38,6 +39,11 @@ html {
   font-size: 16px;
   -webkit-text-size-adjust: 100%;
   overflow-x: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
 }
 
 body {
@@ -211,7 +217,9 @@ nav .container {
   border: none;
   color: var(--text-dim);
   cursor: pointer;
-  padding: 4px;
+  padding: 10px;
+  min-width: 44px;
+  min-height: 44px;
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -231,7 +239,7 @@ nav .container {
     border-bottom: 1px solid var(--border);
   }
   .nav-links.open { display: flex; }
-  .nav-links a { font-size: 0.9rem; }
+  .nav-links a { font-size: 0.9rem; padding: 8px 0; display: block; min-height: 44px; line-height: 28px; }
   .nav-toggle { display: block; }
 }
 
@@ -1094,20 +1102,25 @@ footer .footer-links a:hover { color: var(--cyan); text-decoration: none; }
   .container { padding: 0 16px; }
   section { padding: 60px 0; }
   .hero-stat-badge { font-size: 0.65rem; padding: 6px 10px; }
+  .benchmark-summary { grid-template-columns: 1fr; gap: 10px; }
 }
+
+/* Noscript: make content visible when JS is disabled */
+noscript .reveal-fix, .no-js .reveal { opacity: 1 !important; transform: none !important; }
 </style>
+<noscript><style>.reveal{opacity:1!important;transform:none!important;}</style></noscript>
 </head>
 <body>
 
 <!-- ═══ NAVIGATION ═══ -->
-<nav>
+<nav aria-label="Main navigation">
   <div class="container">
     <div class="nav-logo">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
       HPRX
     </div>
-    <button class="nav-toggle" id="navToggle" aria-label="Menu">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    <button class="nav-toggle" id="navToggle" type="button" aria-label="Menu" aria-expanded="false">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
     </button>
     <ul class="nav-links" id="navLinks">
       <li><a href="#pipeline">How It Works</a></li>
@@ -1122,7 +1135,7 @@ footer .footer-links a:hover { color: var(--cyan); text-decoration: none; }
 
 <!-- ═══ HERO ═══ -->
 <section id="hero">
-  <canvas id="hero-canvas"></canvas>
+  <canvas id="hero-canvas" aria-hidden="true"></canvas>
   <div class="hero-content">
     <h1 class="hero-title reveal" data-text="HyperPress">HyperPress</h1>
     <p class="hero-subtitle reveal reveal-d1">Adaptive Meta-Compression Engine</p>
@@ -1131,7 +1144,7 @@ footer .footer-links a:hover { color: var(--cyan); text-decoration: none; }
       <span class="hero-stat-badge">Beats LZMA by 24%</span>
     </div>
     <a href="#pipeline" class="hero-cta reveal reveal-d3">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
       Explore the Engine
     </a>
   </div>
@@ -1323,31 +1336,31 @@ footer .footer-links a:hover { color: var(--cyan); text-decoration: none; }
         <div class="node-desc">Raw bytes of any type</div>
         <div class="node-detail">Text, binary, structured, or mixed data</div>
       </div>
-      <div class="arch-arrow reveal reveal-d1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg></div>
+      <div class="arch-arrow reveal reveal-d1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg></div>
       <div class="arch-node reveal reveal-d1">
         <div class="node-title">Adaptive Block Splitter</div>
         <div class="node-desc">Entropy-guided variable block sizing</div>
         <div class="node-detail">4KB&ndash;128KB based on entropy variance</div>
       </div>
-      <div class="arch-arrow reveal reveal-d2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg></div>
+      <div class="arch-arrow reveal reveal-d2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg></div>
       <div class="arch-node reveal reveal-d2">
         <div class="node-title">Block Profiler</div>
         <div class="node-desc">Computes 6 features per block</div>
         <div class="node-detail">ent, delta-ent, null-ratio, txt, struct, uniq</div>
       </div>
-      <div class="arch-arrow reveal reveal-d3"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg></div>
+      <div class="arch-arrow reveal reveal-d3"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg></div>
       <div class="arch-node reveal reveal-d3">
         <div class="node-title">Candidate Selector</div>
         <div class="node-desc">Context-aware preprocessing + backend pairing</div>
         <div class="node-detail">3&ndash;15 candidates per block via rules engine</div>
       </div>
-      <div class="arch-arrow reveal reveal-d4"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg></div>
+      <div class="arch-arrow reveal reveal-d4"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg></div>
       <div class="arch-node reveal reveal-d4">
         <div class="node-title">Racing Engine</div>
         <div class="node-desc">Try all candidates, smallest output wins</div>
         <div class="node-detail">Per-block CRC32 integrity verification</div>
       </div>
-      <div class="arch-arrow reveal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg></div>
+      <div class="arch-arrow reveal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg></div>
       <div class="arch-node final reveal reveal-d1">
         <div class="node-title">HPRX Output</div>
         <div class="node-desc">Self-contained compressed stream</div>
@@ -1366,7 +1379,7 @@ footer .footer-links a:hover { color: var(--cyan); text-decoration: none; }
     <div class="code-block reveal reveal-d1">
       <div class="code-header">
         <div class="code-dots"><span></span><span></span><span></span></div>
-        <button class="code-copy" id="copyBtn" onclick="copyCode()">Copy</button>
+        <button class="code-copy" id="copyBtn" type="button" onclick="copyCode()">Copy</button>
       </div>
       <div class="code-body">
         <div><span class="kw">from</span> <span class="vr">hyperpress</span> <span class="kw">import</span> <span class="fn">compress</span>, <span class="fn">decompress</span></div>
@@ -1388,9 +1401,10 @@ footer .footer-links a:hover { color: var(--cyan); text-decoration: none; }
     <h2 class="section-title reveal">See the Compression</h2>
 
     <div class="demo-container reveal reveal-d1">
-      <textarea class="demo-textarea" id="demoInput" placeholder="Paste or type text here...">The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. Sphinx of black quartz judge my vow. Pack my box with five dozen liquor jugs. HyperPress uses adaptive meta-compression to beat both zlib and LZMA by selecting the optimal preprocessing transform and compression backend for each data block independently.</textarea>
-      <button class="demo-btn" onclick="runDemo()">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+      <label for="demoInput" class="section-desc" style="margin-bottom:8px;">Enter text to see compression results:</label>
+      <textarea class="demo-textarea" id="demoInput" placeholder="Paste or type text here..." maxlength="100000">The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. Sphinx of black quartz judge my vow. Pack my box with five dozen liquor jugs. HyperPress uses adaptive meta-compression to beat both zlib and LZMA by selecting the optimal preprocessing transform and compression backend for each data block independently.</textarea>
+      <button class="demo-btn" type="button" onclick="runDemo()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
         Compress
       </button>
 
@@ -1427,14 +1441,14 @@ footer .footer-links a:hover { color: var(--cyan); text-decoration: none; }
     <p class="footer-brand">Built by <strong>Belkis Aslani</strong></p>
     <ul class="footer-links">
       <li>
-        <a href="https://github.com/BEKO2210/HyperPress">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+        <a href="https://github.com/BEKO2210/HyperPress" target="_blank" rel="noopener noreferrer">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
           GitHub
         </a>
       </li>
       <li>
         <a href="whitepaper.html">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
           Whitepaper
         </a>
       </li>
@@ -1448,35 +1462,37 @@ footer .footer-links a:hover { color: var(--cyan); text-decoration: none; }
 (function(){
   var c=document.getElementById('hero-canvas');
   if(!c)return;
-  var x=c.getContext('2d'),cols,drops;
+  var x=c.getContext('2d');
+  if(!x)return;
+  var cols,drops;
   var ch='01 HPRX DELTA BWT MTF RLE LZMA ZLIB'.split(' ');
   var last=0,fps=24,interval=1000/fps;
   var lastW=0;
+  var animId=0;
 
   function init(){
     var w=window.innerWidth;
-    /* Use max of innerHeight and screen.height to avoid mobile URL-bar flicker */
     var h=Math.max(window.innerHeight,window.screen?window.screen.height:window.innerHeight);
     c.width=w;c.height=h;
     var fs=14;cols=Math.floor(w/fs);
     drops=[];for(var i=0;i<cols;i++)drops[i]=Math.random()*-80;
+    x.font='13px JetBrains Mono,monospace';
     lastW=w;
   }
 
   function onResize(){
-    /* Only reset canvas when width actually changes (ignore mobile URL-bar height changes) */
     var w=window.innerWidth;
     if(w===lastW)return;
     init();
   }
 
   function draw(ts){
-    requestAnimationFrame(draw);
+    animId=requestAnimationFrame(draw);
+    if(document.hidden)return;
     if(ts-last<interval)return;last=ts;
     x.fillStyle='rgba(10,10,15,0.08)';
     x.fillRect(0,0,c.width,c.height);
     x.fillStyle='rgba(0,240,255,0.1)';
-    x.font='13px JetBrains Mono,monospace';
     for(var i=0;i<cols;i++){
       x.fillText(ch[Math.floor(Math.random()*ch.length)],i*14,drops[i]*14);
       if(drops[i]*14>c.height&&Math.random()>0.985)drops[i]=0;
@@ -1489,12 +1505,13 @@ footer .footer-links a:hover { color: var(--cyan); text-decoration: none; }
 
   init();
   window.addEventListener('resize',drs,{passive:true});
-  requestAnimationFrame(draw);
+  animId=requestAnimationFrame(draw);
 })();
 
 /* ═══ INTERSECTION OBSERVER ═══ */
 (function(){
-  var ob=new IntersectionObserver(function(e){e.forEach(function(en){if(en.isIntersecting)en.target.classList.add('visible');});},{threshold:0.08,rootMargin:'0px 0px -30px 0px'});
+  if(typeof IntersectionObserver==='undefined'){document.querySelectorAll('.reveal').forEach(function(el){el.classList.add('visible');});return;}
+  var ob=new IntersectionObserver(function(e){e.forEach(function(en){if(en.isIntersecting){en.target.classList.add('visible');ob.unobserve(en.target);}});},{threshold:0.08,rootMargin:'0px 0px -30px 0px'});
   document.querySelectorAll('.reveal').forEach(function(el){ob.observe(el);});
 })();
 
@@ -1548,17 +1565,22 @@ footer .footer-links a:hover { color: var(--cyan); text-decoration: none; }
 
 /* ═══ COPY CODE ═══ */
 function copyCode(){
+  var code='from hyperpress import compress, decompress\n\ncompressed = compress(data)\nrestored = decompress(compressed)';
+  var b=document.getElementById('copyBtn');
+  if(!b)return;
+  function showCopied(){b.textContent='Copied!';b.classList.add('copied');setTimeout(function(){b.textContent='Copy';b.classList.remove('copied');},2000);}
   try{
-    var code='from hyperpress import compress, decompress\n\ncompressed = compress(data)\nrestored = decompress(compressed)';
-    if(navigator.clipboard){navigator.clipboard.writeText(code).catch(function(){});}else{var t=document.createElement('textarea');t.value=code;t.style.position='fixed';t.style.opacity='0';document.body.appendChild(t);t.select();document.execCommand('copy');document.body.removeChild(t);}
-    var b=document.getElementById('copyBtn');b.textContent='Copied!';b.classList.add('copied');setTimeout(function(){b.textContent='Copy';b.classList.remove('copied');},2000);
-  }catch(e){}
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(code).then(showCopied).catch(function(){fallbackCopy();});}else{fallbackCopy();}
+  }catch(e){fallbackCopy();}
+  function fallbackCopy(){try{var t=document.createElement('textarea');t.value=code;t.style.position='fixed';t.style.opacity='0';document.body.appendChild(t);t.select();document.execCommand('copy');document.body.removeChild(t);showCopied();}catch(e2){}}
 }
 
 /* ═══ LIVE DEMO ═══ */
 function runDemo(){
-  var input=document.getElementById('demoInput').value;
-  if(!input)return;
+  var el=document.getElementById('demoInput');
+  if(!el)return;
+  var input=el.value;
+  if(!input||!input.trim()){el.style.borderColor='var(--magenta)';setTimeout(function(){el.style.borderColor='';},1500);return;}
   var orig=new Blob([input]).size;
   var zR=0.153,lR=0.103,hR=0.078;
   if(orig<100){zR=0.65;lR=0.58;hR=0.50;}
@@ -1583,15 +1605,22 @@ function runDemo(){
     document.getElementById('barHyper').style.width=(hR*100)+'%';
   },50);});
   var sv=orig-hS,sp=((1-hR)*100).toFixed(1),vz=((1-hS/zS)*100).toFixed(1);
-  document.getElementById('demoSavings').innerHTML='HyperPress: '+sp+'% compression<br>'+sv+' bytes saved &mdash; '+vz+'% smaller than zlib-6';
+  var sav=document.getElementById('demoSavings');
+  if(sav)sav.textContent='HyperPress: '+sp+'% compression \u2014 '+sv+' bytes saved \u2014 '+vz+'% smaller than zlib-6';
 }
 
 /* ═══ MOBILE NAV TOGGLE ═══ */
 (function(){
   var btn=document.getElementById('navToggle'),links=document.getElementById('navLinks');
   if(btn&&links){
-    btn.addEventListener('click',function(){links.classList.toggle('open');});
-    links.querySelectorAll('a').forEach(function(a){a.addEventListener('click',function(){links.classList.remove('open');});});
+    btn.addEventListener('click',function(){
+      var open=links.classList.toggle('open');
+      btn.setAttribute('aria-expanded',open?'true':'false');
+    });
+    links.querySelectorAll('a').forEach(function(a){a.addEventListener('click',function(){
+      links.classList.remove('open');
+      btn.setAttribute('aria-expanded','false');
+    });});
   }
 })();
 
