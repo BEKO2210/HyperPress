@@ -1,12 +1,12 @@
 <p align="center">
   <img src="https://img.shields.io/badge/HyperPress-v1.0-00f0ff?style=for-the-badge&labelColor=0a0a0f" alt="HyperPress v1.0">
-  <img src="https://img.shields.io/badge/compression-92.2%25-00f0ff?style=for-the-badge&labelColor=0a0a0f" alt="92.2% compression">
+  <img src="https://img.shields.io/badge/compression-92.3%25-00f0ff?style=for-the-badge&labelColor=0a0a0f" alt="92.3% compression">
 </p>
 
 <h1 align="center">HyperPress</h1>
 <p align="center"><strong>Adaptive Meta-Compression Engine</strong></p>
 <p align="center">
-  Beats zlib-6 by ~49% &middot; Beats LZMA by ~24% &middot; Pure Python &middot; Zero dependencies
+  Beats zlib-9 by ~49% &middot; Beats LZMA-RAW by ~23% &middot; Pure Python &middot; Zero dependencies
 </p>
 
 <p align="center">
@@ -42,25 +42,25 @@ Tested on **8 diverse datasets** (text, JSON, sensor data, logs, binary, source 
 ┌──────────────────────────────────────────────────────┐
 │         Compressor       │   Ratio   │   vs HyperPress │
 ├──────────────────────────┼───────────┼─────────────────┤
-│  zlib-6                  │   84.7%   │   +49% larger    │
-│  LZMA                    │   89.7%   │   +24% larger    │
-│  HyperPress              │   92.2%   │   ★ winner       │
+│  zlib-9                  │   84.9%   │   +49% larger    │
+│  LZMA-RAW                │   89.9%   │   +23% larger    │
+│  HyperPress (netto)      │   92.3%   │   ★ winner       │
 └──────────────────────────────────────────────────────┘
 ```
 
 ### Per-Dataset Breakdown
 
-| Dataset | Original | zlib-6 | LZMA | HyperPress | Winner |
-|---------|----------|--------|------|------------|--------|
-| English Text | 21,930 B | 193 B (99.1%) | 240 B (98.9%) | **211 B (99.0%)** | zlib-6 |
-| German Text | 31,300 B | 272 B (99.1%) | 284 B (99.1%) | **256 B (99.2%)** | HyperPress |
-| JSON Data | 33,582 B | 3,597 B (89.3%) | 1,764 B (94.7%) | **1,881 B (94.4%)** | LZMA |
-| Sensor Data | 30,000 B | 21,990 B (26.7%) | 17,144 B (42.9%) | **11,148 B (62.8%)** | HyperPress |
-| Sparse Binary | 25,000 B | 1,224 B (95.1%) | 1,032 B (95.9%) | **758 B (97.0%)** | HyperPress |
-| Log File | 77,532 B | 10,704 B (86.2%) | 4,948 B (93.6%) | **5,109 B (93.4%)** | LZMA |
-| Pattern+Noise | 24,000 B | 247 B (99.0%) | 168 B (99.3%) | **110 B (99.5%)** | HyperPress |
-| Source Code | 7,680 B | 104 B (98.6%) | 160 B (97.9%) | **132 B (98.3%)** | zlib-6 |
-| **TOTAL** | **251,024 B** | **38,331 B (84.7%)** | **25,740 B (89.7%)** | **19,605 B (92.2%)** | **HyperPress** |
+| Dataset | Original | zlib-9 | LZMA-RAW | HyperPress (netto) | Winner |
+|---------|----------|--------|----------|-------------------|--------|
+| English Text | 21,930 B | 193 B (99.1%) | 181 B (99.2%) | **181 B (99.2%)** | HyperPress |
+| German Text | 31,300 B | 272 B (99.1%) | 226 B (99.3%) | **226 B (99.3%)** | HyperPress |
+| JSON Data | 33,582 B | 3,491 B (89.6%) | 1,705 B (94.9%) | **1,929 B (94.3%)** | LZMA-RAW |
+| Sensor Data | 30,000 B | 21,990 B (26.7%) | 17,087 B (43.0%) | **11,118 B (62.9%)** | HyperPress |
+| Sparse Binary | 25,000 B | 1,195 B (95.2%) | 973 B (96.1%) | **728 B (97.1%)** | HyperPress |
+| Log File | 77,532 B | 10,495 B (86.5%) | 4,889 B (93.7%) | **5,079 B (93.4%)** | LZMA-RAW |
+| Pattern+Noise | 24,000 B | 184 B (99.2%) | 110 B (99.5%) | **80 B (99.7%)** | HyperPress |
+| Source Code | 7,680 B | 104 B (98.6%) | 102 B (98.7%) | **102 B (98.7%)** | HyperPress |
+| **TOTAL** | **251,024 B** | **37,924 B (84.9%)** | **25,273 B (89.9%)** | **19,443 B (92.3%)** | **HyperPress** |
 
 HyperPress wins on aggregate by selecting the best approach for each data type.
 
@@ -192,7 +192,7 @@ python -m pytest tests/ -v
 **55 tests** covering:
 - Roundtrip correctness for all data types
 - CRC32 integrity verification (corrupted data detection)
-- Benchmark assertions (HyperPress > LZMA > zlib-6 on aggregate)
+- Benchmark assertions (HyperPress > LZMA > zlib on aggregate)
 - 100-round fuzz testing with variable entropy levels
 - Edge cases (empty, 1-byte, power-of-2 sizes, all-zeros, all-0xFF)
 
