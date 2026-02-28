@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "hyperpress"
 version = "1.0.0"
-description = "Adaptive Meta-Compression Engine — beats zlib-6 and LZMA"
+description = "Adaptive Meta-Compression Engine — beats zlib-9 and LZMA-RAW"
 readme = "README.md"
 license = {text = "MIT"}
 requires-python = ">=3.8"

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 HyperPress v1.0 — Adaptive Meta-Compression Engine
-Beats zlib-6 and LZMA through intelligent preprocessing + backend racing.
+Beats zlib-9 and LZMA-RAW through intelligent preprocessing + backend racing.
 
 Copyright 2025 Belkis / BEL KI (AI Consultancy)
 Licensed under the MIT License.
