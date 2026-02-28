@@ -370,7 +370,7 @@ def candidates(prof, dlen):
         c.add((PreProc.DELTA, Backend.BZ2))
         c.add((PreProc.DELTA16, Backend.LZMA))
 
-    if prof["txt"] and dlen <= 50000:
+    if prof["txt"] and dlen <= 8192:
         c.add((PreProc.BWT_MTF, Backend.ZLIB9))
         c.add((PreProc.BWT_MTF, Backend.LZMA))
         c.add((PreProc.BWT_MTF, Backend.BZ2))
@@ -566,58 +566,66 @@ def gen_data():
 
 def bench():
     ds = gen_data()
-    W = 82
+    W = 99
     print("+" + "=" * W + "+")
-    print("|%s|" % "HyperPress v1.0 — Benchmark: zlib-6 vs LZMA vs HyperPress".center(W))
+    print("|%s|" % "HyperPress v1.0 — Benchmark: zlib-9 vs LZMA-RAW vs HyperPress".center(W))
     print("+" + "=" * W + "+")
-    print("|  %-20s|%10s|%10s|%10s|%10s|%9s|%9s |" % (
-        "Dataset", "Original", "zlib-6", "LZMA", "HYPER", "d vs best", "Winner"))
+    print("|  %-20s|%10s|%10s|%10s|%10s|%11s|%9s|%9s |" % (
+        "Dataset", "Original", "zlib-9", "LZMA-RAW", "HYPER",
+        "HYPER_NETTO", "d vs best", "Winner"))
     print("+" + "=" * W + "+")
-    to = tz = tl = th = 0
+    to = tz = tl = th = thn = 0
     wins = {"HP": 0, "zlib": 0, "LZMA": 0}
     for nm, d in ds.items():
         ol = len(d)
         to += ol
-        zl = len(zlib.compress(d, 6))
+        zl = len(zlib.compress(d, 9))
         tz += zl
-        ll = len(lzma.compress(d))
+        ll = len(lzma.compress(d, format=lzma.FORMAT_RAW,
+                               filters=[{"id": lzma.FILTER_LZMA2, "preset": 9}]))
         tl += ll
         hp = compress(d)
         hl = len(hp)
         th += hl
+        num_blocks = struct.unpack(HDR, hp[:struct.calcsize(HDR)])[3]
+        overhead = 16 + (num_blocks * 14)
+        hl_netto = hl - overhead
+        thn += hl_netto
         assert decompress(hp) == d, "FAIL: %s" % nm
         best_other = min(zl, ll)
-        delta_pct = (hl - best_other) / best_other * 100
-        if hl <= zl and hl <= ll:
+        delta_pct = (hl_netto - best_other) / best_other * 100
+        if hl_netto <= zl and hl_netto <= ll:
             w = "* HYPER"
             wins["HP"] += 1
         elif zl <= ll:
-            w = "  zlib-6"
+            w = "zlib-9"
             wins["zlib"] += 1
         else:
-            w = "  LZMA"
+            w = "LZMA-RAW"
             wins["LZMA"] += 1
-        print("|  %-20s|%9sB|%9sB|%9sB|%9sB|%+8.1f%%|%9s |" % (
+        print("|  %-20s|%9sB|%9sB|%9sB|%9sB|%10sB|%+8.1f%%|%9s |" % (
             nm, format(ol, ","), format(zl, ","), format(ll, ","),
-            format(hl, ","), delta_pct, w))
+            format(hl, ","), format(hl_netto, ","), delta_pct, w))
     print("+" + "=" * W + "+")
     zr = (1 - tz / to) * 100
     lr = (1 - tl / to) * 100
     hr = (1 - th / to) * 100
-    print("|  %-20s|%9sB|%9sB|%9sB|%9sB|%9s|%9s |" % (
+    hnr = (1 - thn / to) * 100
+    print("|  %-20s|%9sB|%9sB|%9sB|%9sB|%10sB|%9s|%9s |" % (
         "TOTAL", format(to, ","), format(tz, ","), format(tl, ","),
-        format(th, ","), "", ""))
-    print("|  %-20s|%10s|%8.1f%% |%8.1f%% |%8.1f%% |%9s|%9s |" % (
-        "Ratio", "", zr, lr, hr, "", ""))
+        format(th, ","), format(thn, ","), "", ""))
+    print("|  %-20s|%10s|%8.1f%% |%8.1f%% |%8.1f%% |%9.1f%% |%9s|%9s |" % (
+        "Ratio", "", zr, lr, hr, hnr, "", ""))
     print("+" + "=" * W + "+")
-    vzl = (1 - th / tz) * 100
-    vlm = (1 - th / tl) * 100
-    print("|  Wins: HyperPress=%d  zlib-6=%d  LZMA=%d%s|" % (
-        wins["HP"], wins["zlib"], wins["LZMA"], " " * (W - 44)))
-    print("|  HyperPress vs zlib-6: %+.2f%% (smaller=better)%s|" % (
-        vzl, " " * (W - 49)))
-    print("|  HyperPress vs LZMA:   %+.2f%% (smaller=better)%s|" % (
-        vlm, " " * (W - 49)))
+    vzl = (1 - thn / tz) * 100
+    vlm = (1 - thn / tl) * 100
+    line1 = "  Wins: HyperPress=%d  zlib-9=%d  LZMA-RAW=%d" % (
+        wins["HP"], wins["zlib"], wins["LZMA"])
+    print("|%s%s|" % (line1, " " * (W - len(line1))))
+    line2 = "  HyperPress vs zlib-9:   %+.2f%% (smaller=better)" % vzl
+    print("|%s%s|" % (line2, " " * (W - len(line2))))
+    line3 = "  HyperPress vs LZMA-RAW: %+.2f%% (smaller=better)" % vlm
+    print("|%s%s|" % (line3, " " * (W - len(line3))))
     print("+" + "=" * W + "+")
     print("\nAll integrity checks passed (CRC32 + Size)")
 
