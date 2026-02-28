@@ -400,21 +400,21 @@ ul.bullets li::marker { color: var(--cyan); }
     <span class="sec-num">Section 01</span>
     <h2>Abstract</h2>
     <div class="highlight-box">
-      <strong>HyperPress</strong> is an adaptive meta-compression engine that achieves <strong>92.2% average compression</strong> across 8 diverse datasets, outperforming zlib-6 (84.7%) by 49% in size reduction and LZMA (89.7%) by 24%. Rather than implementing a novel compression algorithm, HyperPress introduces an intelligence layer that profiles each data block, races 7 preprocessing transforms against 5 compression backends, and selects the per-block winner based on empirical output size. The result is a self-contained HPRX binary format with CRC32 integrity verification.
+      <strong>HyperPress</strong> is an adaptive meta-compression engine that achieves <strong>92.3% average compression (netto)</strong> across 8 diverse datasets, outperforming zlib-9 (84.9%) by 49% in size reduction and LZMA-RAW (89.9%) by 23%. Rather than implementing a novel compression algorithm, HyperPress introduces an intelligence layer that profiles each data block, races 7 preprocessing transforms against 5 compression backends, and selects the per-block winner based on empirical output size. The result is a self-contained HPRX binary format with CRC32 integrity verification.
     </div>
     <p>Key results across 8 benchmark datasets ranging from natural language text to sensor telemetry:</p>
     <div class="compare-grid">
       <div class="compare-card">
-        <div class="cc-label">zlib-6</div>
-        <div class="cc-value">84.7<span class="cc-suffix">%</span></div>
+        <div class="cc-label">zlib-9</div>
+        <div class="cc-value">84.9<span class="cc-suffix">%</span></div>
       </div>
       <div class="compare-card">
-        <div class="cc-label">LZMA</div>
-        <div class="cc-value">89.7<span class="cc-suffix">%</span></div>
+        <div class="cc-label">LZMA-RAW</div>
+        <div class="cc-value">89.9<span class="cc-suffix">%</span></div>
       </div>
       <div class="compare-card winner">
-        <div class="cc-label">HyperPress</div>
-        <div class="cc-value">92.2<span class="cc-suffix">%</span></div>
+        <div class="cc-label">HyperPress (netto)</div>
+        <div class="cc-value">92.3<span class="cc-suffix">%</span></div>
       </div>
     </div>
   </section>
@@ -834,17 +834,17 @@ ul.bullets li::marker { color: var(--cyan); }
       <table class="data-table">
         <caption style="caption-side:top;text-align:left;font-size:0.78rem;color:var(--text-dim);margin-bottom:8px;">Table 1 &mdash; Per-dataset compression results (lower compressed size = better)</caption>
         <thead>
-          <tr><th scope="col">Dataset</th><th scope="col" class="num-col">Original</th><th scope="col" class="num-col">zlib-6</th><th scope="col" class="num-col">LZMA</th><th scope="col" class="num-col">HyperPress</th><th scope="col">Winner</th></tr>
+          <tr><th scope="col">Dataset</th><th scope="col" class="num-col">Original</th><th scope="col" class="num-col">zlib-9</th><th scope="col" class="num-col">LZMA-RAW</th><th scope="col" class="num-col">HyperPress (netto)</th><th scope="col">Winner</th></tr>
         </thead>
         <tbody>
-          <tr><td>English Text</td><td class="num-col">21,930 B</td><td class="num-col best">193 B (99.1%)</td><td class="num-col">240 B (98.9%)</td><td class="num-col">211 B (99.0%)</td><td class="best">zlib-6</td></tr>
-          <tr><td>German Text</td><td class="num-col">31,300 B</td><td class="num-col">272 B (99.1%)</td><td class="num-col">284 B (99.1%)</td><td class="num-col best">256 B (99.2%)</td><td class="best">HPRX</td></tr>
-          <tr><td>JSON Data</td><td class="num-col">33,582 B</td><td class="num-col">3,597 B (89.3%)</td><td class="num-col best">1,764 B (94.7%)</td><td class="num-col">1,881 B (94.4%)</td><td class="best">LZMA</td></tr>
-          <tr><td>Sensor Data</td><td class="num-col">30,000 B</td><td class="num-col">21,990 B (26.7%)</td><td class="num-col">17,144 B (42.9%)</td><td class="num-col best">11,148 B (62.8%)</td><td class="best">HPRX</td></tr>
-          <tr><td>Sparse Binary</td><td class="num-col">25,000 B</td><td class="num-col">1,224 B (95.1%)</td><td class="num-col">1,032 B (95.9%)</td><td class="num-col best">758 B (97.0%)</td><td class="best">HPRX</td></tr>
-          <tr><td>Log File</td><td class="num-col">77,532 B</td><td class="num-col">10,704 B (86.2%)</td><td class="num-col best">4,948 B (93.6%)</td><td class="num-col">5,109 B (93.4%)</td><td class="best">LZMA</td></tr>
-          <tr><td>Pattern+Noise</td><td class="num-col">24,000 B</td><td class="num-col">247 B (99.0%)</td><td class="num-col">168 B (99.3%)</td><td class="num-col best">110 B (99.5%)</td><td class="best">HPRX</td></tr>
-          <tr><td>Source Code</td><td class="num-col">7,680 B</td><td class="num-col best">104 B (98.6%)</td><td class="num-col">160 B (97.9%)</td><td class="num-col">132 B (98.3%)</td><td class="best">zlib-6</td></tr>
+          <tr><td>English Text</td><td class="num-col">21,930 B</td><td class="num-col">193 B (99.1%)</td><td class="num-col">181 B (99.2%)</td><td class="num-col best">181 B (99.2%)</td><td class="best">HPRX</td></tr>
+          <tr><td>German Text</td><td class="num-col">31,300 B</td><td class="num-col">272 B (99.1%)</td><td class="num-col">226 B (99.3%)</td><td class="num-col best">226 B (99.3%)</td><td class="best">HPRX</td></tr>
+          <tr><td>JSON Data</td><td class="num-col">33,582 B</td><td class="num-col">3,491 B (89.6%)</td><td class="num-col best">1,705 B (94.9%)</td><td class="num-col">1,929 B (94.3%)</td><td class="best">LZMA-RAW</td></tr>
+          <tr><td>Sensor Data</td><td class="num-col">30,000 B</td><td class="num-col">21,990 B (26.7%)</td><td class="num-col">17,087 B (43.0%)</td><td class="num-col best">11,118 B (62.9%)</td><td class="best">HPRX</td></tr>
+          <tr><td>Sparse Binary</td><td class="num-col">25,000 B</td><td class="num-col">1,195 B (95.2%)</td><td class="num-col">973 B (96.1%)</td><td class="num-col best">728 B (97.1%)</td><td class="best">HPRX</td></tr>
+          <tr><td>Log File</td><td class="num-col">77,532 B</td><td class="num-col">10,495 B (86.5%)</td><td class="num-col best">4,889 B (93.7%)</td><td class="num-col">5,079 B (93.4%)</td><td class="best">LZMA-RAW</td></tr>
+          <tr><td>Pattern+Noise</td><td class="num-col">24,000 B</td><td class="num-col">184 B (99.2%)</td><td class="num-col">110 B (99.5%)</td><td class="num-col best">80 B (99.7%)</td><td class="best">HPRX</td></tr>
+          <tr><td>Source Code</td><td class="num-col">7,680 B</td><td class="num-col">104 B (98.6%)</td><td class="num-col">102 B (98.7%)</td><td class="num-col best">102 B (98.7%)</td><td class="best">HPRX</td></tr>
         </tbody>
       </table>
     </div>
@@ -853,16 +853,16 @@ ul.bullets li::marker { color: var(--cyan); }
     <div class="diagram">
       <div class="diagram-title">Figure 5 &mdash; Average Compression Across All Datasets</div>
       <div class="bar-chart" id="benchChart">
-        <div class="bar-row"><span class="bar-label">zlib-6</span><div class="bar-track"><div class="bar-fill dim" data-width="84.7%">84.7%</div></div></div>
+        <div class="bar-row"><span class="bar-label">zlib-9</span><div class="bar-track"><div class="bar-fill dim" data-width="84.9%">84.9%</div></div></div>
         <div class="bar-row"><span class="bar-label">bz2-9</span><div class="bar-track"><div class="bar-fill magenta" data-width="86.2%">86.2%</div></div></div>
-        <div class="bar-row"><span class="bar-label">LZMA</span><div class="bar-track"><div class="bar-fill yellow" data-width="89.7%">89.7%</div></div></div>
-        <div class="bar-row"><span class="bar-label">HyperPress</span><div class="bar-track"><div class="bar-fill cyan" data-width="92.2%">92.2%</div></div></div>
+        <div class="bar-row"><span class="bar-label">LZMA-RAW</span><div class="bar-track"><div class="bar-fill yellow" data-width="89.9%">89.9%</div></div></div>
+        <div class="bar-row"><span class="bar-label">HyperPress (netto)</span><div class="bar-track"><div class="bar-fill cyan" data-width="92.3%">92.3%</div></div></div>
       </div>
     </div>
 
     <h3>Per-Dataset Win Analysis</h3>
     <div class="highlight-box">
-      Out of 8 datasets, <strong>HyperPress achieves the best compression on 4</strong> (Sensor Data, Sparse Binary, Pattern+Noise, German Text). On the remaining 4, it places within 1&ndash;3% of the best individual compressor. Critically, on Sensor Data, HyperPress achieves <strong>62.8% compression</strong> where zlib manages only 26.7% &mdash; a 2.35&times; improvement &mdash; thanks to Delta preprocessing exposing sequential correlation that DEFLATE cannot exploit alone.
+      Out of 8 datasets, <strong>HyperPress (netto) achieves the best compression on 6</strong> (English Text, German Text, Sensor Data, Sparse Binary, Pattern+Noise, Source Code). On the remaining 2, it places within 4&ndash;13% of the best individual compressor. Critically, on Sensor Data, HyperPress achieves <strong>62.9% compression</strong> where zlib-9 manages only 26.7% &mdash; a 2.36&times; improvement &mdash; thanks to Delta preprocessing exposing sequential correlation that DEFLATE cannot exploit alone.
     </div>
   </section>
 
@@ -900,7 +900,7 @@ ul.bullets li::marker { color: var(--cyan); }
       <div class="bar-chart" id="overheadChart">
         <div class="bar-row"><span class="bar-label">Header</span><div class="bar-track"><div class="bar-fill magenta" data-width="4%" style="min-width:50px;">16 B</div></div></div>
         <div class="bar-row"><span class="bar-label">Block Hdrs</span><div class="bar-track"><div class="bar-fill yellow" data-width="8%" style="min-width:60px;">~224 B</div></div></div>
-        <div class="bar-row"><span class="bar-label">Saved</span><div class="bar-track"><div class="bar-fill cyan" data-width="92%">92.2%</div></div></div>
+        <div class="bar-row"><span class="bar-label">Saved</span><div class="bar-track"><div class="bar-fill cyan" data-width="92%">92.3%</div></div></div>
       </div>
     </div>
   </section>
@@ -914,8 +914,8 @@ ul.bullets li::marker { color: var(--cyan); }
     <div class="highlight-box">
       <strong>Key findings:</strong>
       <ul class="bullets" style="margin-top:8px;">
-        <li>92.2% average compression ratio across 8 diverse datasets</li>
-        <li>49% better size reduction than zlib-6, 24% better than LZMA</li>
+        <li>92.3% average compression ratio (netto) across 8 diverse datasets</li>
+        <li>49% better size reduction than zlib-9, 23% better than LZMA-RAW</li>
         <li>Per-block optimization adds only 14 bytes overhead per block</li>
         <li>Delta preprocessing yields 2.35&times; improvement on sensor data</li>
         <li>Zero external dependencies &mdash; Python 3.8+ stdlib only</li>

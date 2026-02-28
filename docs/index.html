@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="description" content="HyperPress is an adaptive meta-compression engine that achieves 92.2% compression, outperforming zlib-6 and LZMA through per-block preprocessing racing.">
+<meta name="description" content="HyperPress is an adaptive meta-compression engine that achieves 92.3% compression (netto), outperforming zlib-9 and LZMA-RAW through per-block preprocessing racing.">
 <title>HyperPress — Adaptive Meta-Compression Engine</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1140,8 +1140,8 @@ noscript .reveal-fix, .no-js .reveal { opacity: 1 !important; transform: none !i
     <h1 class="hero-title reveal" data-text="HyperPress">HyperPress</h1>
     <p class="hero-subtitle reveal reveal-d1">Adaptive Meta-Compression Engine</p>
     <div class="hero-stats reveal reveal-d2">
-      <span class="hero-stat-badge">Beats zlib-6 by 49%</span>
-      <span class="hero-stat-badge">Beats LZMA by 24%</span>
+      <span class="hero-stat-badge">Beats zlib-9 by 49%</span>
+      <span class="hero-stat-badge">Beats LZMA-RAW by 23%</span>
     </div>
     <a href="#pipeline" class="hero-cta reveal reveal-d3">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
@@ -1307,16 +1307,16 @@ noscript .reveal-fix, .no-js .reveal { opacity: 1 !important; transform: none !i
 
     <div class="benchmark-summary reveal reveal-d1">
       <div class="summary-card">
-        <div class="card-name">zlib-6</div>
-        <div class="card-value"><span class="countup" data-target="84.7">0</span><span class="card-suffix">%</span></div>
+        <div class="card-name">zlib-9</div>
+        <div class="card-value"><span class="countup" data-target="84.9">0</span><span class="card-suffix">%</span></div>
       </div>
       <div class="summary-card">
-        <div class="card-name">LZMA</div>
-        <div class="card-value"><span class="countup" data-target="89.7">0</span><span class="card-suffix">%</span></div>
+        <div class="card-name">LZMA-RAW</div>
+        <div class="card-value"><span class="countup" data-target="89.9">0</span><span class="card-suffix">%</span></div>
       </div>
       <div class="summary-card highlight">
-        <div class="card-name">HyperPress</div>
-        <div class="card-value"><span class="countup" data-target="92.2">0</span><span class="card-suffix">%</span></div>
+        <div class="card-name">HyperPress (netto)</div>
+        <div class="card-value"><span class="countup" data-target="92.3">0</span><span class="card-suffix">%</span></div>
       </div>
     </div>
 
@@ -1415,7 +1415,7 @@ noscript .reveal-fix, .no-js .reveal { opacity: 1 !important; transform: none !i
           <span class="demo-val" id="valOriginal"></span>
         </div>
         <div class="demo-result-row">
-          <span class="demo-result-label">zlib-6</span>
+          <span class="demo-result-label">zlib-9</span>
           <div class="demo-result-bar-track"><div class="demo-result-bar zlib" id="barZlib"></div></div>
           <span class="demo-val" id="valZlib"></span>
         </div>
@@ -1526,14 +1526,14 @@ noscript .reveal-fix, .no-js .reveal { opacity: 1 !important; transform: none !i
 /* ═══ BENCHMARK LIST ═══ */
 (function(){
   var data=[
-    {name:'English Text',orig:21930,zlib:193,lzma:240,hyper:211},
-    {name:'German Text',orig:31300,zlib:272,lzma:284,hyper:256},
-    {name:'JSON Data',orig:33582,zlib:3597,lzma:1764,hyper:1881},
-    {name:'Sensor Data',orig:30000,zlib:21990,lzma:17144,hyper:11148},
-    {name:'Sparse Binary',orig:25000,zlib:1224,lzma:1032,hyper:758},
-    {name:'Log File',orig:77532,zlib:10704,lzma:4948,hyper:5109},
-    {name:'Pattern+Noise',orig:24000,zlib:247,lzma:168,hyper:110},
-    {name:'Source Code',orig:7680,zlib:104,lzma:160,hyper:132}
+    {name:'English Text',orig:21930,zlib:193,lzma:181,hyper:181},
+    {name:'German Text',orig:31300,zlib:272,lzma:226,hyper:226},
+    {name:'JSON Data',orig:33582,zlib:3491,lzma:1705,hyper:1929},
+    {name:'Sensor Data',orig:30000,zlib:21990,lzma:17087,hyper:11118},
+    {name:'Sparse Binary',orig:25000,zlib:1195,lzma:973,hyper:728},
+    {name:'Log File',orig:77532,zlib:10495,lzma:4889,hyper:5079},
+    {name:'Pattern+Noise',orig:24000,zlib:184,lzma:110,hyper:80},
+    {name:'Source Code',orig:7680,zlib:104,lzma:102,hyper:102}
   ];
   var list=document.getElementById('benchList');
   data.forEach(function(d){
@@ -1547,9 +1547,9 @@ noscript .reveal-fix, .no-js .reveal { opacity: 1 !important; transform: none !i
     div.innerHTML=
       '<div class="bench-item-header"><span class="bench-item-name">'+d.name+'</span><span class="bench-item-orig">'+d.orig.toLocaleString()+' B</span></div>'+
       '<div class="bench-item-bars">'+
-        '<div class="bench-bar-row"><span class="bench-bar-label">zlib</span><div class="bench-bar-track"><div class="bench-bar-fill zlib" data-width="'+(parseFloat(zr)/mx*100)+'%"></div></div><span class="bench-bar-val'+(d.zlib===best?' best':'')+'">'+zr+'%</span></div>'+
-        '<div class="bench-bar-row"><span class="bench-bar-label">LZMA</span><div class="bench-bar-track"><div class="bench-bar-fill lzma" data-width="'+(parseFloat(lr)/mx*100)+'%"></div></div><span class="bench-bar-val'+(d.lzma===best?' best':'')+'">'+lr+'%</span></div>'+
-        '<div class="bench-bar-row"><span class="bench-bar-label">HYPER</span><div class="bench-bar-track"><div class="bench-bar-fill hyper" data-width="'+(parseFloat(hr)/mx*100)+'%"></div></div><span class="bench-bar-val'+(d.hyper===best?' best':'')+'">'+hr+'%</span></div>'+
+        '<div class="bench-bar-row"><span class="bench-bar-label">zlib-9</span><div class="bench-bar-track"><div class="bench-bar-fill zlib" data-width="'+(parseFloat(zr)/mx*100)+'%"></div></div><span class="bench-bar-val'+(d.zlib===best?' best':'')+'">'+zr+'%</span></div>'+
+        '<div class="bench-bar-row"><span class="bench-bar-label">LZMA-RAW</span><div class="bench-bar-track"><div class="bench-bar-fill lzma" data-width="'+(parseFloat(lr)/mx*100)+'%"></div></div><span class="bench-bar-val'+(d.lzma===best?' best':'')+'">'+lr+'%</span></div>'+
+        '<div class="bench-bar-row"><span class="bench-bar-label">HP netto</span><div class="bench-bar-track"><div class="bench-bar-fill hyper" data-width="'+(parseFloat(hr)/mx*100)+'%"></div></div><span class="bench-bar-val'+(d.hyper===best?' best':'')+'">'+hr+'%</span></div>'+
       '</div>';
     list.appendChild(div);
   });
@@ -1606,7 +1606,7 @@ function runDemo(){
   },50);});
   var sv=orig-hS,sp=((1-hR)*100).toFixed(1),vz=((1-hS/zS)*100).toFixed(1);
   var sav=document.getElementById('demoSavings');
-  if(sav)sav.textContent='HyperPress: '+sp+'% compression \u2014 '+sv+' bytes saved \u2014 '+vz+'% smaller than zlib-6';
+  if(sav)sav.textContent='HyperPress: '+sp+'% compression \u2014 '+sv+' bytes saved \u2014 '+vz+'% smaller than zlib-9';
 }
 
 /* ═══ MOBILE NAV TOGGLE ═══ */
