@@ -13,6 +13,7 @@ Stdlib only, Python 3.8+.
 import argparse
 import hashlib
 import os
+import shutil
 import sys
 import tarfile
 import urllib.request
@@ -20,6 +21,9 @@ import zipfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 CORPUS_DIR = os.path.join(HERE, ".corpus")
+# Small archives are vendored here (same SHA256 pin) because some corpus hosts
+# refuse requests from CI runners (canterbury.ac.nz returned 403 on GitHub Actions).
+VENDOR_DIR = os.path.join(HERE, "data")
 
 CORPORA = {
     "canterbury": {
@@ -128,9 +132,14 @@ def ensure(name, log=sys.stderr):
         return paths
 
     archive = os.path.join(CORPUS_DIR, spec["archive"])
+    vendored = os.path.join(VENDOR_DIR, spec["archive"])
     if not os.path.isfile(archive) or _sha256(archive) != spec["sha256"]:
-        print("downloading %s ..." % spec["url"], file=log)
-        _download(spec["url"], archive)
+        if os.path.isfile(vendored):
+            print("using vendored %s" % vendored, file=log)
+            shutil.copyfile(vendored, archive)
+        else:
+            print("downloading %s ..." % spec["url"], file=log)
+            _download(spec["url"], archive)
     digest = _sha256(archive)
     if digest != spec["sha256"]:
         os.remove(archive)
