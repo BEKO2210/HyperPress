@@ -14,6 +14,8 @@ Every find goes in the same day with an acceptance criterion. Done items get a p
 
 ## Backlog
 
+- [ ] Add `zstd --ultra -22 --long=27` as a reference opponent in `fair_bench.py` (external review 2026-10-31: -19 is not zstd's strongest setting). *Acceptance:* column in results.json and docs; totals reported against it.
+- [ ] Optional parallel candidates: `compress(..., threads=1)` default stays sequential (memory: each xz-9e candidate needs ~700 MB at 64 MiB dict); `threads=N`/`-1` runs candidates concurrently with identical output. *Acceptance:* byte-identical output for all thread counts; Silesia `best` ≥ 2.5 MB/s at threads=4; peak RAM documented.
 - [ ] Compression memory: all candidates run on the whole input; peak RAM on 51 MB mozilla not measured. *Acceptance:* peak documented in README, ≤ 6× input for `best` (external review 2026-10-31).
 - [ ] Document the probe (`_probe_candidates`): which variants it can skip and what it costs; the guarantee is unaffected (baselines always run). *Acceptance:* section in SPEC + a test that the baselines always run on ≥ 2 MiB inputs.
 - [ ] **PyPI 2.0.0 upload failed** (workflow "Publish to PyPI" red on the v2.0.0 release, `pypi.org/pypi/hyperpress/json` = 404). The website installs from the Git tag until then. *Acceptance:* `pip install hyperpress==2.0.0` works, then switch the site snippet and add the PyPI link.
