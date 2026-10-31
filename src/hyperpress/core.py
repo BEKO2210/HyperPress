@@ -605,7 +605,7 @@ def compress(data, level="best", verbose=False):
     header = _v2_header(0, data)
     if not data:
         return header + b"\x00"
-    methods = ([11, 2, 12, 13] if level == "fast" else
+    methods = ([0, 11, 2, 12, 13] if level == "fast" else
                [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13])
     best = None
     for method in methods:

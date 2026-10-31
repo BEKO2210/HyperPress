@@ -14,8 +14,8 @@ where `*` = only when the stdlib has zstd (Python >= 3.14, `compression.zstd`).
 
 ```python
 compress(data: bytes, level: str = "best", verbose: bool = False) -> bytes
-    # level "best": all candidates; "fast": whole-stream zlib-9, bz2-9, xz-raw preset 6 and
-    # zstd-3 if available — at most 4 candidates, no block path.
+    # level "best": all candidates; "fast": whole-stream STORED, zlib-9, bz2-9, xz-raw preset 6 and
+    # zstd-3 if available — at most 5 candidates, no block path.
 decompress(data: bytes, max_output_size: int = 1 << 30) -> bytes
 class HyperPressError(ValueError)   # every invalid / corrupt / truncated / oversize input
 FORMAT_VERSION = 2

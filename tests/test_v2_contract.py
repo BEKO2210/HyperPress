@@ -6,6 +6,7 @@ v1 implementation; they must pass once the v2 core lands.
 
 import bz2
 import lzma
+import os
 import random
 import struct
 import zlib
@@ -269,3 +270,9 @@ class TestSizeGuarantee:
         out = compress(data, level="best")
         cap = _opponent_min_len(data) + HEADER_MAX
         assert len(out) <= cap, "len(compress)=%d opponent_min+16=%d" % (len(out), cap)
+
+
+def test_fast_level_never_expands_incompressible_data_beyond_header():
+    # Regression: "fast" lacked STORED and grew random data by 21 bytes.
+    data = os.urandom(100000)
+    assert len(compress(data, level="fast")) <= len(data) + 16
