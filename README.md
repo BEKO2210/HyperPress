@@ -45,7 +45,7 @@ For every input `d` with the default `level="best"`:
 len(compress(d)) <= min(xz-raw-9e, bz2-9, zstd-19*) + 16
 ```
 
-`*` zstd-19 only counts when the standard library provides zstd (Python 3.14+, `compression.zstd`). The guarantee is enforced by construction (the plain xz-9e, bz2-9 and zstd-19 results are always candidates, plus a STORED fallback) and checked by the test suite. `level="fast"` trades size for speed and has no size guarantee (it never expands beyond STORED + header). Output is deterministic for the same input and the same Python/library versions.
+`*` zstd-19 only counts when the standard library provides zstd (Python 3.14+, `compression.zstd`). The guarantee is enforced by construction (the plain xz-9e, bz2-9 and zstd-19 results are always candidates, plus a STORED fallback) and checked by the test suite. The container adds a fixed 11–16 bytes (magic, version, mode, size varint, CRC32, method), so tiny inputs grow: `b""` becomes 12 bytes, 10 random bytes become 22. `level="fast"` trades size for speed and has no size guarantee (it never expands beyond STORED + header). Output is deterministic for the same input and the same Python/library versions.
 
 ## Benchmarks
 
