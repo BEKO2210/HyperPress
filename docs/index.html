@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="description" content="HyperPress is an adaptive meta-compression engine that achieves 92.3% compression (netto), outperforming zlib-9 and LZMA-RAW through per-block preprocessing racing.">
-<title>HyperPress — Adaptive Meta-Compression Engine</title>
+<meta name="description" content="HyperPress is an adaptive meta-compressor: it tries many LZMA2/bz2/zlib/zstd configurations and keeps the smallest result — never larger than the best of xz-9e, bz2-9 and zstd-19 plus a 16-byte header.">
+<title>HyperPress — Adaptive Meta-Compressor</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -1107,6 +1107,13 @@ footer .footer-links a:hover { color: var(--cyan); text-decoration: none; }
 
 /* Noscript: make content visible when JS is disabled */
 noscript .reveal-fix, .no-js .reveal { opacity: 1 !important; transform: none !important; }
+#benchList { overflow-x: auto; }
+.bench-table { width: 100%; border-collapse: collapse; font-family: var(--font-mono); font-size: 0.8rem; margin-bottom: 1rem; }
+.bench-table th, .bench-table td { padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border); text-align: right; white-space: nowrap; }
+.bench-table th:first-child, .bench-table td:first-child { text-align: left; }
+.bench-table th { color: var(--cyan); background: var(--bg-card); }
+.bench-table tr:last-child td { border-top: 2px solid var(--cyan-dim); }
+#benchList p { color: var(--text-dim); font-size: 0.85rem; }
 </style>
 <noscript><style>.reveal{opacity:1!important;transform:none!important;}</style></noscript>
 </head>
@@ -1127,7 +1134,6 @@ noscript .reveal-fix, .no-js .reveal { opacity: 1 !important; transform: none !i
       <li><a href="#benchmarks">Benchmarks</a></li>
       <li><a href="#architecture">Architecture</a></li>
       <li><a href="#code-example">Code</a></li>
-      <li><a href="#demo">Demo</a></li>
       <li><a href="whitepaper.html">Whitepaper</a></li>
     </ul>
   </div>
@@ -1138,10 +1144,10 @@ noscript .reveal-fix, .no-js .reveal { opacity: 1 !important; transform: none !i
   <canvas id="hero-canvas" aria-hidden="true"></canvas>
   <div class="hero-content">
     <h1 class="hero-title reveal" data-text="HyperPress">HyperPress</h1>
-    <p class="hero-subtitle reveal reveal-d1">Adaptive Meta-Compression Engine</p>
+    <p class="hero-subtitle reveal reveal-d1">Adaptive Meta-Compressor</p>
     <div class="hero-stats reveal reveal-d2">
-      <span class="hero-stat-badge">Beats zlib-9 by 49%</span>
-      <span class="hero-stat-badge">Beats LZMA-RAW by 23%</span>
+      <span class="hero-stat-badge">Never larger than best of xz-9e / bz2-9 / zstd-19 + 16 B</span>
+      <span class="hero-stat-badge">Pure Python &middot; stdlib only</span>
     </div>
     <a href="#pipeline" class="hero-cta reveal reveal-d3">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
@@ -1155,10 +1161,11 @@ noscript .reveal-fix, .no-js .reveal { opacity: 1 !important; transform: none !i
 <section id="pipeline">
   <div class="container">
     <p class="section-label reveal">// How It Works</p>
-    <h2 class="section-title reveal">Intelligent Compression Pipeline</h2>
+    <h2 class="section-title reveal">Many Candidates, Smallest Wins</h2>
     <p class="section-desc reveal reveal-d1">
-      HyperPress is not a new algorithm. It is an intelligence layer that profiles your data
-      and races multiple preprocessing + backend combinations to find the optimal compression for each block.
+      HyperPress is not a new algorithm. It runs several established codec configurations on your data
+      <strong>one after another</strong> (no parallelism) and keeps the smallest stream. No compressor wins on all data;
+      this is a safety net on top of existing codecs.
     </p>
 
     <div class="pipeline-steps reveal reveal-d2">
@@ -1186,8 +1193,8 @@ noscript .reveal-fix, .no-js .reveal { opacity: 1 !important; transform: none !i
         </div>
         <div class="pipe-step-body">
           <div class="pipe-step-num">Step 02</div>
-          <div class="pipe-step-title">Block Analysis</div>
-          <div class="pipe-step-desc">Entropy, delta-entropy, null-ratio, structure detection per block</div>
+          <div class="pipe-step-title">WHOLE Candidates</div>
+          <div class="pipe-step-desc">xz/LZMA2 9e (plain, delta, x86 BCJ, lc/lp/pb tuned), bz2-9, zlib-9, zstd-19 if available, stored</div>
         </div>
       </div>
       <!-- Step 3 -->
@@ -1200,8 +1207,8 @@ noscript .reveal-fix, .no-js .reveal { opacity: 1 !important; transform: none !i
         </div>
         <div class="pipe-step-body">
           <div class="pipe-step-num">Step 03</div>
-          <div class="pipe-step-title">Preprocessing</div>
-          <div class="pipe-step-desc">7 transforms race: Delta, BWT+MTF, RLE, Transpose, Nibble-Split</div>
+          <div class="pipe-step-title">BLOCKS Candidate</div>
+          <div class="pipe-step-desc">Block profiler + preprocessors (Delta, BWT+MTF, RLE, Transpose, Nibble-Split) per block</div>
         </div>
       </div>
       <!-- Step 4 -->
@@ -1214,8 +1221,8 @@ noscript .reveal-fix, .no-js .reveal { opacity: 1 !important; transform: none !i
         </div>
         <div class="pipe-step-body">
           <div class="pipe-step-num">Step 04</div>
-          <div class="pipe-step-title">Backend Racing</div>
-          <div class="pipe-step-desc">5 backends compete: zlib-9, LZMA, bz2, zlib+LZMA chain, stored</div>
+          <div class="pipe-step-title">Sequential Selection</div>
+          <div class="pipe-step-desc">Every candidate is tried in turn; the smallest stream is kept</div>
         </div>
       </div>
       <!-- Step 5 -->
@@ -1229,12 +1236,12 @@ noscript .reveal-fix, .no-js .reveal { opacity: 1 !important; transform: none !i
         <div class="pipe-step-body">
           <div class="pipe-step-num">Step 05</div>
           <div class="pipe-step-title">Winner Output</div>
-          <div class="pipe-step-desc">Smallest result wins. CRC32 integrity. HPRX binary format.</div>
+          <div class="pipe-step-desc">Smallest result wins. Whole-file CRC32. HPRX v2 format.</div>
         </div>
       </div>
     </div>
 
-    <h3 class="section-subtitle reveal">7 Preprocessing Transforms</h3>
+    <h3 class="section-subtitle reveal">Preprocessors in the BLOCKS Path</h3>
     <div class="cards-grid">
       <div class="prep-card reveal">
         <span class="card-tag">Transform 1</span>
@@ -1273,27 +1280,32 @@ noscript .reveal-fix, .no-js .reveal { opacity: 1 !important; transform: none !i
       </div>
     </div>
 
-    <h3 class="section-subtitle reveal">5 Backends Race Per Block</h3>
-    <div class="racing-container reveal reveal-d1">
-      <div class="race-lane">
-        <span class="race-label">zlib-9</span>
-        <div class="race-bar-track"><div class="race-bar third" data-width="75%">75%</div></div>
+    <h3 class="section-subtitle reveal">Whole-Stream Candidates</h3>
+    <div class="cards-grid">
+      <div class="prep-card reveal">
+        <span class="card-tag">xz / LZMA2</span>
+        <h4>Preset 9e + filters</h4>
+        <p>Plain, DELTA (1/2/4), x86 BCJ, and lc/lp/pb variants for text and structured data.</p>
       </div>
-      <div class="race-lane">
-        <span class="race-label">LZMA</span>
-        <div class="race-bar-track"><div class="race-bar second" data-width="88%">88%</div></div>
+      <div class="prep-card reveal reveal-d1">
+        <span class="card-tag">bzip2</span>
+        <h4>bz2-9</h4>
+        <p>Sometimes smaller than LZMA on text.</p>
       </div>
-      <div class="race-lane">
-        <span class="race-label">bz2-9</span>
-        <div class="race-bar-track"><div class="race-bar third" data-width="70%">70%</div></div>
+      <div class="prep-card reveal reveal-d2">
+        <span class="card-tag">zstd</span>
+        <h4>zstd-19</h4>
+        <p>Only on Python 3.14+ (<code>compression.zstd</code>).</p>
       </div>
-      <div class="race-lane">
-        <span class="race-label">zlib+LZMA</span>
-        <div class="race-bar-track"><div class="race-bar second" data-width="82%">82%</div></div>
+      <div class="prep-card reveal">
+        <span class="card-tag">zlib</span>
+        <h4>zlib-9</h4>
+        <p>Raw deflate; rarely the winner, cheap to try.</p>
       </div>
-      <div class="race-lane">
-        <span class="race-label">HyperPress</span>
-        <div class="race-bar-track"><div class="race-bar winner" data-width="95%">Winner</div></div>
+      <div class="prep-card reveal reveal-d1">
+        <span class="card-tag">Fallback</span>
+        <h4>Stored</h4>
+        <p>For incompressible data.</p>
       </div>
     </div>
   </div>
@@ -1303,24 +1315,44 @@ noscript .reveal-fix, .no-js .reveal { opacity: 1 !important; transform: none !i
 <section id="benchmarks">
   <div class="container">
     <p class="section-label reveal">// Benchmark Results</p>
-    <h2 class="section-title reveal">Measured on 8 Diverse Datasets</h2>
+    <h2 class="section-title reveal">Measured on Real Files</h2>
+    <p class="section-desc reveal reveal-d1">
+      Produced by <code>benchmarks/fair_bench.py</code>: full container size (no header subtracted) versus
+      <code>xz -9e</code>, bz2-9 and zstd-19 where available. Ties are ties. No compressor wins on all data.
+    </p>
 
-    <div class="benchmark-summary reveal reveal-d1">
-      <div class="summary-card">
-        <div class="card-name">zlib-9</div>
-        <div class="card-value"><span class="countup" data-target="84.9">0</span><span class="card-suffix">%</span></div>
-      </div>
-      <div class="summary-card">
-        <div class="card-name">LZMA-RAW</div>
-        <div class="card-value"><span class="countup" data-target="89.9">0</span><span class="card-suffix">%</span></div>
-      </div>
-      <div class="summary-card highlight">
-        <div class="card-name">HyperPress (netto)</div>
-        <div class="card-value"><span class="countup" data-target="92.3">0</span><span class="card-suffix">%</span></div>
-      </div>
+    <div class="reveal reveal-d2" id="benchList">
+<!-- BENCH:START -->
+<table class="bench-table">
+<thead><tr><th>File</th><th>Original</th><th>HyperPress</th><th>Best stdlib opponent</th><th>vs best</th><th>vs xz -9e</th></tr></thead><tbody>
+<tr><td>canterbury/alice29.txt</td><td>152,089</td><td>43,216</td><td>bz2-9 43,202</td><td>+0.03&nbsp;%</td><td>-10.9&nbsp;%</td></tr>
+<tr><td>canterbury/asyoulik.txt</td><td>125,179</td><td>39,583</td><td>bz2-9 39,569</td><td>+0.04&nbsp;%</td><td>-11.2&nbsp;%</td></tr>
+<tr><td>canterbury/cp.html</td><td>24,603</td><td>7,602</td><td>xz-raw-9e 7,596</td><td>+0.08&nbsp;%</td><td>-0.7&nbsp;%</td></tr>
+<tr><td>canterbury/fields.c</td><td>11,150</td><td>2,956</td><td>xz-raw-9e 2,973</td><td>-0.57&nbsp;%</td><td>-2.5&nbsp;%</td></tr>
+<tr><td>canterbury/grammar.lsp</td><td>3,721</td><td>1,222</td><td>zlib-9 1,222</td><td>+0.00&nbsp;%</td><td>-5.4&nbsp;%</td></tr>
+<tr><td>canterbury/kennedy.xls</td><td>1,029,744</td><td>47,973</td><td>xz-raw-9e 51,811</td><td>-7.41&nbsp;%</td><td>-7.5&nbsp;%</td></tr>
+<tr><td>canterbury/lcet10.txt</td><td>426,754</td><td>107,720</td><td>bz2-9 107,706</td><td>+0.01&nbsp;%</td><td>-9.8&nbsp;%</td></tr>
+<tr><td>canterbury/plrabn12.txt</td><td>481,861</td><td>145,591</td><td>bz2-9 145,577</td><td>+0.01&nbsp;%</td><td>-12.0&nbsp;%</td></tr>
+<tr><td>canterbury/ptt5</td><td>513,216</td><td>39,012</td><td>xz-raw-9e 39,801</td><td>-1.98&nbsp;%</td><td>-2.1&nbsp;%</td></tr>
+<tr><td>canterbury/sum</td><td>38,240</td><td>9,409</td><td>xz-raw-9e 9,443</td><td>-0.36&nbsp;%</td><td>-1.0&nbsp;%</td></tr>
+<tr><td>canterbury/xargs.1</td><td>4,227</td><td>1,738</td><td>zlib-9 1,736</td><td>+0.12&nbsp;%</td><td>-4.1&nbsp;%</td></tr>
+<tr><td>silesia/dickens</td><td>10,192,446</td><td>2,799,535</td><td>bz2-9 2,799,520</td><td>+0.00&nbsp;%</td><td>-1.1&nbsp;%</td></tr>
+<tr><td>silesia/mozilla</td><td>51,220,480</td><td>13,232,814</td><td>xz-raw-9e 13,376,180</td><td>-1.07&nbsp;%</td><td>-1.1&nbsp;%</td></tr>
+<tr><td>silesia/mr</td><td>9,970,564</td><td>2,441,295</td><td>bz2-9 2,441,280</td><td>+0.00&nbsp;%</td><td>-11.3&nbsp;%</td></tr>
+<tr><td>silesia/nci</td><td>33,553,445</td><td>1,440,074</td><td>xz-raw-9e 1,449,209</td><td>-0.63&nbsp;%</td><td>-0.6&nbsp;%</td></tr>
+<tr><td>silesia/ooffice</td><td>6,152,192</td><td>2,084,481</td><td>xz-raw-9e 2,427,163</td><td>-14.12&nbsp;%</td><td>-14.1&nbsp;%</td></tr>
+<tr><td>silesia/osdb</td><td>10,085,684</td><td>2,802,807</td><td>bz2-9 2,802,792</td><td>+0.00&nbsp;%</td><td>-1.5&nbsp;%</td></tr>
+<tr><td>silesia/reymont</td><td>6,627,202</td><td>1,246,245</td><td>bz2-9 1,246,230</td><td>+0.00&nbsp;%</td><td>-5.3&nbsp;%</td></tr>
+<tr><td>silesia/samba</td><td>21,606,400</td><td>3,727,990</td><td>xz-raw-9e 3,739,464</td><td>-0.31&nbsp;%</td><td>-0.3&nbsp;%</td></tr>
+<tr><td>silesia/sao</td><td>7,251,944</td><td>4,414,312</td><td>xz-raw-9e 4,425,604</td><td>-0.26&nbsp;%</td><td>-0.3&nbsp;%</td></tr>
+<tr><td>silesia/webster</td><td>41,458,703</td><td>8,358,807</td><td>xz-raw-9e 8,368,609</td><td>-0.12&nbsp;%</td><td>-0.1&nbsp;%</td></tr>
+<tr><td>silesia/x-ray</td><td>8,474,240</td><td>4,051,127</td><td>bz2-9 4,051,112</td><td>+0.00&nbsp;%</td><td>-9.8&nbsp;%</td></tr>
+<tr><td>silesia/xml</td><td>5,345,280</td><td>433,831</td><td>xz-raw-9e 434,830</td><td>-0.23&nbsp;%</td><td>-0.2&nbsp;%</td></tr>
+<tr><td><strong>Total (23 files)</strong></td><td>214,749,364</td><td><strong>47,479,340</strong></td><td>48,012,629</td><td><strong>-1.11&nbsp;%</strong></td><td><strong>-3.00&nbsp;%</strong></td></tr>
+</tbody></table>
+<p>Header included. Compression speed: best 0.26 MB/s, fast 2.86 MB/s. Total vs zstd -19 --long=27: -10.97&nbsp;%. Python 3.12.3. Reproduce with <code>python benchmarks/fair_bench.py</code>.</p>
+<!-- BENCH:END -->
     </div>
-
-    <div class="bench-list reveal reveal-d2" id="benchList"></div>
   </div>
 </section>
 
@@ -1328,7 +1360,7 @@ noscript .reveal-fix, .no-js .reveal { opacity: 1 !important; transform: none !i
 <section id="architecture">
   <div class="container">
     <p class="section-label reveal">// Architecture</p>
-    <h2 class="section-title reveal">Block-by-Block Processing</h2>
+    <h2 class="section-title reveal">Two Paths, One Winner</h2>
 
     <div class="arch-flow">
       <div class="arch-node reveal">
@@ -1338,33 +1370,33 @@ noscript .reveal-fix, .no-js .reveal { opacity: 1 !important; transform: none !i
       </div>
       <div class="arch-arrow reveal reveal-d1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg></div>
       <div class="arch-node reveal reveal-d1">
-        <div class="node-title">Adaptive Block Splitter</div>
-        <div class="node-desc">Entropy-guided variable block sizing</div>
-        <div class="node-detail">4KB&ndash;128KB based on entropy variance</div>
+        <div class="node-title">WHOLE Path</div>
+        <div class="node-desc">Whole input, no block split</div>
+        <div class="node-detail">xz/LZMA2 9e variants, bz2-9, zlib-9, zstd-19*, stored</div>
       </div>
       <div class="arch-arrow reveal reveal-d2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg></div>
       <div class="arch-node reveal reveal-d2">
-        <div class="node-title">Block Profiler</div>
-        <div class="node-desc">Computes 6 features per block</div>
-        <div class="node-detail">ent, delta-ent, null-ratio, txt, struct, uniq</div>
+        <div class="node-title">BLOCKS Path</div>
+        <div class="node-desc">Block split + profiler + preprocessors</div>
+        <div class="node-detail">Useful for sensor-like data; one candidate among many</div>
       </div>
       <div class="arch-arrow reveal reveal-d3"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg></div>
       <div class="arch-node reveal reveal-d3">
-        <div class="node-title">Candidate Selector</div>
-        <div class="node-desc">Context-aware preprocessing + backend pairing</div>
-        <div class="node-detail">3&ndash;15 candidates per block via rules engine</div>
+        <div class="node-title">Sequential Selection</div>
+        <div class="node-desc">Candidates are tried one after another</div>
+        <div class="node-detail">Smallest stream wins; no parallelism</div>
       </div>
       <div class="arch-arrow reveal reveal-d4"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg></div>
       <div class="arch-node reveal reveal-d4">
-        <div class="node-title">Racing Engine</div>
-        <div class="node-desc">Try all candidates, smallest output wins</div>
-        <div class="node-detail">Per-block CRC32 integrity verification</div>
+        <div class="node-title">Guarantee</div>
+        <div class="node-desc">Never larger than best of xz-9e / bz2-9 / zstd-19* + 16 B</div>
+        <div class="node-detail">Whole-file CRC32; decompress raises only HyperPressError</div>
       </div>
       <div class="arch-arrow reveal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg></div>
       <div class="arch-node final reveal reveal-d1">
         <div class="node-title">HPRX Output</div>
         <div class="node-desc">Self-contained compressed stream</div>
-        <div class="node-detail">16B header + 14B per block header + data</div>
+        <div class="node-detail">Small header (magic, version, mode, varint size, CRC32) + payload</div>
       </div>
     </div>
   </div>
@@ -1374,7 +1406,7 @@ noscript .reveal-fix, .no-js .reveal { opacity: 1 !important; transform: none !i
 <section id="code-example">
   <div class="container">
     <p class="section-label reveal">// Quick Start</p>
-    <h2 class="section-title reveal">Three Lines of Code</h2>
+    <h2 class="section-title reveal">Two Lines of Code</h2>
 
     <div class="code-block reveal reveal-d1">
       <div class="code-header">
@@ -1391,47 +1423,6 @@ noscript .reveal-fix, .no-js .reveal { opacity: 1 !important; transform: none !i
     <p class="code-install reveal reveal-d2">
       Install: <code>git clone https://github.com/BEKO2210/HyperPress.git &amp;&amp; pip install -e HyperPress/</code> &mdash; Zero dependencies. Python 3.8+.
     </p>
-  </div>
-</section>
-
-<!-- ═══ LIVE DEMO ═══ -->
-<section id="demo">
-  <div class="container">
-    <p class="section-label reveal">// Live Demo</p>
-    <h2 class="section-title reveal">See the Compression</h2>
-
-    <div class="demo-container reveal reveal-d1">
-      <label for="demoInput" class="section-desc" style="margin-bottom:8px;">Enter text to see compression results:</label>
-      <textarea class="demo-textarea" id="demoInput" placeholder="Paste or type text here..." maxlength="100000">The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. Sphinx of black quartz judge my vow. Pack my box with five dozen liquor jugs. HyperPress uses adaptive meta-compression to beat both zlib and LZMA by selecting the optimal preprocessing transform and compression backend for each data block independently.</textarea>
-      <button class="demo-btn" type="button" onclick="runDemo()">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
-        Compress
-      </button>
-
-      <div class="demo-results" id="demoResults">
-        <div class="demo-result-row">
-          <span class="demo-result-label">Original</span>
-          <div class="demo-result-bar-track"><div class="demo-result-bar original" id="barOriginal"></div></div>
-          <span class="demo-val" id="valOriginal"></span>
-        </div>
-        <div class="demo-result-row">
-          <span class="demo-result-label">zlib-9</span>
-          <div class="demo-result-bar-track"><div class="demo-result-bar zlib" id="barZlib"></div></div>
-          <span class="demo-val" id="valZlib"></span>
-        </div>
-        <div class="demo-result-row">
-          <span class="demo-result-label">LZMA</span>
-          <div class="demo-result-bar-track"><div class="demo-result-bar lzma" id="barLzma"></div></div>
-          <span class="demo-val" id="valLzma"></span>
-        </div>
-        <div class="demo-result-row">
-          <span class="demo-result-label">HyperPress</span>
-          <div class="demo-result-bar-track"><div class="demo-result-bar hyper" id="barHyper"></div></div>
-          <span class="demo-val" id="valHyper" style="color:var(--cyan);"></span>
-        </div>
-        <div class="demo-savings" id="demoSavings"></div>
-      </div>
-    </div>
   </div>
 </section>
 
@@ -1515,54 +1506,6 @@ noscript .reveal-fix, .no-js .reveal { opacity: 1 !important; transform: none !i
   document.querySelectorAll('.reveal').forEach(function(el){ob.observe(el);});
 })();
 
-/* ═══ COUNTUP ═══ */
-(function(){
-  var done=false;
-  var ob=new IntersectionObserver(function(e){e.forEach(function(en){if(en.isIntersecting&&!done){done=true;document.querySelectorAll('.countup').forEach(function(el){var t=parseFloat(el.getAttribute('data-target'));anim(el,0,t,1400);});}});},{threshold:0.3});
-  var s=document.getElementById('benchmarks');if(s)ob.observe(s);
-  function anim(el,s,e,d){var st=null;function step(ts){if(!st)st=ts;var p=Math.min((ts-st)/d,1);var ea=1-Math.pow(1-p,3);el.textContent=(s+(e-s)*ea).toFixed(1);if(p<1)requestAnimationFrame(step);}requestAnimationFrame(step);}
-})();
-
-/* ═══ BENCHMARK LIST ═══ */
-(function(){
-  var data=[
-    {name:'English Text',orig:21930,zlib:193,lzma:181,hyper:181},
-    {name:'German Text',orig:31300,zlib:272,lzma:226,hyper:226},
-    {name:'JSON Data',orig:33582,zlib:3491,lzma:1705,hyper:1929},
-    {name:'Sensor Data',orig:30000,zlib:21990,lzma:17087,hyper:11118},
-    {name:'Sparse Binary',orig:25000,zlib:1195,lzma:973,hyper:728},
-    {name:'Log File',orig:77532,zlib:10495,lzma:4889,hyper:5079},
-    {name:'Pattern+Noise',orig:24000,zlib:184,lzma:110,hyper:80},
-    {name:'Source Code',orig:7680,zlib:104,lzma:102,hyper:102}
-  ];
-  var list=document.getElementById('benchList');
-  data.forEach(function(d){
-    var zr=((1-d.zlib/d.orig)*100).toFixed(1);
-    var lr=((1-d.lzma/d.orig)*100).toFixed(1);
-    var hr=((1-d.hyper/d.orig)*100).toFixed(1);
-    var mx=Math.max(parseFloat(zr),parseFloat(lr),parseFloat(hr));
-    var best=Math.min(d.zlib,d.lzma,d.hyper);
-    var div=document.createElement('div');
-    div.className='bench-item';
-    div.innerHTML=
-      '<div class="bench-item-header"><span class="bench-item-name">'+d.name+'</span><span class="bench-item-orig">'+d.orig.toLocaleString()+' B</span></div>'+
-      '<div class="bench-item-bars">'+
-        '<div class="bench-bar-row"><span class="bench-bar-label">zlib-9</span><div class="bench-bar-track"><div class="bench-bar-fill zlib" data-width="'+(parseFloat(zr)/mx*100)+'%"></div></div><span class="bench-bar-val'+(d.zlib===best?' best':'')+'">'+zr+'%</span></div>'+
-        '<div class="bench-bar-row"><span class="bench-bar-label">LZMA-RAW</span><div class="bench-bar-track"><div class="bench-bar-fill lzma" data-width="'+(parseFloat(lr)/mx*100)+'%"></div></div><span class="bench-bar-val'+(d.lzma===best?' best':'')+'">'+lr+'%</span></div>'+
-        '<div class="bench-bar-row"><span class="bench-bar-label">HP netto</span><div class="bench-bar-track"><div class="bench-bar-fill hyper" data-width="'+(parseFloat(hr)/mx*100)+'%"></div></div><span class="bench-bar-val'+(d.hyper===best?' best':'')+'">'+hr+'%</span></div>'+
-      '</div>';
-    list.appendChild(div);
-  });
-  var bo=new IntersectionObserver(function(e){e.forEach(function(en){if(en.isIntersecting)en.target.querySelectorAll('[data-width]').forEach(function(b){b.style.width=b.getAttribute('data-width');});});},{threshold:0.1});
-  document.querySelectorAll('.bench-item,.race-lane').forEach(function(el){bo.observe(el);});
-})();
-
-/* ═══ RACING BARS ═══ */
-(function(){
-  var ob=new IntersectionObserver(function(e){e.forEach(function(en){if(en.isIntersecting)en.target.querySelectorAll('.race-bar[data-width]').forEach(function(b){b.style.width=b.getAttribute('data-width');});});},{threshold:0.2});
-  document.querySelectorAll('.racing-container').forEach(function(el){ob.observe(el);});
-})();
-
 /* ═══ COPY CODE ═══ */
 function copyCode(){
   var code='from hyperpress import compress, decompress\n\ncompressed = compress(data)\nrestored = decompress(compressed)';
@@ -1573,40 +1516,6 @@ function copyCode(){
     if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(code).then(showCopied).catch(function(){fallbackCopy();});}else{fallbackCopy();}
   }catch(e){fallbackCopy();}
   function fallbackCopy(){try{var t=document.createElement('textarea');t.value=code;t.style.position='fixed';t.style.opacity='0';document.body.appendChild(t);t.select();document.execCommand('copy');document.body.removeChild(t);showCopied();}catch(e2){}}
-}
-
-/* ═══ LIVE DEMO ═══ */
-function runDemo(){
-  var el=document.getElementById('demoInput');
-  if(!el)return;
-  var input=el.value;
-  if(!input||!input.trim()){el.style.borderColor='var(--magenta)';setTimeout(function(){el.style.borderColor='';},1500);return;}
-  var orig=new Blob([input]).size;
-  var zR=0.153,lR=0.103,hR=0.078;
-  if(orig<100){zR=0.65;lR=0.58;hR=0.50;}
-  else if(orig<500){zR=0.35;lR=0.28;hR=0.22;}
-  var cs={};for(var i=0;i<input.length;i++)cs[input[i]]=(cs[input[i]]||0)+1;
-  var uq=Object.keys(cs).length,ef=Math.min(uq/80,1);
-  zR+=(1-zR)*ef*0.3;lR+=(1-lR)*ef*0.25;hR+=(1-hR)*ef*0.2;
-  var zS=Math.max(Math.round(orig*zR),10),lS=Math.max(Math.round(orig*lR),8),hS=Math.max(Math.round(orig*hR),6);
-  var r=document.getElementById('demoResults');r.classList.add('active');
-  document.getElementById('barOriginal').style.width='0';
-  document.getElementById('barZlib').style.width='0';
-  document.getElementById('barLzma').style.width='0';
-  document.getElementById('barHyper').style.width='0';
-  document.getElementById('valOriginal').textContent=orig+'B';
-  document.getElementById('valZlib').textContent=zS+'B';
-  document.getElementById('valLzma').textContent=lS+'B';
-  document.getElementById('valHyper').textContent=hS+'B';
-  requestAnimationFrame(function(){setTimeout(function(){
-    document.getElementById('barOriginal').style.width='100%';
-    document.getElementById('barZlib').style.width=(zR*100)+'%';
-    document.getElementById('barLzma').style.width=(lR*100)+'%';
-    document.getElementById('barHyper').style.width=(hR*100)+'%';
-  },50);});
-  var sv=orig-hS,sp=((1-hR)*100).toFixed(1),vz=((1-hS/zS)*100).toFixed(1);
-  var sav=document.getElementById('demoSavings');
-  if(sav)sav.textContent='HyperPress: '+sp+'% compression \u2014 '+sv+' bytes saved \u2014 '+vz+'% smaller than zlib-9';
 }
 
 /* ═══ MOBILE NAV TOGGLE ═══ */

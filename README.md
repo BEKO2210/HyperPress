@@ -1,12 +1,11 @@
 <p align="center">
-  <img src="https://img.shields.io/badge/HyperPress-v1.0-00f0ff?style=for-the-badge&labelColor=0a0a0f" alt="HyperPress v1.0">
-  <img src="https://img.shields.io/badge/compression-92.3%25-00f0ff?style=for-the-badge&labelColor=0a0a0f" alt="92.3% compression">
+  <img src="https://img.shields.io/badge/HyperPress-v2.0-00f0ff?style=for-the-badge&labelColor=0a0a0f" alt="HyperPress v2.0">
 </p>
 
 <h1 align="center">HyperPress</h1>
-<p align="center"><strong>Adaptive Meta-Compression Engine</strong></p>
+<p align="center"><strong>Adaptive Meta-Compressor</strong></p>
 <p align="center">
-  Beats zlib-9 by ~49% &middot; Beats LZMA-RAW by ~23% &middot; Pure Python &middot; Zero dependencies
+  Never larger than the best of xz-9e / bz2-9 / zstd-19 (+ at most 16 header bytes) &middot; Pure Python &middot; Zero dependencies
 </p>
 
 <p align="center">
@@ -23,7 +22,7 @@
 
 ## What is HyperPress?
 
-HyperPress is **not** a new compression algorithm. It is an **intelligence layer** that analyzes your data block-by-block and selects the optimal combination of preprocessing transforms and compression backends — then picks the smallest result.
+HyperPress is **not** a new compression algorithm. It is a **meta-compressor**: it runs several established compressors (LZMA2, bzip2, zlib, zstd when available) with different filters and parameters on your data and keeps the smallest result, so the output is never meaningfully worse than the best of them.
 
 ```python
 from hyperpress import compress, decompress
@@ -32,155 +31,124 @@ compressed = compress(data)
 restored = decompress(compressed)
 ```
 
-That's it. Three lines. No configuration needed.
+## Honest status
 
-## Benchmark Results
+An independent audit showed that the v1 marketing numbers were wrong: they came from self-generated, highly repetitive data, subtracted the container header ("netto"), counted ties as wins, did not run LZMA at its strongest setting, and on real files v1 was about 20 % *worse* than plain `xz -9e`. The "parallel racing" claim was also false — candidates are tried **sequentially**. All of those claims have been removed. v2 was redesigned around a checkable guarantee (below).
 
-Tested on **8 diverse datasets** (text, JSON, sensor data, logs, binary, source code):
+**No compressor wins on all data.** HyperPress is a safety net on top of existing codecs, not a better codec. On many inputs it ties the best single codec (and pays up to 16 bytes of header); on some it is slightly smaller (delta / x86 filters, LZMA `lc/lp/pb` tuning, block path for sensor-like data). It is also slower than any single codec, because it tries many candidates one after another.
+
+## Guarantee
+
+For every input `d`:
 
 ```
-┌──────────────────────────────────────────────────────┐
-│         Compressor       │   Ratio   │   vs HyperPress │
-├──────────────────────────┼───────────┼─────────────────┤
-│  zlib-9                  │   84.9%   │   +49% larger    │
-│  LZMA-RAW                │   89.9%   │   +23% larger    │
-│  HyperPress (netto)      │   92.3%   │   ★ winner       │
-└──────────────────────────────────────────────────────┘
+len(compress(d)) <= min(xz-raw-9e, bz2-9, zstd-19*) + 16
 ```
 
-### Per-Dataset Breakdown
+`*` zstd-19 only counts when the standard library provides zstd (Python 3.14+, `compression.zstd`). The guarantee is enforced by construction (the plain xz-9e, bz2-9 and zstd-19 results are always candidates, plus a STORED fallback) and checked by the test suite. Output is deterministic for the same input and the same Python/library versions.
 
-| Dataset | Original | zlib-9 | LZMA-RAW | HyperPress (netto) | Winner |
-|---------|----------|--------|----------|-------------------|--------|
-| English Text | 21,930 B | 193 B (99.1%) | 181 B (99.2%) | **181 B (99.2%)** | HyperPress |
-| German Text | 31,300 B | 272 B (99.1%) | 226 B (99.3%) | **226 B (99.3%)** | HyperPress |
-| JSON Data | 33,582 B | 3,491 B (89.6%) | 1,705 B (94.9%) | **1,929 B (94.3%)** | LZMA-RAW |
-| Sensor Data | 30,000 B | 21,990 B (26.7%) | 17,087 B (43.0%) | **11,118 B (62.9%)** | HyperPress |
-| Sparse Binary | 25,000 B | 1,195 B (95.2%) | 973 B (96.1%) | **728 B (97.1%)** | HyperPress |
-| Log File | 77,532 B | 10,495 B (86.5%) | 4,889 B (93.7%) | **5,079 B (93.4%)** | LZMA-RAW |
-| Pattern+Noise | 24,000 B | 184 B (99.2%) | 110 B (99.5%) | **80 B (99.7%)** | HyperPress |
-| Source Code | 7,680 B | 104 B (98.6%) | 102 B (98.7%) | **102 B (98.7%)** | HyperPress |
-| **TOTAL** | **251,024 B** | **37,924 B (84.9%)** | **25,273 B (89.9%)** | **19,443 B (92.3%)** | **HyperPress** |
+## Benchmarks
 
-HyperPress wins on aggregate by selecting the best approach for each data type.
+Results are produced by `benchmarks/fair_bench.py` on real files, with the **full container size** (no header subtraction) compared against `xz -9e`, bz2-9 and (if available) zstd-19.
 
-## How It Works
+<!-- BENCH:START -->
+| Corpus | File | Original | HyperPress | Best stdlib opponent | vs best | vs xz -9e | vs zstd -19 |
+|---|---|---:|---:|---|---:|---:|---:|
+| canterbury | alice29.txt | 152,089 | 43,216 | bz2-9 43,202 | +14 B (+0.03 %) | -10.9 % | -12.2 % |
+| canterbury | asyoulik.txt | 125,179 | 39,583 | bz2-9 39,569 | +14 B (+0.04 %) | -11.2 % | -12.3 % |
+| canterbury | cp.html | 24,603 | 7,602 | xz-raw-9e 7,596 | +6 B (+0.08 %) | -0.7 % | -1.5 % |
+| canterbury | fields.c | 11,150 | 2,956 | xz-raw-9e 2,973 | -17 B (-0.57 %) | -2.5 % | -2.0 % |
+| canterbury | grammar.lsp | 3,721 | 1,222 | zlib-9 1,222 | +0 B (+0.00 %) | -5.4 % | +0.7 % |
+| canterbury | kennedy.xls | 1,029,744 | 47,973 | xz-raw-9e 51,811 | -3838 B (-7.41 %) | -7.5 % | -31.2 % |
+| canterbury | lcet10.txt | 426,754 | 107,720 | bz2-9 107,706 | +14 B (+0.01 %) | -9.8 % | -11.2 % |
+| canterbury | plrabn12.txt | 481,861 | 145,591 | bz2-9 145,577 | +14 B (+0.01 %) | -12.0 % | -13.0 % |
+| canterbury | ptt5 | 513,216 | 39,012 | xz-raw-9e 39,801 | -789 B (-1.98 %) | -2.1 % | -10.2 % |
+| canterbury | sum | 38,240 | 9,409 | xz-raw-9e 9,443 | -34 B (-0.36 %) | -1.0 % | -15.1 % |
+| canterbury | xargs.1 | 4,227 | 1,738 | zlib-9 1,736 | +2 B (+0.12 %) | -4.1 % | +0.5 % |
+| silesia | dickens | 10,192,446 | 2,799,535 | bz2-9 2,799,520 | +15 B (+0.00 %) | -1.1 % | -1.8 % |
+| silesia | mozilla | 51,220,480 | 13,232,814 | xz-raw-9e 13,376,180 | -143366 B (-1.07 %) | -1.1 % | -12.0 % |
+| silesia | mr | 9,970,564 | 2,441,295 | bz2-9 2,441,280 | +15 B (+0.00 %) | -11.3 % | -21.6 % |
+| silesia | nci | 33,553,445 | 1,440,074 | xz-raw-9e 1,449,209 | -9135 B (-0.63 %) | -0.6 % | -12.3 % |
+| silesia | ooffice | 6,152,192 | 2,084,481 | xz-raw-9e 2,427,163 | -342682 B (-14.12 %) | -14.1 % | -19.8 % |
+| silesia | osdb | 10,085,684 | 2,802,807 | bz2-9 2,802,792 | +15 B (+0.00 %) | -1.5 % | -9.5 % |
+| silesia | reymont | 6,627,202 | 1,246,245 | bz2-9 1,246,230 | +15 B (+0.00 %) | -5.3 % | -7.5 % |
+| silesia | samba | 21,606,400 | 3,727,990 | xz-raw-9e 3,739,464 | -11474 B (-0.31 %) | -0.3 % | -4.1 % |
+| silesia | sao | 7,251,944 | 4,414,312 | xz-raw-9e 4,425,604 | -11292 B (-0.26 %) | -0.3 % | -11.7 % |
+| silesia | webster | 41,458,703 | 8,358,807 | xz-raw-9e 8,368,609 | -9802 B (-0.12 %) | -0.1 % | -3.1 % |
+| silesia | x-ray | 8,474,240 | 4,051,127 | bz2-9 4,051,112 | +15 B (+0.00 %) | -9.8 % | -21.4 % |
+| silesia | xml | 5,345,280 | 433,831 | xz-raw-9e 434,830 | -999 B (-0.23 %) | -0.2 % | -4.6 % |
+| **Total** | 23 files | **214,749,364** | **47,479,340** | per-file best 48,012,629 | **-1.11 %** | **-3.00 %** | **-10.97 %** |
+
+Sizes are full HPRX containers (header included). Speed on this run: `best` compresses at 0.26 MB/s and `fast` at 2.86 MB/s; decompression runs at about 81 MB/s. Python 3.12.3, zstd opponent: CLI: zstd -19 --ultra --long=27, 0 violations of the guarantee. Reproduce with `python benchmarks/fair_bench.py`.
+<!-- BENCH:END -->
+
+## How It Works (v2)
+
+`compress(data, level="best")` builds candidates and keeps the smallest. Candidates are tried **one after another** (no parallelism).
 
 ```
 Input Data
     │
+    ├── WHOLE candidates (whole input, no block split)
+    │     STORED, xz-raw LZMA2 9e, bz2-9, zstd-19*, zlib-9,
+    │     DELTA(1/2/4) + LZMA2, x86 BCJ + LZMA2,
+    │     LZMA2 with tuned lc/lp/pb (text / structured / other)
+    │
+    └── BLOCKS candidate (block engine inherited from v1)
+          adaptive block split → block profiler → preprocessors
+          (Delta, BWT+MTF, RLE, Transpose, Nibble-Split …) × backends,
+          per-block smallest wins
+    │
     ▼
-┌─────────────────────┐
-│  Adaptive Block      │  Entropy-guided variable sizing (4KB–128KB)
-│  Splitter            │
-└──────────┬──────────┘
-           │
-           ▼
-┌─────────────────────┐
-│  Block Profiler      │  Computes: entropy, delta-entropy, null-ratio,
-│                      │  text-detection, structure-detection, unique bytes
-└──────────┬──────────┘
-           │
-           ▼
-┌─────────────────────┐
-│  Candidate Selector  │  Rules engine picks 3–15 preprocessing+backend
-│                      │  combinations based on block profile
-└──────────┬──────────┘
-           │
-           ▼
-┌─────────────────────┐
-│  Racing Engine       │  Tries all candidates in parallel,
-│                      │  smallest compressed output wins
-└──────────┬──────────┘
-           │
-           ▼
-    HPRX Output (with per-block CRC32)
+ smallest stream wins → HPRX v2 output
 ```
 
-### 7 Preprocessing Transforms
-
-| # | Transform | Best For |
-|---|-----------|----------|
-| 0 | Identity | Data that compresses well raw |
-| 1 | Delta | Slowly-changing signals (sensor data) |
-| 2 | Delta-16 | 16-bit aligned structured data |
-| 3 | BWT + MTF | Text-heavy data (English, German, logs) |
-| 4 | RLE | Sparse data with zero-runs |
-| 5 | Transpose | Fixed-width records with column correlation |
-| 6 | Nibble Split | Data with upper/lower nibble patterns |
-
-### 5 Compression Backends
-
-| # | Backend | Strategy |
-|---|---------|----------|
-| 0 | zlib-9 | Fast, good general-purpose |
-| 1 | LZMA-extreme | Highest single-algorithm ratio |
-| 2 | bz2-9 | Strong on text with BWT synergy |
-| 3 | zlib → LZMA | Two-stage chain compression |
-| 4 | Stored | Fallback for incompressible data |
+`level="fast"` tries only whole-stream zlib-9, bz2-9, xz preset 6 and zstd-3 (if available) — at most 4 candidates, no block path.
 
 ## Installation
 
 ```bash
-# From source
 git clone https://github.com/BEKO2210/HyperPress.git
 cd HyperPress
 pip install -e .
 ```
 
-## Usage
-
-### Basic Compression
+## API
 
 ```python
-from hyperpress import compress, decompress
+from hyperpress import compress, decompress, HyperPressError, FORMAT_VERSION
 
-# Compress any bytes
-data = open("myfile.bin", "rb").read()
-compressed = compress(data)
-
-# Decompress
-restored = decompress(compressed)
-assert restored == data
+compressed = compress(data, level="best", verbose=False)   # level: "best" | "fast"
+restored = decompress(compressed, max_output_size=1 << 30)
 ```
 
-### Verbose Mode
+- `decompress` raises **only** `HyperPressError` (a `ValueError` subclass) for invalid, corrupt, truncated, oversize or trailing-garbage input; it does not rely on `assert`.
+- `max_output_size` is a decompression-bomb guard: a declared size above the limit is rejected up front and decoding is hard-capped while streaming.
+- A whole-file CRC32 is verified on decompression.
+- v1 streams (`HPRX` + version 1) still decompress.
 
-```python
-compressed = compress(data, verbose=True)
-# Prints per-block statistics:
-#   Blk   1:   32,768B ->    5,421B (16.5%) |    DELTA+LZMA
-#   Blk   2:   32,768B ->   18,902B (57.7%) |     NONE+LZMA
-```
-
-### Run Benchmarks
-
-```bash
-python -m hyperpress.core
-```
-
-## HPRX Binary Format
-
-Self-contained, no external dependencies needed to decompress.
+## HPRX v2 Format
 
 ```
-Global Header (16 bytes):
-  4B  Magic      "HPRX"
-  1B  Version    0x01
-  1B  Flags      0x01 (integrity check enabled)
-  2B  Blocks     uint16 block count
-  8B  OrigSize   uint64 original data size
+magic    4 B   "HPRX"
+version  1 B   2
+mode     1 B   0 = WHOLE, 1 = BLOCKS
+size     varint (LEB128)   original length
+crc32    4 B   little endian, CRC32 of the original data
 
-Per Block Header (14 bytes):
-  4B  OrigSize   uint32
-  4B  CompSize   uint32
-  1B  PreProc    enum (0–6)
-  1B  Backend    enum (0–4)
-  4B  CRC32      checksum of original block
-
-Block Data:
-  [CompSize bytes of compressed data]
+mode WHOLE:   method (1 B) + payload
+mode BLOCKS:  nblocks (varint), then per block:
+              osz varint, csz varint, preproc 1 B, backend 1 B, payload
 ```
+
+Fixed overhead is a few bytes (header + varints); filter parameters are implied by the method id. See [`docs/SPEC-v2.md`](docs/SPEC-v2.md) for the full method table.
+
+## Limits
+
+- Pure Python plus the stdlib codecs: slower than a single `xz`/`bz2` call, since many candidates are tried sequentially.
+- Memory use grows with input size (candidates are compressed in memory).
+- zstd candidates are only available on Python 3.14+; a stream that uses zstd cannot be decoded on an older Python (`HyperPressError`).
+- Random or already-compressed data is stored essentially as-is.
 
 ## Testing
 
@@ -189,17 +157,12 @@ pip install pytest
 python -m pytest tests/ -v
 ```
 
-**55 tests** covering:
-- Roundtrip correctness for all data types
-- CRC32 integrity verification (corrupted data detection)
-- Benchmark assertions (HyperPress > LZMA > zlib on aggregate)
-- 100-round fuzz testing with variable entropy levels
-- Edge cases (empty, 1-byte, power-of-2 sizes, all-zeros, all-0xFF)
+The suite covers roundtrips, CRC/corruption handling, the size guarantee, bomb guard and fuzzing.
 
 ## Requirements
 
 - **Python 3.8+**
-- **Zero external dependencies** — uses only the Python standard library (`zlib`, `lzma`, `bz2`, `struct`, `math`)
+- **Zero external dependencies** — stdlib only (`zlib`, `lzma`, `bz2`, optional `compression.zstd`)
 
 ## License
 

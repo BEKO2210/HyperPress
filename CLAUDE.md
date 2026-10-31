@@ -1,18 +1,11 @@
 # CLAUDE.md — HyperPress Project
 
 ## What is HyperPress?
-HyperPress is an adaptive meta-compression engine that beats both zlib-9 and LZMA-RAW.
+HyperPress is an adaptive meta-compressor: it tries many established codec configurations and keeps the smallest result. It is not a new algorithm and does not win on all data.
 
-**Core concept:** Not a new algorithm, but an intelligence layer:
-- Block Analysis (entropy, delta-entropy, null-ratio, structure detection)
-- Preprocessing Racing (Delta, BWT+MTF, RLE, Transpose, Nibble-Split)
-- Backend Competition (zlib-9, LZMA-extreme, bz2-9, zlib->LZMA chain)
-- Per-Block Winner Selection: smallest result wins
+**v2 guarantee:** `len(compress(d)) <= min(xz-raw-9e, bz2-9, zstd-19*) + 16` (`*` only on Python 3.14+). Binding contract: `docs/SPEC-v2.md`.
 
-**Benchmark results (8 datasets, netto = HPRX overhead subtracted):**
-- zlib-9: 84.9% compression
-- LZMA-RAW: 89.9% compression
-- HyperPress (netto): 92.3% compression
+**Design:** WHOLE candidates (xz/LZMA2 9e with delta, x86 BCJ, lc/lp/pb tuning; bz2-9; zstd-19; zlib-9; STORED) plus a BLOCKS path (block profiler, preprocessors, backends). Candidates run sequentially (no parallel racing). Never quote benchmark numbers that are not produced by `benchmarks/fair_bench.py` (full container size, real files, xz at 9e).
 
 ## Project Structure
 ```

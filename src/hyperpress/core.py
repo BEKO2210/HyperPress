@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-HyperPress v1.0 — Adaptive Meta-Compression Engine
+HyperPress v2 — Adaptive Meta-Compression Engine
 Beats zlib-9 and LZMA-RAW through intelligent preprocessing + backend racing.
 
 Copyright 2025 Belkis / BEL KI (AI Consultancy)
@@ -18,7 +18,20 @@ from collections import Counter
 from enum import IntEnum
 
 MAGIC = b"HPRX"
-VERSION = 1
+FORMAT_VERSION = 2
+VERSION = FORMAT_VERSION
+
+try:
+    from compression import zstd
+    HAVE_ZSTD = True
+except ImportError:
+    zstd = None
+    HAVE_ZSTD = False
+
+
+class HyperPressError(ValueError):
+    """Invalid, corrupt, truncated, or oversized HPRX stream."""
+
 
 
 class PreProc(IntEnum):
@@ -442,70 +455,321 @@ def block_size(d):
 
 # ── Format ────────────────────────────────────────────────
 
-HDR = "<4sBBHQ"
-BLK = "<IIBBI"
+HDR = "<4sBBHQ"  # Legacy v1 header.
+BLK = "<IIBBI"  # Legacy v1 block header.
 
 
-def compress(data, verbose=False):
-    """Compress data using HyperPress adaptive meta-compression.
+def _varint(value):
+    out = bytearray()
+    while value >= 128:
+        out.append((value & 127) | 128)
+        value >>= 7
+    out.append(value)
+    return bytes(out)
 
-    Args:
-        data: bytes to compress
-        verbose: if True, print per-block statistics
 
-    Returns:
-        Compressed bytes in HPRX format.
-    """
-    if not data:
-        return struct.pack(HDR, MAGIC, VERSION, 1, 0, 0)
+def _read_varint(data, offset):
+    value = 0
+    for shift in range(0, 70, 7):
+        if offset >= len(data):
+            raise HyperPressError("Truncated varint")
+        byte = data[offset]
+        offset += 1
+        value |= (byte & 127) << shift
+        if not byte & 128:
+            if value > (1 << 64) - 1:
+                raise HyperPressError("Varint overflow")
+            return value, offset
+    raise HyperPressError("Varint overflow")
+
+
+def _lzma_filters(method, size):
+    preset = (6 if method == 12 else 9 | lzma.PRESET_EXTREME)
+    settings = {"id": lzma.FILTER_LZMA2, "preset": preset}
+    if method == 1:
+        settings["dict_size"] = max(4096, min(2 * size, 64 * 1024 * 1024))
+    if method == 8:
+        settings.update(lc=4, lp=0, pb=0)
+    elif method == 9:
+        settings.update(lc=0, lp=2, pb=2)
+    elif method == 10:
+        settings.update(lc=1, lp=0, pb=0)
+    if method in (4, 5, 6):
+        return [{"id": lzma.FILTER_DELTA, "dist": {4: 1, 5: 2, 6: 4}[method]}, settings]
+    if method == 7:
+        return [{"id": lzma.FILTER_X86}, settings]
+    return [settings]
+
+
+def _whole_compress(data, method):
+    if method == 0:
+        return data
+    if method in (1, 4, 5, 6, 7, 8, 9, 10, 12):
+        return lzma.compress(data, format=lzma.FORMAT_RAW,
+                             filters=_lzma_filters(method, len(data)))
+    if method == 2:
+        return bz2.compress(data, compresslevel=9)
+    if method in (3, 13):
+        return zstd.compress(data, level=19 if method == 3 else 3)
+    if method == 11:
+        obj = zlib.compressobj(9, zlib.DEFLATED, -15)
+        return obj.compress(data) + obj.flush()
+    raise HyperPressError("Unknown method")
+
+
+def _bounded_decode(payload, kind, limit, filters=None):
+    if kind == "lzma":
+        obj = lzma.LZMADecompressor(format=lzma.FORMAT_RAW, filters=filters)
+    elif kind == "bz2":
+        obj = bz2.BZ2Decompressor()
+    elif kind == "zstd":
+        obj = zstd.ZstdDecompressor()
+    else:
+        obj = zlib.decompressobj(-15 if kind == "raw-zlib" else 15)
+    out = bytearray()
+    pos = 0
+    while not obj.eof:
+        if kind in ("bz2", "zstd") and not obj.needs_input:
+            chunk = b""
+        elif kind == "lzma" and not obj.needs_input:
+            chunk = b""
+        elif pos < len(payload):
+            chunk = payload[pos:pos + 65536]
+            pos += len(chunk)
+        else:
+            raise HyperPressError("Truncated compressed stream")
+        cap = min(65536, limit - len(out) + 1)
+        if cap <= 0:
+            raise HyperPressError("Output exceeds limit")
+        part = obj.decompress(chunk, cap)
+        out.extend(part)
+        if len(out) > limit:
+            raise HyperPressError("Output exceeds limit")
+        if kind in ("raw-zlib", "zlib") and obj.unconsumed_tail:
+            pos -= len(obj.unconsumed_tail)
+        if not chunk and not part and not obj.eof and (kind not in ("bz2", "zstd", "lzma") or obj.needs_input):
+            raise HyperPressError("Truncated compressed stream")
+    if obj.unused_data or pos != len(payload):
+        raise HyperPressError("Trailing garbage")
+    return bytes(out)
+
+
+def _whole_decode(payload, method, size):
+    if method == 0:
+        if len(payload) != size:
+            raise HyperPressError("Stored size mismatch")
+        return payload
+    if method in (1, 4, 5, 6, 7, 8, 9, 10, 12):
+        return _bounded_decode(payload, "lzma", size, _lzma_filters(method, size))
+    if method == 2:
+        return _bounded_decode(payload, "bz2", size)
+    if method in (3, 13):
+        if not HAVE_ZSTD:
+            raise HyperPressError("Zstandard decoder unavailable")
+        return _bounded_decode(payload, "zstd", size)
+    if method == 11:
+        return _bounded_decode(payload, "raw-zlib", size)
+    raise HyperPressError("Unknown method")
+
+
+def _v2_header(mode, data):
+    return MAGIC + bytes((FORMAT_VERSION, mode)) + _varint(len(data)) + struct.pack("<I", zlib.crc32(data) & 0xffffffff)
+
+
+def _blocks_compress(data, verbose):
     bs = block_size(data)
     blocks = []
-    off = 0
-    while off < len(data):
+    for off in range(0, len(data), bs):
         chunk = data[off:off + bs]
-        cd, osz, pp, be, crc = compress_block(chunk)
-        blocks.append((cd, osz, len(cd), pp, be, crc))
+        cd, osz, pp, be, _ = compress_block(chunk)
+        blocks.append((cd, osz, pp, be))
         if verbose:
-            r = len(cd) / len(chunk) * 100
-            print("  Blk %3d: %8sB -> %8sB (%5.1f%%) | %8s+%s" % (
-                len(blocks), format(len(chunk), ","),
-                format(len(cd), ","), r, pp.name, be.name))
-        off += bs
-    out = bytearray(struct.pack(HDR, MAGIC, VERSION, 1, len(blocks), len(data)))
-    for cd, osz, csz, pp, be, crc in blocks:
-        out.extend(struct.pack(BLK, osz, csz, int(pp), int(be), crc))
+            print("  Blk %3d: %8dB -> %8dB | %s+%s" %
+                  (len(blocks), len(chunk), len(cd), pp.name, be.name))
+    out = bytearray(_v2_header(1, data))
+    out.extend(_varint(len(blocks)))
+    for cd, osz, pp, be in blocks:
+        out.extend(_varint(osz))
+        out.extend(_varint(len(cd)))
+        out.extend((int(pp), int(be)))
         out.extend(cd)
     return bytes(out)
 
 
-def decompress(data):
-    """Decompress HPRX-format data back to the original bytes.
+def compress(data, level="best", verbose=False):
+    """Compress bytes to HPRX v2, selecting smallest candidate."""
+    if not isinstance(data, bytes):
+        raise TypeError("data must be bytes")
+    if level not in ("best", "fast"):
+        raise ValueError("level must be 'best' or 'fast'")
+    header = _v2_header(0, data)
+    if not data:
+        return header + b"\x00"
+    methods = ([0, 11, 2, 12, 13] if level == "fast" else
+               [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13])
+    best = None
+    for method in methods:
+        if method in (3, 13) and not HAVE_ZSTD:
+            continue
+        try:
+            candidate = header + bytes((method,)) + _whole_compress(data, method)
+        except (lzma.LZMAError, OSError, ValueError):
+            continue
+        if best is None or len(candidate) < len(best):
+            best = candidate
+    if level == "best":
+        blocks = _blocks_compress(data, verbose)
+        if len(blocks) < len(best):
+            best = blocks
+    return best
 
-    Args:
-        data: HPRX compressed bytes
 
-    Returns:
-        Original uncompressed bytes.
+def _decode_block(payload, pp, be, osz):
+    if pp not in PREPROC_DEC or be not in Backend._value2member_map_:
+        raise HyperPressError("Unknown block codec")
+    if pp == PreProc.NIBBLE:
+        cap = 2 * osz
+    elif pp == PreProc.RLE:
+        cap = 2 * osz
+    elif pp == PreProc.BWT_MTF:
+        cap = osz + 4
+    elif pp == PreProc.TRANSPOSE:
+        cap = osz + 1
+    else:
+        cap = osz
+    if be == Backend.STORED:
+        decoded = payload
+        if len(decoded) > cap:
+            raise HyperPressError("Block exceeds limit")
+    elif be == Backend.ZLIB9:
+        decoded = _bounded_decode(payload, "zlib", cap)
+    elif be == Backend.LZMA:
+        decoded = _bounded_decode(payload, "lzma", cap,
+                                  [{"id": lzma.FILTER_LZMA2}])
+    elif be == Backend.BZ2:
+        decoded = _bounded_decode(payload, "bz2", cap)
+    else:
+        # Legacy backend: zlib-1 then raw LZMA2-6.
+        inner = _bounded_decode(payload, "lzma", cap + 65536,
+                                [{"id": lzma.FILTER_LZMA2}])
+        decoded = _bounded_decode(inner, "zlib", cap)
+    if pp == PreProc.RLE:
+        result_buf = bytearray()
+        i = 0
+        while i < len(decoded):
+            if decoded[i] == 0:
+                if i + 1 >= len(decoded) or len(result_buf) + decoded[i + 1] > osz:
+                    raise HyperPressError("Invalid RLE block")
+                result_buf.extend(b"\x00" * decoded[i + 1])
+                i += 2
+            else:
+                if len(result_buf) >= osz:
+                    raise HyperPressError("Block exceeds limit")
+                result_buf.append(decoded[i])
+                i += 1
+        result = bytes(result_buf)
+    else:
+        if pp == PreProc.BWT_MTF and (len(decoded) < 4 or
+                struct.unpack_from("<I", decoded)[0] >= len(decoded) - 4):
+            raise HyperPressError("Invalid BWT block")
+        if pp == PreProc.TRANSPOSE and (not decoded or decoded[0] == 0):
+            raise HyperPressError("Invalid transpose block")
+        if pp == PreProc.NIBBLE and len(decoded) != 2 * osz:
+            raise HyperPressError("Invalid nibble block")
+        result = PREPROC_DEC[PreProc(pp)](decoded)
+    if len(result) != osz:
+        raise HyperPressError("Block size mismatch")
+    return result
 
-    Raises:
-        AssertionError: if magic bytes, CRC, or size checks fail.
-    """
-    mg, ver, fl, bc, osz = struct.unpack(HDR, data[:struct.calcsize(HDR)])
-    assert mg == MAGIC, "Invalid HPRX magic bytes"
-    off = struct.calcsize(HDR)
-    out = bytearray()
+
+def _decode_v2(data, max_output_size):
+    if len(data) < 6 or data[:4] != MAGIC or data[4] != FORMAT_VERSION:
+        raise HyperPressError("Invalid HPRX header")
+    mode = data[5]
+    size, off = _read_varint(data, 6)
+    if size > max_output_size:
+        raise HyperPressError("Output exceeds limit")
+    if len(data) < off + 4:
+        raise HyperPressError("Truncated CRC")
+    crc = struct.unpack_from("<I", data, off)[0]
+    off += 4
+    if mode == 0:
+        if off >= len(data):
+            raise HyperPressError("Missing method")
+        result = _whole_decode(data[off + 1:], data[off], size)
+    elif mode == 1:
+        count, off = _read_varint(data, off)
+        if count > size or (count == 0) != (size == 0):
+            raise HyperPressError("Invalid block count")
+        out = bytearray()
+        for _ in range(count):
+            osz, off = _read_varint(data, off)
+            csz, off = _read_varint(data, off)
+            if osz == 0 or osz > 131072 or osz > size - len(out):
+                raise HyperPressError("Invalid block size")
+            if len(data) - off < 2 or csz > len(data) - off - 2:
+                raise HyperPressError("Truncated block")
+            pp, be = data[off], data[off + 1]
+            off += 2
+            out.extend(_decode_block(data[off:off + csz], pp, be, osz))
+            off += csz
+        if off != len(data):
+            raise HyperPressError("Trailing garbage")
+        result = bytes(out)
+    else:
+        raise HyperPressError("Unknown mode")
+    if len(result) != size or (zlib.crc32(result) & 0xffffffff) != crc:
+        raise HyperPressError("Size or CRC mismatch")
+    return result
+
+
+def _decode_v1(data, max_output_size):
+    hsz = struct.calcsize(HDR)
+    if len(data) < hsz:
+        raise HyperPressError("Truncated v1 header")
+    mg, ver, flag, count, size = struct.unpack_from(HDR, data)
+    if mg != MAGIC or ver != 1 or size > max_output_size:
+        raise HyperPressError("Invalid v1 header or output exceeds limit")
+    off = hsz
     bsz = struct.calcsize(BLK)
-    for _ in range(bc):
-        bosz, bcsz, pp, be, crc = struct.unpack(BLK, data[off:off + bsz])
+    out = bytearray()
+    if count > size or (count == 0) != (size == 0):
+        raise HyperPressError("Invalid v1 block count")
+    for _ in range(count):
+        if len(data) - off < bsz:
+            raise HyperPressError("Truncated v1 block")
+        osz, csz, pp, be, crc = struct.unpack_from(BLK, data, off)
         off += bsz
-        cd = data[off:off + bcsz]
-        off += bcsz
-        dec = decomp_backend(cd, Backend(be), bosz)
-        res = PREPROC_DEC[PreProc(pp)](dec)
-        assert zlib.crc32(res) & 0xFFFFFFFF == crc, "CRC FAIL"
-        out.extend(res)
-    assert len(out) == osz, "Size mismatch"
+        if osz == 0 or osz > 131072 or osz > size - len(out) or csz > len(data) - off:
+            raise HyperPressError("Invalid v1 block size")
+        block = _decode_block(data[off:off + csz], pp, be, osz)
+        if zlib.crc32(block) & 0xffffffff != crc:
+            raise HyperPressError("v1 block CRC mismatch")
+        out.extend(block)
+        off += csz
+    if off != len(data) or len(out) != size:
+        raise HyperPressError("v1 size mismatch or trailing garbage")
     return bytes(out)
+
+
+def decompress(data, max_output_size=1 << 30):
+    """Decode HPRX v1 or v2, enforcing declared and streamed output limits."""
+    if not isinstance(data, bytes):
+        raise HyperPressError("Input must be bytes")
+    if not isinstance(max_output_size, int) or max_output_size < 0:
+        raise HyperPressError("Invalid max_output_size")
+    try:
+        if len(data) < 5 or data[:4] != MAGIC:
+            raise HyperPressError("Invalid HPRX magic bytes")
+        if data[4] == 1:
+            return _decode_v1(data, max_output_size)
+        if data[4] == FORMAT_VERSION:
+            return _decode_v2(data, max_output_size)
+        raise HyperPressError("Unknown HPRX version")
+    except Exception as exc:
+        if isinstance(exc, HyperPressError):
+            raise
+        raise HyperPressError(str(exc)) from exc
 
 
 # ── Benchmark ─────────────────────────────────────────────

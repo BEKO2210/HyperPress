@@ -1,0 +1,1134 @@
+{
+  "corpora": {
+    "canterbury": "f140e8a5b73d3f53198555a63bfb827889394a42f20825df33c810c3d5e3f8fb",
+    "silesia": "0626e25f45c0ffb5dc801f13b7c82a3b75743ba07e3a71835a41e3d9f63c77af"
+  },
+  "env": {
+    "hyperpress": "2.0.0",
+    "platform": "Linux-6.18.7-76061807-generic-x86_64-with-glibc2.39",
+    "python": "3.12.3",
+    "zstd": "CLI: zstd -19 --ultra --long=27"
+  },
+  "files": [
+    {
+      "best_stdlib_opponent": {
+        "name": "bz2-9",
+        "size": 43202
+      },
+      "corpus": "canterbury",
+      "delta_vs_best": 14,
+      "file": "alice29.txt",
+      "hp_best": {
+        "comp_mbs": 0.244,
+        "decomp_mbs": 41.316,
+        "method_byte": 153,
+        "roundtrip": true,
+        "size": 43216
+      },
+      "hp_fast": {
+        "comp_mbs": 3.151,
+        "decomp_mbs": 44.745,
+        "method_byte": 153,
+        "roundtrip": true,
+        "size": 43216
+      },
+      "opponents": {
+        "bz2-9": {
+          "comp_mbs": 20.971,
+          "size": 43202
+        },
+        "xz-9e": {
+          "comp_mbs": 2.565,
+          "size": 48528
+        },
+        "xz-raw-9e": {
+          "comp_mbs": 2.616,
+          "size": 48469
+        },
+        "zlib-9": {
+          "comp_mbs": 19.025,
+          "size": 54170
+        },
+        "zstd-19": {
+          "comp_mbs": 1.629,
+          "size": 49212
+        }
+      },
+      "size": 152089,
+      "violation": false
+    },
+    {
+      "best_stdlib_opponent": {
+        "name": "bz2-9",
+        "size": 39569
+      },
+      "corpus": "canterbury",
+      "delta_vs_best": 14,
+      "file": "asyoulik.txt",
+      "hp_best": {
+        "comp_mbs": 0.247,
+        "decomp_mbs": 39.848,
+        "method_byte": 251,
+        "roundtrip": true,
+        "size": 39583
+      },
+      "hp_fast": {
+        "comp_mbs": 3.148,
+        "decomp_mbs": 42.913,
+        "method_byte": 251,
+        "roundtrip": true,
+        "size": 39583
+      },
+      "opponents": {
+        "bz2-9": {
+          "comp_mbs": 21.083,
+          "size": 39569
+        },
+        "xz-9e": {
+          "comp_mbs": 2.329,
+          "size": 44592
+        },
+        "xz-raw-9e": {
+          "comp_mbs": 2.308,
+          "size": 44535
+        },
+        "zlib-9": {
+          "comp_mbs": 20.239,
+          "size": 48778
+        },
+        "zstd-19": {
+          "comp_mbs": 1.473,
+          "size": 45138
+        }
+      },
+      "size": 125179,
+      "violation": false
+    },
+    {
+      "best_stdlib_opponent": {
+        "name": "xz-raw-9e",
+        "size": 7596
+      },
+      "corpus": "canterbury",
+      "delta_vs_best": 6,
+      "file": "cp.html",
+      "hp_best": {
+        "comp_mbs": 0.089,
+        "decomp_mbs": 68.614,
+        "method_byte": 155,
+        "roundtrip": true,
+        "size": 7602
+      },
+      "hp_fast": {
+        "comp_mbs": 2.722,
+        "decomp_mbs": 75.342,
+        "method_byte": 155,
+        "roundtrip": true,
+        "size": 7602
+      },
+      "opponents": {
+        "bz2-9": {
+          "comp_mbs": 16.352,
+          "size": 7624
+        },
+        "xz-9e": {
+          "comp_mbs": 0.707,
+          "size": 7652
+        },
+        "xz-raw-9e": {
+          "comp_mbs": 0.724,
+          "size": 7596
+        },
+        "zlib-9": {
+          "comp_mbs": 53.489,
+          "size": 7940
+        },
+        "zstd-19": {
+          "comp_mbs": 0.438,
+          "size": 7716
+        }
+      },
+      "size": 24603,
+      "violation": false
+    },
+    {
+      "best_stdlib_opponent": {
+        "name": "xz-raw-9e",
+        "size": 2973
+      },
+      "corpus": "canterbury",
+      "delta_vs_best": -17,
+      "file": "fields.c",
+      "hp_best": {
+        "comp_mbs": 0.045,
+        "decomp_mbs": 67.416,
+        "method_byte": 142,
+        "roundtrip": true,
+        "size": 2956
+      },
+      "hp_fast": {
+        "comp_mbs": 3.418,
+        "decomp_mbs": 77.695,
+        "method_byte": 142,
+        "roundtrip": true,
+        "size": 2983
+      },
+      "opponents": {
+        "bz2-9": {
+          "comp_mbs": 12.012,
+          "size": 3039
+        },
+        "xz-9e": {
+          "comp_mbs": 0.336,
+          "size": 3032
+        },
+        "xz-raw-9e": {
+          "comp_mbs": 0.343,
+          "size": 2973
+        },
+        "zlib-9": {
+          "comp_mbs": 50.611,
+          "size": 3115
+        },
+        "zstd-19": {
+          "comp_mbs": 0.221,
+          "size": 3017
+        }
+      },
+      "size": 11150,
+      "violation": false
+    },
+    {
+      "best_stdlib_opponent": {
+        "name": "zlib-9",
+        "size": 1222
+      },
+      "corpus": "canterbury",
+      "delta_vs_best": 0,
+      "file": "grammar.lsp",
+      "hp_best": {
+        "comp_mbs": 0.016,
+        "decomp_mbs": 43.937,
+        "method_byte": 137,
+        "roundtrip": true,
+        "size": 1222
+      },
+      "hp_fast": {
+        "comp_mbs": 2.278,
+        "decomp_mbs": 117.94,
+        "method_byte": 137,
+        "roundtrip": true,
+        "size": 1229
+      },
+      "opponents": {
+        "bz2-9": {
+          "comp_mbs": 10.325,
+          "size": 1283
+        },
+        "xz-9e": {
+          "comp_mbs": 0.118,
+          "size": 1292
+        },
+        "xz-raw-9e": {
+          "comp_mbs": 0.121,
+          "size": 1235
+        },
+        "zlib-9": {
+          "comp_mbs": 56.073,
+          "size": 1222
+        },
+        "zstd-19": {
+          "comp_mbs": 0.08,
+          "size": 1213
+        }
+      },
+      "size": 3721,
+      "violation": false
+    },
+    {
+      "best_stdlib_opponent": {
+        "name": "xz-raw-9e",
+        "size": 51811
+      },
+      "corpus": "canterbury",
+      "delta_vs_best": -3838,
+      "file": "kennedy.xls",
+      "hp_best": {
+        "comp_mbs": 0.166,
+        "decomp_mbs": 218.33,
+        "method_byte": 240,
+        "roundtrip": true,
+        "size": 47973
+      },
+      "hp_fast": {
+        "comp_mbs": 1.98,
+        "decomp_mbs": 236.178,
+        "method_byte": 240,
+        "roundtrip": true,
+        "size": 49074
+      },
+      "opponents": {
+        "bz2-9": {
+          "comp_mbs": 33.772,
+          "size": 130280
+        },
+        "xz-9e": {
+          "comp_mbs": 1.777,
+          "size": 51868
+        },
+        "xz-raw-9e": {
+          "comp_mbs": 1.793,
+          "size": 51811
+        },
+        "zlib-9": {
+          "comp_mbs": 3.677,
+          "size": 207029
+        },
+        "zstd-19": {
+          "comp_mbs": 3.36,
+          "size": 69725
+        }
+      },
+      "size": 1029744,
+      "violation": false
+    },
+    {
+      "best_stdlib_opponent": {
+        "name": "bz2-9",
+        "size": 107706
+      },
+      "corpus": "canterbury",
+      "delta_vs_best": 14,
+      "file": "lcet10.txt",
+      "hp_best": {
+        "comp_mbs": 0.335,
+        "decomp_mbs": 42.19,
+        "method_byte": 130,
+        "roundtrip": true,
+        "size": 107720
+      },
+      "hp_fast": {
+        "comp_mbs": 3.627,
+        "decomp_mbs": 42.897,
+        "method_byte": 130,
+        "roundtrip": true,
+        "size": 107720
+      },
+      "opponents": {
+        "bz2-9": {
+          "comp_mbs": 23.009,
+          "size": 107706
+        },
+        "xz-9e": {
+          "comp_mbs": 3.793,
+          "size": 119488
+        },
+        "xz-raw-9e": {
+          "comp_mbs": 3.773,
+          "size": 119430
+        },
+        "zlib-9": {
+          "comp_mbs": 22.002,
+          "size": 144439
+        },
+        "zstd-19": {
+          "comp_mbs": 3.001,
+          "size": 121371
+        }
+      },
+      "size": 426754,
+      "violation": false
+    },
+    {
+      "best_stdlib_opponent": {
+        "name": "bz2-9",
+        "size": 145577
+      },
+      "corpus": "canterbury",
+      "delta_vs_best": 14,
+      "file": "plrabn12.txt",
+      "hp_best": {
+        "comp_mbs": 0.329,
+        "decomp_mbs": 35.916,
+        "method_byte": 197,
+        "roundtrip": true,
+        "size": 145591
+      },
+      "hp_fast": {
+        "comp_mbs": 3.204,
+        "decomp_mbs": 37.183,
+        "method_byte": 197,
+        "roundtrip": true,
+        "size": 145591
+      },
+      "opponents": {
+        "bz2-9": {
+          "comp_mbs": 20.623,
+          "size": 145577
+        },
+        "xz-9e": {
+          "comp_mbs": 3.745,
+          "size": 165456
+        },
+        "xz-raw-9e": {
+          "comp_mbs": 3.766,
+          "size": 165398
+        },
+        "zlib-9": {
+          "comp_mbs": 14.513,
+          "size": 194332
+        },
+        "zstd-19": {
+          "comp_mbs": 3.018,
+          "size": 167439
+        }
+      },
+      "size": 481861,
+      "violation": false
+    },
+    {
+      "best_stdlib_opponent": {
+        "name": "xz-raw-9e",
+        "size": 39801
+      },
+      "corpus": "canterbury",
+      "delta_vs_best": -789,
+      "file": "ptt5",
+      "hp_best": {
+        "comp_mbs": 0.223,
+        "decomp_mbs": 221.455,
+        "method_byte": 192,
+        "roundtrip": true,
+        "size": 39012
+      },
+      "hp_fast": {
+        "comp_mbs": 4.505,
+        "decomp_mbs": 237.121,
+        "method_byte": 192,
+        "roundtrip": true,
+        "size": 41947
+      },
+      "opponents": {
+        "bz2-9": {
+          "comp_mbs": 81.915,
+          "size": 49759
+        },
+        "xz-9e": {
+          "comp_mbs": 2.496,
+          "size": 39860
+        },
+        "xz-raw-9e": {
+          "comp_mbs": 2.487,
+          "size": 39801
+        },
+        "zlib-9": {
+          "comp_mbs": 10.67,
+          "size": 52221
+        },
+        "zstd-19": {
+          "comp_mbs": 2.045,
+          "size": 43444
+        }
+      },
+      "size": 513216,
+      "violation": false
+    },
+    {
+      "best_stdlib_opponent": {
+        "name": "xz-raw-9e",
+        "size": 9443
+      },
+      "corpus": "canterbury",
+      "delta_vs_best": -34,
+      "file": "sum",
+      "hp_best": {
+        "comp_mbs": 0.118,
+        "decomp_mbs": 79.519,
+        "method_byte": 224,
+        "roundtrip": true,
+        "size": 9409
+      },
+      "hp_fast": {
+        "comp_mbs": 2.535,
+        "decomp_mbs": 80.536,
+        "method_byte": 224,
+        "roundtrip": true,
+        "size": 9409
+      },
+      "opponents": {
+        "bz2-9": {
+          "comp_mbs": 18.426,
+          "size": 12909
+        },
+        "xz-9e": {
+          "comp_mbs": 1.023,
+          "size": 9500
+        },
+        "xz-raw-9e": {
+          "comp_mbs": 1.018,
+          "size": 9443
+        },
+        "zlib-9": {
+          "comp_mbs": 5.299,
+          "size": 12838
+        },
+        "zstd-19": {
+          "comp_mbs": 0.706,
+          "size": 11076
+        }
+      },
+      "size": 38240,
+      "violation": false
+    },
+    {
+      "best_stdlib_opponent": {
+        "name": "zlib-9",
+        "size": 1736
+      },
+      "corpus": "canterbury",
+      "delta_vs_best": 2,
+      "file": "xargs.1",
+      "hp_best": {
+        "comp_mbs": 0.017,
+        "decomp_mbs": 39.016,
+        "method_byte": 131,
+        "roundtrip": true,
+        "size": 1738
+      },
+      "hp_fast": {
+        "comp_mbs": 2.43,
+        "decomp_mbs": 145.759,
+        "method_byte": 131,
+        "roundtrip": true,
+        "size": 1743
+      },
+      "opponents": {
+        "bz2-9": {
+          "comp_mbs": 11.295,
+          "size": 1762
+        },
+        "xz-9e": {
+          "comp_mbs": 0.131,
+          "size": 1812
+        },
+        "xz-raw-9e": {
+          "comp_mbs": 0.132,
+          "size": 1756
+        },
+        "zlib-9": {
+          "comp_mbs": 55.342,
+          "size": 1736
+        },
+        "zstd-19": {
+          "comp_mbs": 0.083,
+          "size": 1729
+        }
+      },
+      "size": 4227,
+      "violation": false
+    },
+    {
+      "best_stdlib_opponent": {
+        "name": "bz2-9",
+        "size": 2799520
+      },
+      "corpus": "silesia",
+      "delta_vs_best": 15,
+      "file": "dickens",
+      "hp_best": {
+        "comp_mbs": 0.25,
+        "decomp_mbs": 38.03,
+        "method_byte": 190,
+        "roundtrip": true,
+        "size": 2799535
+      },
+      "hp_fast": {
+        "comp_mbs": 2.097,
+        "decomp_mbs": 37.765,
+        "method_byte": 190,
+        "roundtrip": true,
+        "size": 2799535
+      },
+      "opponents": {
+        "bz2-9": {
+          "comp_mbs": 20.885,
+          "size": 2799520
+        },
+        "xz-9e": {
+          "comp_mbs": 2.714,
+          "size": 2831212
+        },
+        "xz-raw-9e": {
+          "comp_mbs": 2.759,
+          "size": 2831149
+        },
+        "zlib-9": {
+          "comp_mbs": 17.152,
+          "size": 3854735
+        },
+        "zstd-19": {
+          "comp_mbs": 2.764,
+          "size": 2849699
+        }
+      },
+      "size": 10192446,
+      "violation": false
+    },
+    {
+      "best_stdlib_opponent": {
+        "name": "xz-raw-9e",
+        "size": 13376180
+      },
+      "corpus": "silesia",
+      "delta_vs_best": -143366,
+      "file": "mozilla",
+      "hp_best": {
+        "comp_mbs": 0.26,
+        "decomp_mbs": 81.29,
+        "method_byte": 128,
+        "roundtrip": true,
+        "size": 13232814
+      },
+      "hp_fast": {
+        "comp_mbs": 2.623,
+        "decomp_mbs": 78.317,
+        "method_byte": 128,
+        "roundtrip": true,
+        "size": 13503553
+      },
+      "opponents": {
+        "bz2-9": {
+          "comp_mbs": 22.752,
+          "size": 17914392
+        },
+        "xz-9e": {
+          "comp_mbs": 3.215,
+          "size": 13376240
+        },
+        "xz-raw-9e": {
+          "comp_mbs": 3.215,
+          "size": 13376180
+        },
+        "zlib-9": {
+          "comp_mbs": 9.793,
+          "size": 19044396
+        },
+        "zstd-19": {
+          "comp_mbs": 3.64,
+          "size": 15040033
+        }
+      },
+      "size": 51220480,
+      "violation": false
+    },
+    {
+      "best_stdlib_opponent": {
+        "name": "bz2-9",
+        "size": 2441280
+      },
+      "corpus": "silesia",
+      "delta_vs_best": 15,
+      "file": "mr",
+      "hp_best": {
+        "comp_mbs": 0.203,
+        "decomp_mbs": 53.105,
+        "method_byte": 132,
+        "roundtrip": true,
+        "size": 2441295
+      },
+      "hp_fast": {
+        "comp_mbs": 2.752,
+        "decomp_mbs": 53.07,
+        "method_byte": 132,
+        "roundtrip": true,
+        "size": 2441295
+      },
+      "opponents": {
+        "bz2-9": {
+          "comp_mbs": 29.574,
+          "size": 2441280
+        },
+        "xz-9e": {
+          "comp_mbs": 2.668,
+          "size": 2751892
+        },
+        "xz-raw-9e": {
+          "comp_mbs": 2.664,
+          "size": 2751831
+        },
+        "zlib-9": {
+          "comp_mbs": 9.927,
+          "size": 3660794
+        },
+        "zstd-19": {
+          "comp_mbs": 4.519,
+          "size": 3112781
+        }
+      },
+      "size": 9970564,
+      "violation": false
+    },
+    {
+      "best_stdlib_opponent": {
+        "name": "xz-raw-9e",
+        "size": 1449209
+      },
+      "corpus": "silesia",
+      "delta_vs_best": -9135,
+      "file": "nci",
+      "hp_best": {
+        "comp_mbs": 0.248,
+        "decomp_mbs": 332.259,
+        "method_byte": 165,
+        "roundtrip": true,
+        "size": 1440074
+      },
+      "hp_fast": {
+        "comp_mbs": 3.876,
+        "decomp_mbs": 346.316,
+        "method_byte": 165,
+        "roundtrip": true,
+        "size": 1779226
+      },
+      "opponents": {
+        "bz2-9": {
+          "comp_mbs": 13.178,
+          "size": 1812734
+        },
+        "xz-9e": {
+          "comp_mbs": 2.642,
+          "size": 1449272
+        },
+        "xz-raw-9e": {
+          "comp_mbs": 2.637,
+          "size": 1449209
+        },
+        "zlib-9": {
+          "comp_mbs": 24.993,
+          "size": 2988001
+        },
+        "zstd-19": {
+          "comp_mbs": 2.892,
+          "size": 1641183
+        }
+      },
+      "size": 33553445,
+      "violation": false
+    },
+    {
+      "best_stdlib_opponent": {
+        "name": "xz-raw-9e",
+        "size": 2427163
+      },
+      "corpus": "silesia",
+      "delta_vs_best": -342682,
+      "file": "ooffice",
+      "hp_best": {
+        "comp_mbs": 0.353,
+        "decomp_mbs": 63.97,
+        "method_byte": 128,
+        "roundtrip": true,
+        "size": 2084481
+      },
+      "hp_fast": {
+        "comp_mbs": 3.019,
+        "decomp_mbs": 62.408,
+        "method_byte": 128,
+        "roundtrip": true,
+        "size": 2426770
+      },
+      "opponents": {
+        "bz2-9": {
+          "comp_mbs": 21.094,
+          "size": 2862526
+        },
+        "xz-9e": {
+          "comp_mbs": 4.36,
+          "size": 2427224
+        },
+        "xz-raw-9e": {
+          "comp_mbs": 4.189,
+          "size": 2427163
+        },
+        "zlib-9": {
+          "comp_mbs": 16.61,
+          "size": 3092926
+        },
+        "zstd-19": {
+          "comp_mbs": 4.883,
+          "size": 2598842
+        }
+      },
+      "size": 6152192,
+      "violation": false
+    },
+    {
+      "best_stdlib_opponent": {
+        "name": "bz2-9",
+        "size": 2802792
+      },
+      "corpus": "silesia",
+      "delta_vs_best": 15,
+      "file": "osdb",
+      "hp_best": {
+        "comp_mbs": 0.336,
+        "decomp_mbs": 41.052,
+        "method_byte": 180,
+        "roundtrip": true,
+        "size": 2802807
+      },
+      "hp_fast": {
+        "comp_mbs": 3.19,
+        "decomp_mbs": 40.976,
+        "method_byte": 180,
+        "roundtrip": true,
+        "size": 2802807
+      },
+      "opponents": {
+        "bz2-9": {
+          "comp_mbs": 23.025,
+          "size": 2802792
+        },
+        "xz-9e": {
+          "comp_mbs": 3.741,
+          "size": 2844556
+        },
+        "xz-raw-9e": {
+          "comp_mbs": 3.684,
+          "size": 2844493
+        },
+        "zlib-9": {
+          "comp_mbs": 36.038,
+          "size": 3673177
+        },
+        "zstd-19": {
+          "comp_mbs": 3.55,
+          "size": 3098462
+        }
+      },
+      "size": 10085684,
+      "violation": false
+    },
+    {
+      "best_stdlib_opponent": {
+        "name": "bz2-9",
+        "size": 1246230
+      },
+      "corpus": "silesia",
+      "delta_vs_best": 15,
+      "file": "reymont",
+      "hp_best": {
+        "comp_mbs": 0.264,
+        "decomp_mbs": 46.864,
+        "method_byte": 130,
+        "roundtrip": true,
+        "size": 1246245
+      },
+      "hp_fast": {
+        "comp_mbs": 2.101,
+        "decomp_mbs": 46.926,
+        "method_byte": 130,
+        "roundtrip": true,
+        "size": 1246245
+      },
+      "opponents": {
+        "bz2-9": {
+          "comp_mbs": 21.75,
+          "size": 1246230
+        },
+        "xz-9e": {
+          "comp_mbs": 2.965,
+          "size": 1315592
+        },
+        "xz-raw-9e": {
+          "comp_mbs": 2.861,
+          "size": 1315531
+        },
+        "zlib-9": {
+          "comp_mbs": 9.615,
+          "size": 1823196
+        },
+        "zstd-19": {
+          "comp_mbs": 2.786,
+          "size": 1347614
+        }
+      },
+      "size": 6627202,
+      "violation": false
+    },
+    {
+      "best_stdlib_opponent": {
+        "name": "xz-raw-9e",
+        "size": 3739464
+      },
+      "corpus": "silesia",
+      "delta_vs_best": -11474,
+      "file": "samba",
+      "hp_best": {
+        "comp_mbs": 0.318,
+        "decomp_mbs": 133.915,
+        "method_byte": 128,
+        "roundtrip": true,
+        "size": 3727990
+      },
+      "hp_fast": {
+        "comp_mbs": 4.112,
+        "decomp_mbs": 139.743,
+        "method_byte": 128,
+        "roundtrip": true,
+        "size": 3787354
+      },
+      "opponents": {
+        "bz2-9": {
+          "comp_mbs": 23.677,
+          "size": 4549759
+        },
+        "xz-9e": {
+          "comp_mbs": 3.292,
+          "size": 3739524
+        },
+        "xz-raw-9e": {
+          "comp_mbs": 3.266,
+          "size": 3739464
+        },
+        "zlib-9": {
+          "comp_mbs": 31.645,
+          "size": 5402710
+        },
+        "zstd-19": {
+          "comp_mbs": 4.035,
+          "size": 3886776
+        }
+      },
+      "size": 21606400,
+      "violation": false
+    },
+    {
+      "best_stdlib_opponent": {
+        "name": "xz-raw-9e",
+        "size": 4425604
+      },
+      "corpus": "silesia",
+      "delta_vs_best": -11292,
+      "file": "sao",
+      "hp_best": {
+        "comp_mbs": 0.376,
+        "decomp_mbs": 38.567,
+        "method_byte": 232,
+        "roundtrip": true,
+        "size": 4414312
+      },
+      "hp_fast": {
+        "comp_mbs": 2.914,
+        "decomp_mbs": 39.046,
+        "method_byte": 232,
+        "roundtrip": true,
+        "size": 4415026
+      },
+      "opponents": {
+        "bz2-9": {
+          "comp_mbs": 18.522,
+          "size": 4940524
+        },
+        "xz-9e": {
+          "comp_mbs": 3.984,
+          "size": 4425664
+        },
+        "xz-raw-9e": {
+          "comp_mbs": 4.124,
+          "size": 4425604
+        },
+        "zlib-9": {
+          "comp_mbs": 21.179,
+          "size": 5325920
+        },
+        "zstd-19": {
+          "comp_mbs": 4.959,
+          "size": 5000512
+        }
+      },
+      "size": 7251944,
+      "violation": false
+    },
+    {
+      "best_stdlib_opponent": {
+        "name": "xz-raw-9e",
+        "size": 8368609
+      },
+      "corpus": "silesia",
+      "delta_vs_best": -9802,
+      "file": "webster",
+      "hp_best": {
+        "comp_mbs": 0.231,
+        "decomp_mbs": 118.933,
+        "method_byte": 143,
+        "roundtrip": true,
+        "size": 8358807
+      },
+      "hp_fast": {
+        "comp_mbs": 2.347,
+        "decomp_mbs": 120.687,
+        "method_byte": 143,
+        "roundtrip": true,
+        "size": 8628803
+      },
+      "opponents": {
+        "bz2-9": {
+          "comp_mbs": 19.787,
+          "size": 8644714
+        },
+        "xz-9e": {
+          "comp_mbs": 2.314,
+          "size": 8368672
+        },
+        "xz-raw-9e": {
+          "comp_mbs": 2.308,
+          "size": 8368609
+        },
+        "zlib-9": {
+          "comp_mbs": 23.612,
+          "size": 12073475
+        },
+        "zstd-19": {
+          "comp_mbs": 2.54,
+          "size": 8624124
+        }
+      },
+      "size": 41458703,
+      "violation": false
+    },
+    {
+      "best_stdlib_opponent": {
+        "name": "bz2-9",
+        "size": 4051112
+      },
+      "corpus": "silesia",
+      "delta_vs_best": 15,
+      "file": "x-ray",
+      "hp_best": {
+        "comp_mbs": 0.289,
+        "decomp_mbs": 35.727,
+        "method_byte": 128,
+        "roundtrip": true,
+        "size": 4051127
+      },
+      "hp_fast": {
+        "comp_mbs": 3.299,
+        "decomp_mbs": 35.725,
+        "method_byte": 128,
+        "roundtrip": true,
+        "size": 4051127
+      },
+      "opponents": {
+        "bz2-9": {
+          "comp_mbs": 24.025,
+          "size": 4051112
+        },
+        "xz-9e": {
+          "comp_mbs": 4.443,
+          "size": 4491264
+        },
+        "xz-raw-9e": {
+          "comp_mbs": 4.211,
+          "size": 4491203
+        },
+        "zlib-9": {
+          "comp_mbs": 38.365,
+          "size": 6045038
+        },
+        "zstd-19": {
+          "comp_mbs": 4.501,
+          "size": 5155749
+        }
+      },
+      "size": 8474240,
+      "violation": false
+    },
+    {
+      "best_stdlib_opponent": {
+        "name": "xz-raw-9e",
+        "size": 434830
+      },
+      "corpus": "silesia",
+      "delta_vs_best": -999,
+      "file": "xml",
+      "hp_best": {
+        "comp_mbs": 0.425,
+        "decomp_mbs": 268.824,
+        "method_byte": 128,
+        "roundtrip": true,
+        "size": 433831
+      },
+      "hp_fast": {
+        "comp_mbs": 4.994,
+        "decomp_mbs": 70.415,
+        "method_byte": 128,
+        "roundtrip": true,
+        "size": 441201
+      },
+      "opponents": {
+        "bz2-9": {
+          "comp_mbs": 15.968,
+          "size": 441186
+        },
+        "xz-9e": {
+          "comp_mbs": 4.919,
+          "size": 434892
+        },
+        "xz-raw-9e": {
+          "comp_mbs": 4.887,
+          "size": 434830
+        },
+        "zlib-9": {
+          "comp_mbs": 41.284,
+          "size": 658905
+        },
+        "zstd-19": {
+          "comp_mbs": 3.672,
+          "size": 454692
+        }
+      },
+      "size": 5345280,
+      "violation": false
+    }
+  ],
+  "header_max": 16,
+  "mode": "full",
+  "totals": {
+    "best_stdlib_opponent": {
+      "name": "per-file min",
+      "size": 48012629
+    },
+    "delta_vs_best": -533289,
+    "hp_best": {
+      "comp_mbs": 0.263,
+      "decomp_mbs": 80.619,
+      "size": 47479340
+    },
+    "hp_fast": {
+      "comp_mbs": 2.86,
+      "decomp_mbs": 78.71,
+      "size": 48773039
+    },
+    "opponents": {
+      "bz2-9": {
+        "size": 55049479
+      },
+      "xz-9e": {
+        "size": 48949084
+      },
+      "xz-raw-9e": {
+        "size": 48947713
+      },
+      "zlib-9": {
+        "size": 68371093
+      },
+      "zstd-19": {
+        "size": 53331547
+      }
+    },
+    "size": 214749364,
+    "sum_best_stdlib": 48012629
+  },
+  "violations": []
+}

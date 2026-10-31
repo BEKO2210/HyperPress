@@ -19,10 +19,12 @@ concurrency:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    # Python 3.8 builds are not published for ubuntu-24.04; keep it on 22.04.
+    runs-on: ${{ matrix.python-version == '3.8' && 'ubuntu-22.04' || 'ubuntu-latest' }}
     strategy:
+      fail-fast: false
       matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13", "3.14"]
 
     steps:
       - uses: actions/checkout@v4
@@ -31,6 +33,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+          allow-prereleases: true
 
       - name: Install dependencies
         run: |
@@ -40,6 +43,34 @@ jobs:
 
       - name: Run tests
         run: python -m pytest tests/ -v --tb=short
+
+  fair-benchmark:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.14 (stdlib compression.zstd)
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+          allow-prereleases: true
+
+      - name: Cache benchmark corpus
+        uses: actions/cache@v4
+        with:
+          path: benchmarks/.corpus
+          key: corpus-canterbury-${{ hashFiles('benchmarks/corpus.py') }}
+
+      - name: Fair benchmark (Canterbury, never worse than best stdlib opponent + 16 B)
+        run: python benchmarks/fair_bench.py --quick --check
+
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fair-bench-results
+          path: benchmarks/results.json
+          if-no-files-found: ignore
 
   publish-pypi:
     needs: test
@@ -90,30 +121,30 @@ jobs:
           if [ ! -f _site/index.html ]; then
             python -m pip install markdown
             python -c "
-import markdown
-with open('README.md', 'r') as f:
-    html = markdown.markdown(f.read(), extensions=['tables', 'fenced_code'])
-with open('_site/index.html', 'w') as f:
-    f.write(f'''<!DOCTYPE html>
-<html>
-<head>
-    <meta charset=\"UTF-8\">
-    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
-    <title>HyperPress</title>
-    <style>
-        body {{ font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.6; }}
-        pre {{ background: #f4f4f4; padding: 1rem; border-radius: 8px; overflow-x: auto; }}
-        code {{ background: #f4f4f4; padding: 0.2rem 0.4rem; border-radius: 4px; }}
-        h1, h2, h3 {{ color: #00f0ff; }}
-        table {{ border-collapse: collapse; width: 100%; margin: 1rem 0; }}
-        th, td {{ border: 1px solid #ddd; padding: 0.5rem; text-align: left; }}
-        th {{ background: #0a0a0f; color: #00f0ff; }}
-    </style>
-</head>
-<body>
-{html}
-</body>
-</html>''')
+          import markdown
+          with open('README.md', 'r') as f:
+              html = markdown.markdown(f.read(), extensions=['tables', 'fenced_code'])
+          with open('_site/index.html', 'w') as f:
+              f.write(f'''<!DOCTYPE html>
+          <html>
+          <head>
+              <meta charset=\"UTF-8\">
+              <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
+              <title>HyperPress</title>
+              <style>
+                  body {{ font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.6; }}
+                  pre {{ background: #f4f4f4; padding: 1rem; border-radius: 8px; overflow-x: auto; }}
+                  code {{ background: #f4f4f4; padding: 0.2rem 0.4rem; border-radius: 4px; }}
+                  h1, h2, h3 {{ color: #00f0ff; }}
+                  table {{ border-collapse: collapse; width: 100%; margin: 1rem 0; }}
+                  th, td {{ border: 1px solid #ddd; padding: 0.5rem; text-align: left; }}
+                  th {{ background: #0a0a0f; color: #00f0ff; }}
+              </style>
+          </head>
+          <body>
+          {html}
+          </body>
+          </html>''')"
             
           fi
 

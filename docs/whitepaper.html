@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Technical whitepaper on HyperPress adaptive meta-compression engine. Detailed analysis of preprocessing racing, block profiling, HPRX format, and benchmark results.">
+<meta name="description" content="Technical whitepaper on HyperPress, an adaptive meta-compressor over LZMA2, bzip2, zlib and zstd: design, HPRX v2 format, guarantees and limits.">
 <title>HyperPress — Technical Whitepaper</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -367,11 +367,11 @@ ul.bullets li::marker { color: var(--cyan); }
   <!-- Title -->
   <header class="paper-header reveal">
     <p class="paper-tag">Technical Whitepaper</p>
-    <h1 class="paper-title">HyperPress: Adaptive Meta-Compression<br>Through Preprocessing Racing</h1>
-    <p class="paper-subtitle">A per-block intelligence layer that outperforms static compressors by selecting optimal preprocessing transforms and compression backends for each data block independently.</p>
+    <h1 class="paper-title">HyperPress: An Adaptive<br>Meta-Compressor</h1>
+    <p class="paper-subtitle">A thin selection layer over established codecs (LZMA2, bzip2, zlib, zstd) with a checkable size guarantee &mdash; and an honest account of what it does not do.</p>
     <div class="paper-meta">
       <span>Belkis Aslani</span>
-      <span>Version 1.0</span>
+      <span>Version 2.0</span>
       <span>2025</span>
       <span>MIT License</span>
     </div>
@@ -384,13 +384,13 @@ ul.bullets li::marker { color: var(--cyan); }
       <li><a href="#abstract">Abstract</a></li>
       <li><a href="#motivation">Motivation &amp; Problem Statement</a></li>
       <li><a href="#architecture">System Architecture</a></li>
-      <li><a href="#block-analysis">Block Analysis Engine</a></li>
+      <li><a href="#block-analysis">Block Analysis (BLOCKS path)</a></li>
       <li><a href="#preprocessing">Preprocessing Transforms</a></li>
       <li><a href="#backends">Compression Backends</a></li>
-      <li><a href="#racing">Racing Algorithm</a></li>
+      <li><a href="#racing">Candidate Selection</a></li>
       <li><a href="#format">HPRX Binary Format</a></li>
-      <li><a href="#benchmarks">Benchmark Results</a></li>
-      <li><a href="#complexity">Complexity Analysis</a></li>
+      <li><a href="#benchmarks">Benchmarks</a></li>
+      <li><a href="#complexity">Complexity &amp; Limits</a></li>
       <li><a href="#conclusions">Conclusions</a></li>
     </ol>
   </nav>
@@ -400,22 +400,10 @@ ul.bullets li::marker { color: var(--cyan); }
     <span class="sec-num">Section 01</span>
     <h2>Abstract</h2>
     <div class="highlight-box">
-      <strong>HyperPress</strong> is an adaptive meta-compression engine that achieves <strong>92.3% average compression (netto)</strong> across 8 diverse datasets, outperforming zlib-9 (84.9%) by 49% in size reduction and LZMA-RAW (89.9%) by 23%. Rather than implementing a novel compression algorithm, HyperPress introduces an intelligence layer that profiles each data block, races 7 preprocessing transforms against 5 compression backends, and selects the per-block winner based on empirical output size. The result is a self-contained HPRX binary format with CRC32 integrity verification.
+      <strong>HyperPress</strong> is an adaptive meta-compressor. It is not a new compression algorithm: it runs several established codec configurations on the input, one after another, and keeps the smallest result. Version 2 guarantees <code>len(compress(d)) &le; min(xz-raw-9e, bz2-9, zstd-19*) + 16</code> bytes for every input (<code>*</code> only when the standard library provides zstd, Python 3.14+). On real data it is often slightly smaller than the best single codec thanks to delta and x86 filters, LZMA <code>lc/lp/pb</code> tuning and a block path for sensor-like data; on other data it merely ties.
     </div>
-    <p>Key results across 8 benchmark datasets ranging from natural language text to sensor telemetry:</p>
-    <div class="compare-grid">
-      <div class="compare-card">
-        <div class="cc-label">zlib-9</div>
-        <div class="cc-value">84.9<span class="cc-suffix">%</span></div>
-      </div>
-      <div class="compare-card">
-        <div class="cc-label">LZMA-RAW</div>
-        <div class="cc-value">89.9<span class="cc-suffix">%</span></div>
-      </div>
-      <div class="compare-card winner">
-        <div class="cc-label">HyperPress (netto)</div>
-        <div class="cc-value">92.3<span class="cc-suffix">%</span></div>
-      </div>
+    <div class="highlight-box">
+      <strong>Correction of v1 claims.</strong> An independent audit found the v1 marketing figures (&ldquo;92.3% / +23% vs LZMA&rdquo;) invalid: they were measured on self-generated repetitive data, subtracted the container header (&ldquo;netto&rdquo;), counted ties as wins, did not run LZMA at its strongest setting, and on real files v1 was about 20% <em>worse</em> than plain <code>xz -9e</code>. The claim that candidates are tried in parallel was also false; they are tried sequentially. This document replaces those claims. <strong>No compressor wins on all data.</strong>
     </div>
   </section>
 
@@ -433,7 +421,7 @@ ul.bullets li::marker { color: var(--cyan); }
       <li>High-entropy regions that are incompressible</li>
     </ul>
     <div class="highlight-box">
-      <strong>Core insight:</strong> Instead of choosing one algorithm, let multiple algorithms race on preprocessed variants of each block and keep the smallest output. The meta-compression overhead (14 bytes per block header) is negligible compared to the gains from per-block optimization.
+      <strong>Core idea:</strong> instead of betting on one codec, try several and keep the smallest output. Because the plain xz-9e, bz2-9 (and zstd-19) results are always among the candidates, the output can only exceed the best of them by the container header (at most 16 bytes). Whether any candidate wins by a meaningful margin depends entirely on the data.
     </div>
   </section>
 
@@ -441,7 +429,7 @@ ul.bullets li::marker { color: var(--cyan); }
   <section id="architecture" class="reveal">
     <span class="sec-num">Section 03</span>
     <h2>System Architecture</h2>
-    <p>HyperPress operates as a 5-stage pipeline, processing data in variable-sized blocks:</p>
+    <p>HyperPress v2 builds two kinds of candidates and keeps the smallest. All candidates are tried <strong>sequentially</strong>; there is no parallelism.</p>
 
     <div class="diagram">
       <div class="diagram-title">Figure 1 &mdash; Processing Pipeline</div>
@@ -454,45 +442,16 @@ ul.bullets li::marker { color: var(--cyan); }
 
         <div class="flow-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg></div>
 
-        <div class="flow-node">
-          <div class="flow-node-title">Block Splitter</div>
-          <div class="flow-node-desc">Entropy-guided variable block sizing</div>
-          <div class="flow-node-detail">4 KB &ndash; 128 KB per block</div>
-        </div>
-
-        <div class="flow-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg></div>
-
-        <div class="flow-node">
-          <div class="flow-node-title">Block Profiler</div>
-          <div class="flow-node-desc">Computes 6 features per block</div>
-          <div class="flow-node-detail">entropy &bull; delta-ent &bull; null-ratio &bull; text &bull; struct &bull; uniq</div>
-        </div>
-
-        <div class="flow-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg></div>
-
-        <!-- Branching: preprocessing -->
-        <div class="flow-branch">
-          <div class="flow-node accent-magenta">
-            <div class="flow-node-title">Preprocessing A</div>
-            <div class="flow-node-desc">Delta, Delta-16, RLE, Transpose, Nibble-Split</div>
-          </div>
-          <div class="flow-node accent-magenta">
-            <div class="flow-node-title">Preprocessing B</div>
-            <div class="flow-node-desc">BWT+MTF, Identity (no-op)</div>
-          </div>
-        </div>
-
-        <div class="flow-arrow" style="margin-top:-4px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg></div>
-
-        <!-- Branching: backends -->
         <div class="flow-branch">
           <div class="flow-node accent-yellow">
-            <div class="flow-node-title">Backend Group 1</div>
-            <div class="flow-node-desc">zlib-9, LZMA-extreme</div>
+            <div class="flow-node-title">WHOLE candidates</div>
+            <div class="flow-node-desc">Stored, xz-raw LZMA2 9e, bz2-9, zstd-19*, zlib-9</div>
+            <div class="flow-node-detail">DELTA 1/2/4, x86 BCJ, lc/lp/pb variants</div>
           </div>
-          <div class="flow-node accent-yellow">
-            <div class="flow-node-title">Backend Group 2</div>
-            <div class="flow-node-desc">bz2-9, zlib+LZMA chain, Stored</div>
+          <div class="flow-node accent-magenta">
+            <div class="flow-node-title">BLOCKS candidate</div>
+            <div class="flow-node-desc">Block split &rarr; profiler &rarr; preprocessors &times; backends</div>
+            <div class="flow-node-detail">Per-block smallest wins</div>
           </div>
         </div>
 
@@ -500,16 +459,16 @@ ul.bullets li::marker { color: var(--cyan); }
 
         <div class="flow-node accent-green">
           <div class="flow-node-title">Winner Selection</div>
-          <div class="flow-node-desc">Smallest output wins &bull; CRC32 integrity verification</div>
+          <div class="flow-node-desc">Smallest stream wins &bull; whole-file CRC32</div>
           <div class="flow-node-detail">min(output_size) across all candidates</div>
         </div>
 
         <div class="flow-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg></div>
 
         <div class="flow-node accent-cyan">
-          <div class="flow-node-title">HPRX Output</div>
+          <div class="flow-node-title">HPRX v2 Output</div>
           <div class="flow-node-desc">Self-contained compressed stream</div>
-          <div class="flow-node-detail">16 B header + 14 B per block + data</div>
+          <div class="flow-node-detail">Small header + payload</div>
         </div>
 
       </div>
@@ -517,19 +476,18 @@ ul.bullets li::marker { color: var(--cyan); }
 
     <h3>Stage Details</h3>
     <ol class="steps">
-      <li><strong>Block Splitting:</strong> Input data is divided into blocks of 4 KB to 128 KB. Block boundaries are guided by entropy variance to avoid splitting homogeneous regions.</li>
-      <li><strong>Block Profiling:</strong> Each block is analyzed for 6 features: Shannon entropy, delta-entropy, null-ratio, text-ratio, structure-score, and unique-byte-count.</li>
-      <li><strong>Preprocessing:</strong> Based on the profile, 3 to 7 candidate transforms are selected and applied to the block data.</li>
-      <li><strong>Backend Racing:</strong> Each preprocessed variant is compressed through up to 5 backends. The smallest output wins.</li>
-      <li><strong>Output Assembly:</strong> Winning blocks are serialized into the HPRX format with per-block CRC32 checksums.</li>
+      <li><strong>WHOLE candidates:</strong> the full input is compressed by each whole-stream method (see the method table in <code>docs/SPEC-v2.md</code>). Filter parameters are implied by the method id.</li>
+      <li><strong>BLOCKS candidate:</strong> the block engine splits the input, profiles each block, tries preprocessor/backend combinations per block and keeps the smallest per block. It is one candidate among the others and is kept only if the whole stream is smaller.</li>
+      <li><strong>Selection:</strong> the smallest total stream wins. <code>level="fast"</code> tries only zlib-9, bz2-9, xz preset 6 and zstd-3 (if available), with no block path.</li>
+      <li><strong>Output:</strong> HPRX v2 header with whole-file CRC32, then the payload.</li>
     </ol>
   </section>
 
   <!-- 4. Block Analysis -->
   <section id="block-analysis" class="reveal">
     <span class="sec-num">Section 04</span>
-    <h2>Block Analysis Engine</h2>
-    <p>Each block is profiled using 6 numerical features that guide preprocessing selection:</p>
+    <h2>Block Analysis (BLOCKS path)</h2>
+    <p>In the BLOCKS candidate, each block is profiled using 6 numerical features that guide preprocessing selection:</p>
 
     <div class="feature-grid">
       <div class="feature-card">
@@ -579,7 +537,7 @@ ul.bullets li::marker { color: var(--cyan); }
   <section id="preprocessing" class="reveal">
     <span class="sec-num">Section 05</span>
     <h2>Preprocessing Transforms</h2>
-    <p>HyperPress implements 7 preprocessing transforms. Each is invertible and operates in O(n) time:</p>
+    <p>The BLOCKS path implements 7 preprocessing transforms. Each is invertible and operates in O(n) time unless noted. They help only on data with the matching structure; on other data the plain codec usually wins. (The WHOLE path additionally uses the xz DELTA and x86 BCJ filters.)</p>
 
     <div class="table-wrap">
       <table class="data-table">
@@ -682,7 +640,7 @@ ul.bullets li::marker { color: var(--cyan); }
   <section id="backends" class="reveal">
     <span class="sec-num">Section 06</span>
     <h2>Compression Backends</h2>
-    <p>After preprocessing, each variant is compressed through up to 5 backends:</p>
+    <p>In the BLOCKS path, each preprocessed variant is compressed through up to 5 backends (the WHOLE path uses the codecs listed in <code>docs/SPEC-v2.md</code>):</p>
 
     <div class="table-wrap">
       <table class="data-table">
@@ -701,7 +659,7 @@ ul.bullets li::marker { color: var(--cyan); }
     </div>
 
     <h3>Chain Compression: zlib + LZMA</h3>
-    <p>The chain backend first compresses with zlib-9, then compresses the zlib output with LZMA. This two-pass approach can extract additional redundancy that neither backend finds alone &mdash; the DEFLATE pass reorganizes data in ways that benefit LZMA's dictionary matching.</p>
+    <p>The two-pass approach can occasionally extract additional redundancy, but it is not generally better than plain LZMA; it is tried and kept only when it produces the smaller output.</p>
 
     <div class="diagram">
       <div class="diagram-title">Figure 3 &mdash; Chain Compression Flow</div>
@@ -732,8 +690,8 @@ ul.bullets li::marker { color: var(--cyan); }
   <!-- 7. Racing Algorithm -->
   <section id="racing" class="reveal">
     <span class="sec-num">Section 07</span>
-    <h2>Racing Algorithm</h2>
-    <p>The racing engine is the core innovation. For each block, it generates candidate combinations of (preprocessing, backend) and empirically selects the smallest output:</p>
+    <h2>Candidate Selection</h2>
+    <p>Candidates are evaluated <strong>sequentially</strong> (not in parallel) and the smallest output is kept. In the BLOCKS path this happens per block:</p>
 
     <pre><span class="kw">def</span> <span class="fn">race_block</span>(block, profile):
     <span class="cm"># Generate candidates based on block profile</span>
@@ -761,35 +719,40 @@ ul.bullets li::marker { color: var(--cyan); }
       <li><strong>High structure-score:</strong> Transpose is prioritized</li>
       <li><strong>High entropy (&gt;7.5):</strong> Only Identity + Stored is tried (incompressible)</li>
     </ul>
-    <p>Typically 3 to 15 candidates are evaluated per block, keeping compression time practical.</p>
+    <p>Typically 3 to 15 candidates are evaluated per block. At the top level, <code>compress(level="best")</code> additionally runs every WHOLE method and keeps the overall smallest stream, which is what yields the guarantee in the abstract.</p>
   </section>
 
   <!-- 8. Format -->
   <section id="format" class="reveal">
     <span class="sec-num">Section 08</span>
     <h2>HPRX Binary Format</h2>
-    <p>The HPRX format is a self-contained binary stream with a 16-byte global header followed by per-block headers and data:</p>
+    <p>The HPRX v2 format is a self-contained binary stream. Fixed fields are small; sizes are LEB128 varints:</p>
 
-    <h3>Global Header (16 bytes)</h3>
+    <h3>Header (WHOLE and BLOCKS)</h3>
     <div class="format-box">
-      <div class="fmt-field"><div class="ff-name">MAGIC</div><div class="ff-size">4 bytes</div></div>
-      <div class="fmt-field"><div class="ff-name">VERSION</div><div class="ff-size">1 byte</div></div>
-      <div class="fmt-field"><div class="ff-name">FLAGS</div><div class="ff-size">1 byte</div></div>
-      <div class="fmt-field"><div class="ff-name">BLOCK_CNT</div><div class="ff-size">2 bytes</div></div>
-      <div class="fmt-field"><div class="ff-name">ORIG_SIZE</div><div class="ff-size">8 bytes</div></div>
+      <div class="fmt-field"><div class="ff-name">MAGIC "HPRX"</div><div class="ff-size">4 bytes</div></div>
+      <div class="fmt-field"><div class="ff-name">VERSION (2)</div><div class="ff-size">1 byte</div></div>
+      <div class="fmt-field"><div class="ff-name">MODE (0/1)</div><div class="ff-size">1 byte</div></div>
+      <div class="fmt-field"><div class="ff-name">ORIG_SIZE</div><div class="ff-size">varint</div></div>
+      <div class="fmt-field"><div class="ff-name">CRC32 (LE)</div><div class="ff-size">4 bytes</div></div>
     </div>
 
-    <h3>Per-Block Header (14 bytes)</h3>
+    <h3>Mode 0 &mdash; WHOLE</h3>
     <div class="format-box">
-      <div class="fmt-field"><div class="ff-name">PREPROC</div><div class="ff-size">1 byte</div></div>
-      <div class="fmt-field"><div class="ff-name">BACKEND</div><div class="ff-size">1 byte</div></div>
-      <div class="fmt-field"><div class="ff-name">ORIG_LEN</div><div class="ff-size">4 bytes</div></div>
-      <div class="fmt-field"><div class="ff-name">COMP_LEN</div><div class="ff-size">4 bytes</div></div>
-      <div class="fmt-field"><div class="ff-name">CRC32</div><div class="ff-size">4 bytes</div></div>
+      <div class="fmt-field"><div class="ff-name">METHOD</div><div class="ff-size">1 byte</div></div>
+      <div class="fmt-field"><div class="ff-name">PAYLOAD</div><div class="ff-size">rest</div></div>
+    </div>
+
+    <h3>Mode 1 &mdash; BLOCKS</h3>
+    <div class="format-box">
+      <div class="fmt-field"><div class="ff-name">NBLOCKS</div><div class="ff-size">varint</div></div>
+      <div class="fmt-field"><div class="ff-name">per block: ORIG_LEN, COMP_LEN</div><div class="ff-size">varints</div></div>
+      <div class="fmt-field"><div class="ff-name">PREPROC, BACKEND</div><div class="ff-size">1 byte each</div></div>
+      <div class="fmt-field"><div class="ff-name">PAYLOAD</div><div class="ff-size">COMP_LEN</div></div>
     </div>
 
     <div class="highlight-box">
-      <strong>Overhead analysis:</strong> For a 1 MB file split into 16 blocks of 64 KB each, the total overhead is 16 + (16 &times; 14) = 240 bytes &mdash; just 0.023% of the original data. This negligible overhead is the price paid for per-block optimization that saves kilobytes or megabytes.
+      <strong>Overhead:</strong> the fixed overhead of the container is a few bytes (the guarantee allows at most 16 bytes over the best single codec). v1 streams (<code>HPRX</code>, version 1) remain decodable.
     </div>
 
     <h3>Decompression Flow</h3>
@@ -798,27 +761,27 @@ ul.bullets li::marker { color: var(--cyan); }
       <div class="flow">
         <div class="flow-node accent-cyan" style="max-width:380px">
           <div class="flow-node-title">Read HPRX Stream</div>
-          <div class="flow-node-desc">Validate MAGIC = "HPRX", VERSION = 1</div>
+          <div class="flow-node-desc">Validate MAGIC = "HPRX", VERSION = 1 or 2</div>
         </div>
         <div class="flow-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg></div>
         <div class="flow-node" style="max-width:380px">
-          <div class="flow-node-title">Read Block Header</div>
-          <div class="flow-node-desc">14 bytes: preproc ID, backend ID, sizes, CRC32</div>
+          <div class="flow-node-title">Check Declared Size</div>
+          <div class="flow-node-desc">Reject sizes above <code>max_output_size</code> (default 1 GiB)</div>
         </div>
         <div class="flow-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg></div>
         <div class="flow-node accent-yellow" style="max-width:380px">
-          <div class="flow-node-title">Decompress Backend</div>
-          <div class="flow-node-desc">Dispatch to zlib/LZMA/bz2/chain based on stored ID</div>
+          <div class="flow-node-title">Decode with Hard Cap</div>
+          <div class="flow-node-desc">Streaming LZMA/zlib/bz2 decode, capped at the declared limit</div>
         </div>
         <div class="flow-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg></div>
         <div class="flow-node accent-magenta" style="max-width:380px">
           <div class="flow-node-title">Inverse Preprocessing</div>
-          <div class="flow-node-desc">Apply reverse transform (delta_dec, bwt_dec, etc.)</div>
+          <div class="flow-node-desc">BLOCKS mode only: reverse the per-block transform</div>
         </div>
         <div class="flow-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg></div>
         <div class="flow-node accent-green" style="max-width:380px">
           <div class="flow-node-title">Verify &amp; Output</div>
-          <div class="flow-node-desc">CRC32 check &rarr; concatenate restored blocks</div>
+          <div class="flow-node-desc">Size and CRC32 check; any failure raises <code>HyperPressError</code></div>
         </div>
       </div>
     </div>
@@ -827,49 +790,49 @@ ul.bullets li::marker { color: var(--cyan); }
   <!-- 9. Benchmarks -->
   <section id="benchmarks" class="reveal">
     <span class="sec-num">Section 09</span>
-    <h2>Benchmark Results</h2>
-    <p>All benchmarks measured on the same 8 datasets. Compression ratio = <code>(1 - compressed/original) &times; 100%</code>. Higher is better.</p>
+    <h2>Benchmarks</h2>
+    <p>Numbers are produced by <code>benchmarks/fair_bench.py</code> on real files, comparing the <strong>full HPRX container size</strong> (no header subtraction) with <code>xz -9e</code>, bz2-9 and, where available, zstd-19. Ties are reported as ties. Compression ratio = <code>(1 - compressed/original) &times; 100%</code>.</p>
 
-    <div class="table-wrap">
-      <table class="data-table">
-        <caption style="caption-side:top;text-align:left;font-size:0.78rem;color:var(--text-dim);margin-bottom:8px;">Table 1 &mdash; Per-dataset compression results (lower compressed size = better)</caption>
-        <thead>
-          <tr><th scope="col">Dataset</th><th scope="col" class="num-col">Original</th><th scope="col" class="num-col">zlib-9</th><th scope="col" class="num-col">LZMA-RAW</th><th scope="col" class="num-col">HyperPress (netto)</th><th scope="col">Winner</th></tr>
-        </thead>
-        <tbody>
-          <tr><td>English Text</td><td class="num-col">21,930 B</td><td class="num-col">193 B (99.1%)</td><td class="num-col">181 B (99.2%)</td><td class="num-col best">181 B (99.2%)</td><td class="best">HPRX</td></tr>
-          <tr><td>German Text</td><td class="num-col">31,300 B</td><td class="num-col">272 B (99.1%)</td><td class="num-col">226 B (99.3%)</td><td class="num-col best">226 B (99.3%)</td><td class="best">HPRX</td></tr>
-          <tr><td>JSON Data</td><td class="num-col">33,582 B</td><td class="num-col">3,491 B (89.6%)</td><td class="num-col best">1,705 B (94.9%)</td><td class="num-col">1,929 B (94.3%)</td><td class="best">LZMA-RAW</td></tr>
-          <tr><td>Sensor Data</td><td class="num-col">30,000 B</td><td class="num-col">21,990 B (26.7%)</td><td class="num-col">17,087 B (43.0%)</td><td class="num-col best">11,118 B (62.9%)</td><td class="best">HPRX</td></tr>
-          <tr><td>Sparse Binary</td><td class="num-col">25,000 B</td><td class="num-col">1,195 B (95.2%)</td><td class="num-col">973 B (96.1%)</td><td class="num-col best">728 B (97.1%)</td><td class="best">HPRX</td></tr>
-          <tr><td>Log File</td><td class="num-col">77,532 B</td><td class="num-col">10,495 B (86.5%)</td><td class="num-col best">4,889 B (93.7%)</td><td class="num-col">5,079 B (93.4%)</td><td class="best">LZMA-RAW</td></tr>
-          <tr><td>Pattern+Noise</td><td class="num-col">24,000 B</td><td class="num-col">184 B (99.2%)</td><td class="num-col">110 B (99.5%)</td><td class="num-col best">80 B (99.7%)</td><td class="best">HPRX</td></tr>
-          <tr><td>Source Code</td><td class="num-col">7,680 B</td><td class="num-col">104 B (98.6%)</td><td class="num-col">102 B (98.7%)</td><td class="num-col best">102 B (98.7%)</td><td class="best">HPRX</td></tr>
-        </tbody>
-      </table>
-    </div>
+    <!-- BENCH:START -->
+<table class="data-table">
+<thead><tr><th>File</th><th>Original</th><th>HyperPress</th><th>Best stdlib opponent</th><th>vs best</th><th>vs xz -9e</th></tr></thead><tbody>
+<tr><td>canterbury/alice29.txt</td><td>152,089</td><td>43,216</td><td>bz2-9 43,202</td><td>+0.03&nbsp;%</td><td>-10.9&nbsp;%</td></tr>
+<tr><td>canterbury/asyoulik.txt</td><td>125,179</td><td>39,583</td><td>bz2-9 39,569</td><td>+0.04&nbsp;%</td><td>-11.2&nbsp;%</td></tr>
+<tr><td>canterbury/cp.html</td><td>24,603</td><td>7,602</td><td>xz-raw-9e 7,596</td><td>+0.08&nbsp;%</td><td>-0.7&nbsp;%</td></tr>
+<tr><td>canterbury/fields.c</td><td>11,150</td><td>2,956</td><td>xz-raw-9e 2,973</td><td>-0.57&nbsp;%</td><td>-2.5&nbsp;%</td></tr>
+<tr><td>canterbury/grammar.lsp</td><td>3,721</td><td>1,222</td><td>zlib-9 1,222</td><td>+0.00&nbsp;%</td><td>-5.4&nbsp;%</td></tr>
+<tr><td>canterbury/kennedy.xls</td><td>1,029,744</td><td>47,973</td><td>xz-raw-9e 51,811</td><td>-7.41&nbsp;%</td><td>-7.5&nbsp;%</td></tr>
+<tr><td>canterbury/lcet10.txt</td><td>426,754</td><td>107,720</td><td>bz2-9 107,706</td><td>+0.01&nbsp;%</td><td>-9.8&nbsp;%</td></tr>
+<tr><td>canterbury/plrabn12.txt</td><td>481,861</td><td>145,591</td><td>bz2-9 145,577</td><td>+0.01&nbsp;%</td><td>-12.0&nbsp;%</td></tr>
+<tr><td>canterbury/ptt5</td><td>513,216</td><td>39,012</td><td>xz-raw-9e 39,801</td><td>-1.98&nbsp;%</td><td>-2.1&nbsp;%</td></tr>
+<tr><td>canterbury/sum</td><td>38,240</td><td>9,409</td><td>xz-raw-9e 9,443</td><td>-0.36&nbsp;%</td><td>-1.0&nbsp;%</td></tr>
+<tr><td>canterbury/xargs.1</td><td>4,227</td><td>1,738</td><td>zlib-9 1,736</td><td>+0.12&nbsp;%</td><td>-4.1&nbsp;%</td></tr>
+<tr><td>silesia/dickens</td><td>10,192,446</td><td>2,799,535</td><td>bz2-9 2,799,520</td><td>+0.00&nbsp;%</td><td>-1.1&nbsp;%</td></tr>
+<tr><td>silesia/mozilla</td><td>51,220,480</td><td>13,232,814</td><td>xz-raw-9e 13,376,180</td><td>-1.07&nbsp;%</td><td>-1.1&nbsp;%</td></tr>
+<tr><td>silesia/mr</td><td>9,970,564</td><td>2,441,295</td><td>bz2-9 2,441,280</td><td>+0.00&nbsp;%</td><td>-11.3&nbsp;%</td></tr>
+<tr><td>silesia/nci</td><td>33,553,445</td><td>1,440,074</td><td>xz-raw-9e 1,449,209</td><td>-0.63&nbsp;%</td><td>-0.6&nbsp;%</td></tr>
+<tr><td>silesia/ooffice</td><td>6,152,192</td><td>2,084,481</td><td>xz-raw-9e 2,427,163</td><td>-14.12&nbsp;%</td><td>-14.1&nbsp;%</td></tr>
+<tr><td>silesia/osdb</td><td>10,085,684</td><td>2,802,807</td><td>bz2-9 2,802,792</td><td>+0.00&nbsp;%</td><td>-1.5&nbsp;%</td></tr>
+<tr><td>silesia/reymont</td><td>6,627,202</td><td>1,246,245</td><td>bz2-9 1,246,230</td><td>+0.00&nbsp;%</td><td>-5.3&nbsp;%</td></tr>
+<tr><td>silesia/samba</td><td>21,606,400</td><td>3,727,990</td><td>xz-raw-9e 3,739,464</td><td>-0.31&nbsp;%</td><td>-0.3&nbsp;%</td></tr>
+<tr><td>silesia/sao</td><td>7,251,944</td><td>4,414,312</td><td>xz-raw-9e 4,425,604</td><td>-0.26&nbsp;%</td><td>-0.3&nbsp;%</td></tr>
+<tr><td>silesia/webster</td><td>41,458,703</td><td>8,358,807</td><td>xz-raw-9e 8,368,609</td><td>-0.12&nbsp;%</td><td>-0.1&nbsp;%</td></tr>
+<tr><td>silesia/x-ray</td><td>8,474,240</td><td>4,051,127</td><td>bz2-9 4,051,112</td><td>+0.00&nbsp;%</td><td>-9.8&nbsp;%</td></tr>
+<tr><td>silesia/xml</td><td>5,345,280</td><td>433,831</td><td>xz-raw-9e 434,830</td><td>-0.23&nbsp;%</td><td>-0.2&nbsp;%</td></tr>
+<tr><td><strong>Total (23 files)</strong></td><td>214,749,364</td><td><strong>47,479,340</strong></td><td>48,012,629</td><td><strong>-1.11&nbsp;%</strong></td><td><strong>-3.00&nbsp;%</strong></td></tr>
+</tbody></table>
+<p>Header included. Compression speed: best 0.26 MB/s, fast 2.86 MB/s. Total vs zstd -19 --long=27: -10.97&nbsp;%. Python 3.12.3. Reproduce with <code>python benchmarks/fair_bench.py</code>.</p>
+<!-- BENCH:END -->
 
-    <h3>Visual Comparison: Average Compression Ratio</h3>
-    <div class="diagram">
-      <div class="diagram-title">Figure 5 &mdash; Average Compression Across All Datasets</div>
-      <div class="bar-chart" id="benchChart">
-        <div class="bar-row"><span class="bar-label">zlib-9</span><div class="bar-track"><div class="bar-fill dim" data-width="84.9%">84.9%</div></div></div>
-        <div class="bar-row"><span class="bar-label">bz2-9</span><div class="bar-track"><div class="bar-fill magenta" data-width="86.2%">86.2%</div></div></div>
-        <div class="bar-row"><span class="bar-label">LZMA-RAW</span><div class="bar-track"><div class="bar-fill yellow" data-width="89.9%">89.9%</div></div></div>
-        <div class="bar-row"><span class="bar-label">HyperPress (netto)</span><div class="bar-track"><div class="bar-fill cyan" data-width="92.3%">92.3%</div></div></div>
-      </div>
-    </div>
-
-    <h3>Per-Dataset Win Analysis</h3>
     <div class="highlight-box">
-      Out of 8 datasets, <strong>HyperPress (netto) achieves the best compression on 6</strong> (English Text, German Text, Sensor Data, Sparse Binary, Pattern+Noise, Source Code). On the remaining 2, it places within 4&ndash;13% of the best individual compressor. Critically, on Sensor Data, HyperPress achieves <strong>62.9% compression</strong> where zlib-9 manages only 26.7% &mdash; a 2.36&times; improvement &mdash; thanks to Delta preprocessing exposing sequential correlation that DEFLATE cannot exploit alone.
+      <strong>What to expect:</strong> the size guarantee holds for every input. Beyond it, gains over the best single codec are data-dependent: typically small on text and generic data, larger where a filter fits (delta for sensor-like data, x86 BCJ for executables). No compressor wins on all data.
     </div>
   </section>
 
   <!-- 10. Complexity -->
   <section id="complexity" class="reveal">
     <span class="sec-num">Section 10</span>
-    <h2>Complexity Analysis</h2>
+    <h2>Complexity &amp; Limits</h2>
 
     <h3>Time Complexity</h3>
     <div class="table-wrap">
@@ -877,58 +840,52 @@ ul.bullets li::marker { color: var(--cyan); }
         <caption style="caption-side:top;text-align:left;font-size:0.78rem;color:var(--text-dim);margin-bottom:8px;">Table 4 &mdash; Time complexity per stage</caption>
         <thead><tr><th scope="col">Stage</th><th scope="col">Complexity</th><th scope="col">Notes</th></tr></thead>
         <tbody>
-          <tr><td>Block Splitting</td><td class="num-col">O(n)</td><td>Single pass through input data</td></tr>
-          <tr><td>Block Profiling</td><td class="num-col">O(n)</td><td>Histogram + entropy calculation per block</td></tr>
+          <tr><td>Block Splitting / Profiling</td><td class="num-col">O(n)</td><td>BLOCKS path only</td></tr>
           <tr><td>Preprocessing</td><td class="num-col">O(n log n)</td><td>BWT is O(n log n); all others O(n)</td></tr>
-          <tr><td>Backend Compression</td><td class="num-col">O(n)</td><td>DEFLATE, LZMA, bz2 are all O(n) amortized</td></tr>
-          <tr><td>Racing Selection</td><td class="num-col">O(c)</td><td>c = number of candidates (3&ndash;15 per block)</td></tr>
+          <tr><td>Backend Compression</td><td class="num-col">O(n)</td><td>Each codec pass, run once per candidate</td></tr>
+          <tr><td>Candidate Selection</td><td class="num-col">O(c)</td><td>c = number of candidates, tried sequentially</td></tr>
         </tbody>
       </table>
     </div>
 
     <div class="equation">
-      T(n) = O(n log n &middot; c) &nbsp;&nbsp; where c = avg candidates per block
+      T(n) = O(n log n &middot; c) &nbsp;&nbsp; where c = number of candidates
       <div class="label">Equation 5 &mdash; Overall time complexity</div>
     </div>
 
     <h3>Space Complexity</h3>
-    <p>Peak memory usage is bounded by the largest block size (128 KB) multiplied by the number of concurrent candidates. In practice, candidates are processed sequentially, so peak memory is O(block_size) = O(128 KB).</p>
+    <p>Candidates are compressed in memory and run one after another, so memory grows with input size (the whole input plus the best result so far plus one candidate output). Decompression never allocates more than <code>max_output_size</code> plus a small constant.</p>
 
-    <h3>Overhead vs. Gains</h3>
-    <div class="diagram">
-      <div class="diagram-title">Figure 6 &mdash; Format Overhead vs. Compression Gain</div>
-      <div class="bar-chart" id="overheadChart">
-        <div class="bar-row"><span class="bar-label">Header</span><div class="bar-track"><div class="bar-fill magenta" data-width="4%" style="min-width:50px;">16 B</div></div></div>
-        <div class="bar-row"><span class="bar-label">Block Hdrs</span><div class="bar-track"><div class="bar-fill yellow" data-width="8%" style="min-width:60px;">~224 B</div></div></div>
-        <div class="bar-row"><span class="bar-label">Saved</span><div class="bar-track"><div class="bar-fill cyan" data-width="92%">92.3%</div></div></div>
-      </div>
-    </div>
+    <h3>Limits</h3>
+    <ul class="bullets">
+      <li>Slower than any single codec: <code>level="best"</code> tries every candidate sequentially. Use <code>level="fast"</code> for at most 4 candidates.</li>
+      <li>On data where one plain codec is already best, HyperPress ties it and adds a few header bytes.</li>
+      <li>Random or already-compressed data is stored essentially as-is.</li>
+      <li>zstd candidates exist only on Python 3.14+; such streams cannot be decoded on older Pythons (<code>HyperPressError</code>).</li>
+    </ul>
   </section>
 
   <!-- 11. Conclusions -->
   <section id="conclusions" class="reveal">
     <span class="sec-num">Section 11</span>
     <h2>Conclusions</h2>
-    <p>HyperPress demonstrates that meta-compression &mdash; the strategy of racing multiple preprocessing transforms and compression backends per data block &mdash; consistently outperforms any single static compressor across heterogeneous workloads.</p>
+    <p>HyperPress is a meta-compressor: a selection layer over established codecs. Its value is a checkable guarantee &mdash; never meaningfully worse than the best of xz-9e, bz2-9 and zstd-19 &mdash; plus occasional gains where a filter or parameter tuning fits the data. It is not a new algorithm and does not beat state-of-the-art codecs across the board.</p>
 
     <div class="highlight-box">
-      <strong>Key findings:</strong>
+      <strong>Key points:</strong>
       <ul class="bullets" style="margin-top:8px;">
-        <li>92.3% average compression ratio (netto) across 8 diverse datasets</li>
-        <li>49% better size reduction than zlib-9, 23% better than LZMA-RAW</li>
-        <li>Per-block optimization adds only 14 bytes overhead per block</li>
-        <li>Delta preprocessing yields 2.35&times; improvement on sensor data</li>
+        <li>Size bound: <code>len(compress(d)) &le; min(xz-raw-9e, bz2-9, zstd-19*) + 16</code></li>
+        <li>Candidates are tried sequentially; there is no parallel racing</li>
+        <li>Hardened decoder: only <code>HyperPressError</code> on bad input, <code>max_output_size</code> bomb guard, whole-file CRC32</li>
         <li>Zero external dependencies &mdash; Python 3.8+ stdlib only</li>
-        <li>Self-contained HPRX format with CRC32 integrity per block</li>
       </ul>
     </div>
 
     <h3>Future Work</h3>
     <ul class="bullets">
-      <li><strong>Parallel racing:</strong> Multiprocessing to compress candidate blocks concurrently</li>
-      <li><strong>ML-guided selection:</strong> Train a small model on block profiles to predict optimal (preproc, backend) without full racing</li>
-      <li><strong>Streaming mode:</strong> Enable compression of unbounded streams with adaptive block sizing</li>
-      <li><strong>Additional transforms:</strong> Wavelet preprocessing for audio/image data, dictionary coding for repeated structures</li>
+      <li><strong>Parallel candidate evaluation:</strong> not implemented; would reduce wall-clock time</li>
+      <li><strong>Cheaper candidate pruning:</strong> skip candidates that are unlikely to win</li>
+      <li><strong>Streaming mode:</strong> compression of unbounded streams</li>
     </ul>
 
     <h3>Getting Started</h3>
