@@ -599,6 +599,10 @@ class _PullDecoder:
             if isinstance(chunk, memoryview):
                 return chunk.tobytes()
             return chunk
+        if kind in ("raw-zlib", "zlib"):
+            # zlib can hold pending output after all input was consumed under
+            # max_length; an empty feed drains it. read() raises if nothing comes.
+            return b""
         raise HyperPressError("Truncated compressed stream")
 
     def read(self, max_length):
