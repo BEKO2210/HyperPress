@@ -94,6 +94,7 @@ Parallel racing (README must not claim it), new preprocessors, C extensions.
 |----|--------|
 | 14 | TEXT transform + bz2-9 |
 | 15 | TEXT transform + xz raw LZMA2 9e (lc/lp/pb free to choose, but fixed per id) |
+| 16 | xz raw LZMA2 preset 1 (fast level, inputs >= 128 KiB) |
 
 - Implemented in `src/hyperpress/textxf.py` (`encode(data) -> bytes`, `decode(payload, limit) -> bytes`).
   The transform is fully self-describing (any dictionary is stored inside the payload).

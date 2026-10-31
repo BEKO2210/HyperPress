@@ -484,7 +484,7 @@ def _read_varint(data, offset):
 
 
 def _lzma_filters(method, size):
-    preset = (6 if method == 12 else 9 | lzma.PRESET_EXTREME)
+    preset = {12: 6, 16: 1}.get(method, 9 | lzma.PRESET_EXTREME)
     settings = {"id": lzma.FILTER_LZMA2, "preset": preset}
     if method == 1:
         settings["dict_size"] = max(4096, min(2 * size, 64 * 1024 * 1024))
@@ -504,7 +504,7 @@ def _lzma_filters(method, size):
 def _whole_compress(data, method):
     if method == 0:
         return data
-    if method in (1, 4, 5, 6, 7, 8, 9, 10, 12):
+    if method in (1, 4, 5, 6, 7, 8, 9, 10, 12, 16):
         return lzma.compress(data, format=lzma.FORMAT_RAW,
                              filters=_lzma_filters(method, len(data)))
     if method == 2:
@@ -559,7 +559,7 @@ def _whole_decode(payload, method, size):
         if len(payload) != size:
             raise HyperPressError("Stored size mismatch")
         return payload
-    if method in (1, 4, 5, 6, 7, 8, 9, 10, 12):
+    if method in (1, 4, 5, 6, 7, 8, 9, 10, 12, 16):
         return _bounded_decode(payload, "lzma", size, _lzma_filters(method, size))
     if method == 2:
         return _bounded_decode(payload, "bz2", size)
@@ -632,7 +632,7 @@ def compress(data, level="best", verbose=False):
     if not data:
         return header + b"\x00"
     if level == "fast":
-        methods = [0, 11, 13] if len(data) >= 131072 else [0, 11, 2, 12, 13]
+        methods = [0, 16, 13] if len(data) >= 131072 else [0, 11, 2, 12, 13]
         try_blocks = False
     elif len(data) >= 2 * 1024 * 1024:
         optional, try_blocks = _probe_candidates(data)
