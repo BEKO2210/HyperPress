@@ -27,7 +27,7 @@ Rules:
   (wrap `lzma.LZMAError`, `zlib.error`, `OSError`, `struct.error`, `ValueError`, `IndexError`, `KeyError`).
 - `max_output_size`: raise `HyperPressError` if the declared size exceeds it, and stream-decode
   with a hard cap (lzma `max_length`, zlib `decompressobj(...).decompress(d, cap)`, bz2 `BZ2Decompressor.decompress(d, cap)`),
-  so a bomb never allocates more than `max_output_size + 64 KiB`.
+  so a bomb never allocates more than `max_output_size + 64 KiB` (LZMA paths: `2 * max_output_size + 64 KiB`, see Memory cap).
 - Wrong CRC / size mismatch / trailing garbage -> `HyperPressError`.
 - v1 streams (`HPRX` + version 1) still decompress unchanged.
 - Python 3.8+ compatible, stdlib only. zstd import guarded:
@@ -105,4 +105,11 @@ Parallel racing (README must not claim it), new preprocessors, C extensions.
 
 ### Memory cap (decoder)
 - Every decode path (WHOLE, BLOCKS incl. every preprocessor, v1) keeps peak allocation
-  <= `max_output_size + 64 KiB` beyond the input itself.
+  <= `max_output_size + 64 KiB` beyond the input itself when it rejects a stream.
+- Exception, LZMA paths: liblzma needs its own dictionary next to the output buffer, so the bound
+  there is `2 * max_output_size + 64 KiB`. The dictionary is set to `max(4096, decoded cap)` and is
+  never shrunk below that: a smaller one breaks valid streams (found 2026-10-31: 13 of 28 Canterbury
+  streams failed at `max_output_size = size`).
+- The cap never breaks a valid stream: every `compress()` output decodes with `max_output_size = len(data)`.
+- TEXT (14/15): the encoder only emits them when the transformed inner stream is not larger than the
+  input; the decoder caps the inner stream at the declared size.
