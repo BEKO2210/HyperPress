@@ -112,4 +112,6 @@ Parallel racing (README must not claim it), new preprocessors, C extensions.
   streams failed at `max_output_size = size`).
 - The cap never breaks a valid stream: every `compress()` output decodes with `max_output_size = len(data)`.
 - TEXT (14/15): the encoder only emits them when the transformed inner stream is not larger than the
-  input; the decoder caps the inner stream at the declared size.
+  input; the decoder caps the inner stream at the declared size. It holds the inner stream and the
+  growing output, so the bound there is `2.25 * max_output_size + 64 KiB` (bytearray slack); the CRLF
+  size check runs before the newline expansion.

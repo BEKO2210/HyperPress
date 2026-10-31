@@ -123,7 +123,7 @@ def test_v2_zlib_lzma_bomb_within_budget():
         raw, format=lzma.FORMAT_RAW,
         filters=[{"id": lzma.FILTER_LZMA2, "preset": 0}],
     )
-    _peak_raises(_v2_blocks(CAP, PreProc.NONE, Backend.ZLIB_LZMA, payload))
+    _peak_raises(_v2_blocks(CAP, PreProc.NONE, Backend.ZLIB_LZMA, payload), LZMA_BUDGET)
 
 
 def test_v1_zlib_lzma_bomb_within_budget():
@@ -132,7 +132,7 @@ def test_v1_zlib_lzma_bomb_within_budget():
         raw, format=lzma.FORMAT_RAW,
         filters=[{"id": lzma.FILTER_LZMA2, "preset": 0}],
     )
-    _peak_raises(_v1_block(CAP, PreProc.NONE, Backend.ZLIB_LZMA, payload))
+    _peak_raises(_v1_block(CAP, PreProc.NONE, Backend.ZLIB_LZMA, payload), LZMA_BUDGET)
 
 
 def test_v2_stored_payload_not_sliced():
@@ -332,3 +332,63 @@ def test_valid_stream_decodes_at_exact_limit(level, kind):
     }[kind]
     from hyperpress import compress
     assert decompress(compress(data, level=level), max_output_size=len(data)) == data
+
+
+class _DrainThenNeedInput:
+    """Codec that drains its buffer to nothing once, then wants more input.
+
+    liblzma does this on real data (Silesia mozilla) at buffer boundaries.
+    """
+
+    def __init__(self, data):
+        self.data = data
+        self.eof = False
+        self.needs_input = True
+        self.fed = 0
+        self.drained = False
+
+    def decompress(self, chunk, max_length):
+        self.fed += len(chunk)
+        if chunk and not self.drained:
+            self.needs_input = False
+            return b""
+        if not chunk and not self.needs_input:
+            self.drained = True
+            self.needs_input = True
+            return b""
+        if self.fed >= len(self.data):
+            self.eof = True
+            self.needs_input = False
+        return self.data[:0] if not chunk else chunk[:max_length]
+
+
+def test_empty_drain_with_input_left_is_not_truncation():
+    from hyperpress.core import _PullDecoder
+    payload = b"x" * 10000
+    dec = _PullDecoder(payload, "bz2", 1 << 20, 1 << 20)
+    dec.obj = _DrainThenNeedInput(payload)
+    out = bytearray()
+    while True:
+        part = dec.read(4096)
+        if not part:
+            break
+        out += part
+    assert len(out) > 0
+
+
+def test_text_crlf_newline_bomb_within_budget():
+    # Hostile CRLF stream of newlines: size check must run before replace().
+    n = 1024 * 1024
+    inner = b"HPt" + bytes((2, 2)) + _uvarint(0) + b"\n" * (n - 16)
+    blob = _v2_whole(n, 14, bz2.compress(inner, 9))
+    del inner
+    gc.collect()
+    tracemalloc.start()
+    try:
+        with pytest.raises(HyperPressError):
+            decompress(blob, max_output_size=n)
+        peak = tracemalloc.get_traced_memory()[1]
+    finally:
+        tracemalloc.stop()
+    # TEXT holds the inner stream and the growing output (bytearray slack).
+    assert peak <= 2.25 * n + 64 * 1024, peak

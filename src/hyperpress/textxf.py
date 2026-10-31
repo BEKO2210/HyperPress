@@ -173,9 +173,12 @@ def _emit_literal_run(out, chunk):
     if len(chunk) == 1:
         _emit_literal_byte(out, chunk[0])
         return
-    out.extend((_ESC, _LIT_RUN))
-    out.extend(_uvarint_write(len(chunk)))
-    out.extend(chunk)
+    # decode() rejects runs above 64 KiB, so split long ones.
+    for i in range(0, len(chunk), 65536):
+        part = chunk[i:i + 65536]
+        out.extend((_ESC, _LIT_RUN))
+        out.extend(_uvarint_write(len(part)))
+        out.extend(part)
 
 
 def _emit_word(out, windex, lower, case):
@@ -301,8 +304,8 @@ def encode(data):
 
 def _decode_identity(body, limit, flags):
     if flags & _FLAG_CRLF:
-        if len(body) > limit:
-            raise HyperPressError("Output exceeds limit")
+        if len(body) + body.count(b"\n") != limit:
+            raise HyperPressError("Size mismatch")
         out = _denorm_crlf(body)
         if len(out) != limit:
             raise HyperPressError("Size mismatch")
@@ -314,6 +317,10 @@ def _decode_identity(body, limit, flags):
 
 def _finish_decode(out, flags, limit):
     if flags & _FLAG_CRLF:
+        # Check the expanded size first: replace() on a hostile stream of
+        # newlines would allocate 2 * limit before the size check.
+        if len(out) + out.count(b"\n") != limit:
+            raise HyperPressError("Size mismatch")
         out = _denorm_crlf(out)
     if len(out) != limit:
         raise HyperPressError("Size mismatch")

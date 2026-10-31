@@ -50,3 +50,12 @@ def test_corrupted_textxf_payload():
     payload = textxf_encode(data)
     with pytest.raises(HyperPressError):
         textxf_decode(payload[:-2], len(data))
+
+
+def test_literal_run_longer_than_64k_roundtrips_in_every_coding():
+    # decode() caps a single literal run at 64 KiB; the encoder must split.
+    from hyperpress.textxf import _encode_compact, _encode_stream, _wrap_encode
+    data = b"word " * 100 + b"9" * 200000 + b" word" * 100
+    for fn in (_encode_stream, _encode_compact):
+        payload = _wrap_encode(fn, data)
+        assert textxf_decode(payload, len(data)) == data

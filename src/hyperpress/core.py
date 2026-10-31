@@ -638,8 +638,14 @@ class _PullDecoder:
                 return part
             if obj.eof:
                 break
-            if not chunk and (kind not in ("bz2", "zstd", "lzma") or obj.needs_input):
+            if not chunk and kind not in ("bz2", "zstd", "lzma"):
                 raise HyperPressError("Truncated compressed stream")
+            if not chunk and obj.needs_input:
+                # An empty drain can exhaust the codec's buffer with no output;
+                # only a stream with no input left is truncated.
+                if self.pos >= len(self.payload):
+                    raise HyperPressError("Truncated compressed stream")
+                continue
             if not chunk:
                 self.empty_spins += 1
                 if self.empty_spins > 8:
@@ -668,7 +674,10 @@ def _bounded_decode(payload, kind, limit, filters=None, mem_budget=None):
                 break
             out[n:n + len(part)] = part
             n += len(part)
-        return bytes(out[:n])
+        if n == limit:
+            return bytes(out)
+        with memoryview(out) as view:
+            return bytes(view[:n])
     out = bytearray()
     while len(out) <= limit:
         room = limit - len(out)
@@ -837,8 +846,10 @@ def _iter_codec(payload, kind, filters, cap, mem_budget, hold):
 def _iter_zlib_lzma(payload, cap, mem_budget, hold):
     # Count the LZMA intermediate; do not keep it. The zlib output is what
     # the preprocessor sees, and that count stays at `cap`.
+    # The zlib intermediate can be slightly longer than the block, so the
+    # dictionary must cover lz_limit, not just hold.
     dec = _PullDecoder(
-        payload, "lzma", mem_budget, hold,
+        payload, "lzma", mem_budget, cap + _SLACK,
         [{"id": lzma.FILTER_LZMA2}], step_span=cap + _SLACK,
     )
     zobj = zlib.decompressobj(15)
@@ -886,6 +897,9 @@ def _iter_zlib_lzma(payload, cap, mem_budget, hold):
     if not zobj.eof:
         raise HyperPressError("Truncated compressed stream")
     if zobj.unused_data or pending:
+        raise HyperPressError("Trailing garbage")
+    # The LZMA stream must end with the zlib stream; read() checks its trailer.
+    if dec.read(1):
         raise HyperPressError("Trailing garbage")
 
 
