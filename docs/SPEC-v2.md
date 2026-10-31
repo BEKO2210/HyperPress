@@ -78,3 +78,30 @@ BLOCKS mode = existing v1 block engine (preprocessors + backends), kept as one c
 
 ## Out of scope for v2
 Parallel racing (README must not claim it), new preprocessors, C extensions.
+
+## v2.1 additions (2026-10-31)
+
+### Speed (compress side only, format unchanged)
+- `level="best"` may prune candidates using a deterministic probe on samples of the input, BUT it must
+  always run methods 1 (xz raw 9e), 2 (bz2-9) and 3 (zstd-19, if HAVE_ZSTD) on the full input, so the
+  guarantee `<= min(xz-raw-9e, bz2-9, zstd-19) + 16` still holds by construction.
+- Targets on Silesia total: `best` >= 1 MB/s, `fast` >= 10 MB/s compression. `fast` has no size guarantee
+  except `<= len(data) + 16`.
+- Same input -> same output bytes (probe must be deterministic, no time-based decisions).
+
+### Text transform (new WHOLE methods)
+| id | method |
+|----|--------|
+| 14 | TEXT transform + bz2-9 |
+| 15 | TEXT transform + xz raw LZMA2 9e (lc/lp/pb free to choose, but fixed per id) |
+
+- Implemented in `src/hyperpress/textxf.py` (`encode(data) -> bytes`, `decode(payload, limit) -> bytes`).
+  The transform is fully self-describing (any dictionary is stored inside the payload).
+- Decoding must respect `max_output_size` (raise `HyperPressError` before allocating beyond limit + 64 KiB)
+  and raise only `HyperPressError` on malformed payloads.
+- Exact payload layout is documented in a docstring at the top of `textxf.py`.
+- Candidates 14/15 are only tried when the input looks like text (cheap check), so they cost nothing on binaries.
+
+### Memory cap (decoder)
+- Every decode path (WHOLE, BLOCKS incl. every preprocessor, v1) keeps peak allocation
+  <= `max_output_size + 64 KiB` beyond the input itself.
