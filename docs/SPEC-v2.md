@@ -27,7 +27,7 @@ Rules:
   (wrap `lzma.LZMAError`, `zlib.error`, `OSError`, `struct.error`, `ValueError`, `IndexError`, `KeyError`).
 - `max_output_size`: raise `HyperPressError` if the declared size exceeds it, and stream-decode
   with a hard cap (lzma `max_length`, zlib `decompressobj(...).decompress(d, cap)`, bz2 `BZ2Decompressor.decompress(d, cap)`),
-  so a bomb never allocates more than `max_output_size + 64 KiB`.
+  so a bomb never allocates more than `max_output_size + 64 KiB` (LZMA paths: `2 * max_output_size + 64 KiB`, see Memory cap).
 - Wrong CRC / size mismatch / trailing garbage -> `HyperPressError`.
 - v1 streams (`HPRX` + version 1) still decompress unchanged.
 - Python 3.8+ compatible, stdlib only. zstd import guarded:
@@ -78,3 +78,40 @@ BLOCKS mode = existing v1 block engine (preprocessors + backends), kept as one c
 
 ## Out of scope for v2
 Parallel racing (README must not claim it), new preprocessors, C extensions.
+
+## v2.1 additions (2026-10-31)
+
+### Speed (compress side only, format unchanged)
+- `level="best"` may prune candidates using a deterministic probe on samples of the input, BUT it must
+  always run methods 1 (xz raw 9e), 2 (bz2-9) and 3 (zstd-19, if HAVE_ZSTD) on the full input, so the
+  guarantee `<= min(xz-raw-9e, bz2-9, zstd-19) + 16` still holds by construction.
+- Targets on Silesia total: `best` >= 1 MB/s, `fast` >= 10 MB/s compression. `fast` has no size guarantee
+  except `<= len(data) + 16`.
+- Same input -> same output bytes (probe must be deterministic, no time-based decisions).
+
+### Text transform (new WHOLE methods)
+| id | method |
+|----|--------|
+| 14 | TEXT transform + bz2-9 |
+| 15 | TEXT transform + xz raw LZMA2 9e (lc/lp/pb free to choose, but fixed per id) |
+| 16 | xz raw LZMA2 preset 1 (fast level, inputs >= 128 KiB) |
+
+- Implemented in `src/hyperpress/textxf.py` (`encode(data) -> bytes`, `decode(payload, limit) -> bytes`).
+  The transform is fully self-describing (any dictionary is stored inside the payload).
+- Decoding must respect `max_output_size` (raise `HyperPressError` before allocating beyond limit + 64 KiB)
+  and raise only `HyperPressError` on malformed payloads.
+- Exact payload layout is documented in a docstring at the top of `textxf.py`.
+- Candidates 14/15 are only tried when the input looks like text (cheap check), so they cost nothing on binaries.
+
+### Memory cap (decoder)
+- Every decode path (WHOLE, BLOCKS incl. every preprocessor, v1) keeps peak allocation
+  <= `max_output_size + 64 KiB` beyond the input itself when it rejects a stream.
+- Exception, LZMA paths: liblzma needs its own dictionary next to the output buffer, so the bound
+  there is `2 * max_output_size + 64 KiB`. The dictionary is set to `max(4096, decoded cap)` and is
+  never shrunk below that: a smaller one breaks valid streams (found 2026-10-31: 13 of 28 Canterbury
+  streams failed at `max_output_size = size`).
+- The cap never breaks a valid stream: every `compress()` output decodes with `max_output_size = len(data)`.
+- TEXT (14/15): the encoder only emits them when the transformed inner stream is not larger than the
+  input; the decoder caps the inner stream at the declared size. It holds the inner stream and the
+  growing output, so the bound there is `2.25 * max_output_size + 64 KiB` (bytearray slack); the CRLF
+  size check runs before the newline expansion.

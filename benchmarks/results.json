@@ -16,41 +16,41 @@
         "size": 43202
       },
       "corpus": "canterbury",
-      "delta_vs_best": 14,
+      "delta_vs_best": -25,
       "file": "alice29.txt",
       "hp_best": {
-        "comp_mbs": 0.244,
-        "decomp_mbs": 41.316,
+        "comp_mbs": 0.143,
+        "decomp_mbs": 42.002,
         "method_byte": 153,
         "roundtrip": true,
-        "size": 43216
+        "size": 43177
       },
       "hp_fast": {
-        "comp_mbs": 3.151,
-        "decomp_mbs": 44.745,
+        "comp_mbs": 20.417,
+        "decomp_mbs": 77.962,
         "method_byte": 153,
         "roundtrip": true,
-        "size": 43216
+        "size": 54162
       },
       "opponents": {
         "bz2-9": {
-          "comp_mbs": 20.971,
+          "comp_mbs": 21.067,
           "size": 43202
         },
         "xz-9e": {
-          "comp_mbs": 2.565,
+          "comp_mbs": 2.569,
           "size": 48528
         },
         "xz-raw-9e": {
-          "comp_mbs": 2.616,
+          "comp_mbs": 2.664,
           "size": 48469
         },
         "zlib-9": {
-          "comp_mbs": 19.025,
+          "comp_mbs": 19.095,
           "size": 54170
         },
         "zstd-19": {
-          "comp_mbs": 1.629,
+          "comp_mbs": 1.662,
           "size": 49212
         }
       },
@@ -66,38 +66,38 @@
       "delta_vs_best": 14,
       "file": "asyoulik.txt",
       "hp_best": {
-        "comp_mbs": 0.247,
-        "decomp_mbs": 39.848,
+        "comp_mbs": 0.15,
+        "decomp_mbs": 41.156,
         "method_byte": 251,
         "roundtrip": true,
         "size": 39583
       },
       "hp_fast": {
-        "comp_mbs": 3.148,
-        "decomp_mbs": 42.913,
+        "comp_mbs": 3.785,
+        "decomp_mbs": 41.985,
         "method_byte": 251,
         "roundtrip": true,
         "size": 39583
       },
       "opponents": {
         "bz2-9": {
-          "comp_mbs": 21.083,
+          "comp_mbs": 21.837,
           "size": 39569
         },
         "xz-9e": {
-          "comp_mbs": 2.329,
+          "comp_mbs": 2.359,
           "size": 44592
         },
         "xz-raw-9e": {
-          "comp_mbs": 2.308,
+          "comp_mbs": 2.436,
           "size": 44535
         },
         "zlib-9": {
-          "comp_mbs": 20.239,
+          "comp_mbs": 20.5,
           "size": 48778
         },
         "zstd-19": {
-          "comp_mbs": 1.473,
+          "comp_mbs": 1.518,
           "size": 45138
         }
       },
@@ -113,38 +113,38 @@
       "delta_vs_best": 6,
       "file": "cp.html",
       "hp_best": {
-        "comp_mbs": 0.089,
-        "decomp_mbs": 68.614,
+        "comp_mbs": 0.075,
+        "decomp_mbs": 69.662,
         "method_byte": 155,
         "roundtrip": true,
         "size": 7602
       },
       "hp_fast": {
-        "comp_mbs": 2.722,
-        "decomp_mbs": 75.342,
+        "comp_mbs": 4.082,
+        "decomp_mbs": 71.481,
         "method_byte": 155,
         "roundtrip": true,
         "size": 7602
       },
       "opponents": {
         "bz2-9": {
-          "comp_mbs": 16.352,
+          "comp_mbs": 17.531,
           "size": 7624
         },
         "xz-9e": {
-          "comp_mbs": 0.707,
+          "comp_mbs": 0.703,
           "size": 7652
         },
         "xz-raw-9e": {
-          "comp_mbs": 0.724,
+          "comp_mbs": 0.727,
           "size": 7596
         },
         "zlib-9": {
-          "comp_mbs": 53.489,
+          "comp_mbs": 53.831,
           "size": 7940
         },
         "zstd-19": {
-          "comp_mbs": 0.438,
+          "comp_mbs": 0.478,
           "size": 7716
         }
       },
@@ -160,38 +160,38 @@
       "delta_vs_best": -17,
       "file": "fields.c",
       "hp_best": {
-        "comp_mbs": 0.045,
-        "decomp_mbs": 67.416,
+        "comp_mbs": 0.043,
+        "decomp_mbs": 69.71,
         "method_byte": 142,
         "roundtrip": true,
         "size": 2956
       },
       "hp_fast": {
-        "comp_mbs": 3.418,
-        "decomp_mbs": 77.695,
+        "comp_mbs": 3.391,
+        "decomp_mbs": 72.639,
         "method_byte": 142,
         "roundtrip": true,
         "size": 2983
       },
       "opponents": {
         "bz2-9": {
-          "comp_mbs": 12.012,
+          "comp_mbs": 13.576,
           "size": 3039
         },
         "xz-9e": {
-          "comp_mbs": 0.336,
+          "comp_mbs": 0.345,
           "size": 3032
         },
         "xz-raw-9e": {
-          "comp_mbs": 0.343,
+          "comp_mbs": 0.352,
           "size": 2973
         },
         "zlib-9": {
-          "comp_mbs": 50.611,
+          "comp_mbs": 54.826,
           "size": 3115
         },
         "zstd-19": {
-          "comp_mbs": 0.221,
+          "comp_mbs": 0.228,
           "size": 3017
         }
       },
@@ -207,38 +207,38 @@
       "delta_vs_best": 0,
       "file": "grammar.lsp",
       "hp_best": {
-        "comp_mbs": 0.016,
-        "decomp_mbs": 43.937,
+        "comp_mbs": 0.015,
+        "decomp_mbs": 40.854,
         "method_byte": 137,
         "roundtrip": true,
         "size": 1222
       },
       "hp_fast": {
-        "comp_mbs": 2.278,
-        "decomp_mbs": 117.94,
+        "comp_mbs": 2.288,
+        "decomp_mbs": 107.018,
         "method_byte": 137,
         "roundtrip": true,
         "size": 1229
       },
       "opponents": {
         "bz2-9": {
-          "comp_mbs": 10.325,
+          "comp_mbs": 10.173,
           "size": 1283
         },
         "xz-9e": {
-          "comp_mbs": 0.118,
+          "comp_mbs": 0.117,
           "size": 1292
         },
         "xz-raw-9e": {
-          "comp_mbs": 0.121,
+          "comp_mbs": 0.12,
           "size": 1235
         },
         "zlib-9": {
-          "comp_mbs": 56.073,
+          "comp_mbs": 53.525,
           "size": 1222
         },
         "zstd-19": {
-          "comp_mbs": 0.08,
+          "comp_mbs": 0.076,
           "size": 1213
         }
       },
@@ -255,37 +255,37 @@
       "file": "kennedy.xls",
       "hp_best": {
         "comp_mbs": 0.166,
-        "decomp_mbs": 218.33,
+        "decomp_mbs": 231.582,
         "method_byte": 240,
         "roundtrip": true,
         "size": 47973
       },
       "hp_fast": {
-        "comp_mbs": 1.98,
-        "decomp_mbs": 236.178,
+        "comp_mbs": 58.415,
+        "decomp_mbs": 278.047,
         "method_byte": 240,
         "roundtrip": true,
-        "size": 49074
+        "size": 66792
       },
       "opponents": {
         "bz2-9": {
-          "comp_mbs": 33.772,
+          "comp_mbs": 33.837,
           "size": 130280
         },
         "xz-9e": {
-          "comp_mbs": 1.777,
+          "comp_mbs": 1.807,
           "size": 51868
         },
         "xz-raw-9e": {
-          "comp_mbs": 1.793,
+          "comp_mbs": 1.787,
           "size": 51811
         },
         "zlib-9": {
-          "comp_mbs": 3.677,
+          "comp_mbs": 3.616,
           "size": 207029
         },
         "zstd-19": {
-          "comp_mbs": 3.36,
+          "comp_mbs": 3.38,
           "size": 69725
         }
       },
@@ -298,41 +298,41 @@
         "size": 107706
       },
       "corpus": "canterbury",
-      "delta_vs_best": 14,
+      "delta_vs_best": -41,
       "file": "lcet10.txt",
       "hp_best": {
-        "comp_mbs": 0.335,
-        "decomp_mbs": 42.19,
+        "comp_mbs": 0.185,
+        "decomp_mbs": 39.624,
         "method_byte": 130,
         "roundtrip": true,
-        "size": 107720
+        "size": 107665
       },
       "hp_fast": {
-        "comp_mbs": 3.627,
-        "decomp_mbs": 42.897,
+        "comp_mbs": 20.744,
+        "decomp_mbs": 87.255,
         "method_byte": 130,
         "roundtrip": true,
-        "size": 107720
+        "size": 137365
       },
       "opponents": {
         "bz2-9": {
-          "comp_mbs": 23.009,
+          "comp_mbs": 22.68,
           "size": 107706
         },
         "xz-9e": {
-          "comp_mbs": 3.793,
+          "comp_mbs": 3.741,
           "size": 119488
         },
         "xz-raw-9e": {
-          "comp_mbs": 3.773,
+          "comp_mbs": 3.792,
           "size": 119430
         },
         "zlib-9": {
-          "comp_mbs": 22.002,
+          "comp_mbs": 22.168,
           "size": 144439
         },
         "zstd-19": {
-          "comp_mbs": 3.001,
+          "comp_mbs": 3.011,
           "size": 121371
         }
       },
@@ -345,21 +345,21 @@
         "size": 145577
       },
       "corpus": "canterbury",
-      "delta_vs_best": 14,
+      "delta_vs_best": -11,
       "file": "plrabn12.txt",
       "hp_best": {
-        "comp_mbs": 0.329,
-        "decomp_mbs": 35.916,
+        "comp_mbs": 0.175,
+        "decomp_mbs": 34.585,
         "method_byte": 197,
         "roundtrip": true,
-        "size": 145591
+        "size": 145566
       },
       "hp_fast": {
-        "comp_mbs": 3.204,
-        "decomp_mbs": 37.183,
+        "comp_mbs": 17.042,
+        "decomp_mbs": 71.925,
         "method_byte": 197,
         "roundtrip": true,
-        "size": 145591
+        "size": 189658
       },
       "opponents": {
         "bz2-9": {
@@ -367,19 +367,19 @@
           "size": 145577
         },
         "xz-9e": {
-          "comp_mbs": 3.745,
+          "comp_mbs": 3.506,
           "size": 165456
         },
         "xz-raw-9e": {
-          "comp_mbs": 3.766,
+          "comp_mbs": 3.568,
           "size": 165398
         },
         "zlib-9": {
-          "comp_mbs": 14.513,
+          "comp_mbs": 14.95,
           "size": 194332
         },
         "zstd-19": {
-          "comp_mbs": 3.018,
+          "comp_mbs": 3.153,
           "size": 167439
         }
       },
@@ -396,37 +396,37 @@
       "file": "ptt5",
       "hp_best": {
         "comp_mbs": 0.223,
-        "decomp_mbs": 221.455,
+        "decomp_mbs": 232.943,
         "method_byte": 192,
         "roundtrip": true,
         "size": 39012
       },
       "hp_fast": {
-        "comp_mbs": 4.505,
-        "decomp_mbs": 237.121,
+        "comp_mbs": 55.414,
+        "decomp_mbs": 218.486,
         "method_byte": 192,
         "roundtrip": true,
-        "size": 41947
+        "size": 48538
       },
       "opponents": {
         "bz2-9": {
-          "comp_mbs": 81.915,
+          "comp_mbs": 79.814,
           "size": 49759
         },
         "xz-9e": {
-          "comp_mbs": 2.496,
+          "comp_mbs": 2.432,
           "size": 39860
         },
         "xz-raw-9e": {
-          "comp_mbs": 2.487,
+          "comp_mbs": 2.492,
           "size": 39801
         },
         "zlib-9": {
-          "comp_mbs": 10.67,
+          "comp_mbs": 10.676,
           "size": 52221
         },
         "zstd-19": {
-          "comp_mbs": 2.045,
+          "comp_mbs": 2.109,
           "size": 43444
         }
       },
@@ -442,38 +442,38 @@
       "delta_vs_best": -34,
       "file": "sum",
       "hp_best": {
-        "comp_mbs": 0.118,
-        "decomp_mbs": 79.519,
+        "comp_mbs": 0.114,
+        "decomp_mbs": 75.621,
         "method_byte": 224,
         "roundtrip": true,
         "size": 9409
       },
       "hp_fast": {
-        "comp_mbs": 2.535,
-        "decomp_mbs": 80.536,
+        "comp_mbs": 2.526,
+        "decomp_mbs": 76.909,
         "method_byte": 224,
         "roundtrip": true,
         "size": 9409
       },
       "opponents": {
         "bz2-9": {
-          "comp_mbs": 18.426,
+          "comp_mbs": 19.115,
           "size": 12909
         },
         "xz-9e": {
-          "comp_mbs": 1.023,
+          "comp_mbs": 1.047,
           "size": 9500
         },
         "xz-raw-9e": {
-          "comp_mbs": 1.018,
+          "comp_mbs": 1.071,
           "size": 9443
         },
         "zlib-9": {
-          "comp_mbs": 5.299,
+          "comp_mbs": 5.345,
           "size": 12838
         },
         "zstd-19": {
-          "comp_mbs": 0.706,
+          "comp_mbs": 0.686,
           "size": 11076
         }
       },
@@ -490,37 +490,37 @@
       "file": "xargs.1",
       "hp_best": {
         "comp_mbs": 0.017,
-        "decomp_mbs": 39.016,
+        "decomp_mbs": 41.095,
         "method_byte": 131,
         "roundtrip": true,
         "size": 1738
       },
       "hp_fast": {
-        "comp_mbs": 2.43,
-        "decomp_mbs": 145.759,
+        "comp_mbs": 2.409,
+        "decomp_mbs": 108.75,
         "method_byte": 131,
         "roundtrip": true,
         "size": 1743
       },
       "opponents": {
         "bz2-9": {
-          "comp_mbs": 11.295,
+          "comp_mbs": 11.45,
           "size": 1762
         },
         "xz-9e": {
-          "comp_mbs": 0.131,
+          "comp_mbs": 0.137,
           "size": 1812
         },
         "xz-raw-9e": {
-          "comp_mbs": 0.132,
+          "comp_mbs": 0.138,
           "size": 1756
         },
         "zlib-9": {
-          "comp_mbs": 55.342,
+          "comp_mbs": 55.538,
           "size": 1736
         },
         "zstd-19": {
-          "comp_mbs": 0.083,
+          "comp_mbs": 0.089,
           "size": 1729
         }
       },
@@ -533,41 +533,41 @@
         "size": 2799520
       },
       "corpus": "silesia",
-      "delta_vs_best": 15,
+      "delta_vs_best": -39912,
       "file": "dickens",
       "hp_best": {
-        "comp_mbs": 0.25,
-        "decomp_mbs": 38.03,
+        "comp_mbs": 0.586,
+        "decomp_mbs": 5.09,
         "method_byte": 190,
         "roundtrip": true,
-        "size": 2799535
+        "size": 2759608
       },
       "hp_fast": {
-        "comp_mbs": 2.097,
-        "decomp_mbs": 37.765,
+        "comp_mbs": 18.406,
+        "decomp_mbs": 83.067,
         "method_byte": 190,
         "roundtrip": true,
-        "size": 2799535
+        "size": 3662039
       },
       "opponents": {
         "bz2-9": {
-          "comp_mbs": 20.885,
+          "comp_mbs": 20.817,
           "size": 2799520
         },
         "xz-9e": {
-          "comp_mbs": 2.714,
+          "comp_mbs": 2.741,
           "size": 2831212
         },
         "xz-raw-9e": {
-          "comp_mbs": 2.759,
+          "comp_mbs": 2.752,
           "size": 2831149
         },
         "zlib-9": {
-          "comp_mbs": 17.152,
+          "comp_mbs": 17.105,
           "size": 3854735
         },
         "zstd-19": {
-          "comp_mbs": 2.764,
+          "comp_mbs": 2.814,
           "size": 2849699
         }
       },
@@ -583,38 +583,38 @@
       "delta_vs_best": -143366,
       "file": "mozilla",
       "hp_best": {
-        "comp_mbs": 0.26,
-        "decomp_mbs": 81.29,
+        "comp_mbs": 1.514,
+        "decomp_mbs": 75.419,
         "method_byte": 128,
         "roundtrip": true,
         "size": 13232814
       },
       "hp_fast": {
-        "comp_mbs": 2.623,
-        "decomp_mbs": 78.317,
+        "comp_mbs": 23.945,
+        "decomp_mbs": 75.315,
         "method_byte": 128,
         "roundtrip": true,
-        "size": 13503553
+        "size": 15109096
       },
       "opponents": {
         "bz2-9": {
-          "comp_mbs": 22.752,
+          "comp_mbs": 22.863,
           "size": 17914392
         },
         "xz-9e": {
-          "comp_mbs": 3.215,
+          "comp_mbs": 3.272,
           "size": 13376240
         },
         "xz-raw-9e": {
-          "comp_mbs": 3.215,
+          "comp_mbs": 3.284,
           "size": 13376180
         },
         "zlib-9": {
-          "comp_mbs": 9.793,
+          "comp_mbs": 9.981,
           "size": 19044396
         },
         "zstd-19": {
-          "comp_mbs": 3.64,
+          "comp_mbs": 3.848,
           "size": 15040033
         }
       },
@@ -630,38 +630,38 @@
       "delta_vs_best": 15,
       "file": "mr",
       "hp_best": {
-        "comp_mbs": 0.203,
-        "decomp_mbs": 53.105,
+        "comp_mbs": 2.237,
+        "decomp_mbs": 52.597,
         "method_byte": 132,
         "roundtrip": true,
         "size": 2441295
       },
       "hp_fast": {
-        "comp_mbs": 2.752,
-        "decomp_mbs": 53.07,
+        "comp_mbs": 22.065,
+        "decomp_mbs": 81.509,
         "method_byte": 132,
         "roundtrip": true,
-        "size": 2441295
+        "size": 3085772
       },
       "opponents": {
         "bz2-9": {
-          "comp_mbs": 29.574,
+          "comp_mbs": 30.934,
           "size": 2441280
         },
         "xz-9e": {
-          "comp_mbs": 2.668,
+          "comp_mbs": 2.685,
           "size": 2751892
         },
         "xz-raw-9e": {
-          "comp_mbs": 2.664,
+          "comp_mbs": 2.694,
           "size": 2751831
         },
         "zlib-9": {
-          "comp_mbs": 9.927,
+          "comp_mbs": 9.905,
           "size": 3660794
         },
         "zstd-19": {
-          "comp_mbs": 4.519,
+          "comp_mbs": 4.518,
           "size": 3112781
         }
       },
@@ -674,41 +674,41 @@
         "size": 1449209
       },
       "corpus": "silesia",
-      "delta_vs_best": -9135,
+      "delta_vs_best": 15,
       "file": "nci",
       "hp_best": {
-        "comp_mbs": 0.248,
-        "decomp_mbs": 332.259,
+        "comp_mbs": 0.753,
+        "decomp_mbs": 266.74,
         "method_byte": 165,
         "roundtrip": true,
-        "size": 1440074
+        "size": 1449224
       },
       "hp_fast": {
-        "comp_mbs": 3.876,
-        "decomp_mbs": 346.316,
+        "comp_mbs": 67.074,
+        "decomp_mbs": 267.88,
         "method_byte": 165,
         "roundtrip": true,
-        "size": 1779226
+        "size": 2355847
       },
       "opponents": {
         "bz2-9": {
-          "comp_mbs": 13.178,
+          "comp_mbs": 13.209,
           "size": 1812734
         },
         "xz-9e": {
-          "comp_mbs": 2.642,
+          "comp_mbs": 2.64,
           "size": 1449272
         },
         "xz-raw-9e": {
-          "comp_mbs": 2.637,
+          "comp_mbs": 2.646,
           "size": 1449209
         },
         "zlib-9": {
-          "comp_mbs": 24.993,
+          "comp_mbs": 24.874,
           "size": 2988001
         },
         "zstd-19": {
-          "comp_mbs": 2.892,
+          "comp_mbs": 2.961,
           "size": 1641183
         }
       },
@@ -724,38 +724,38 @@
       "delta_vs_best": -342682,
       "file": "ooffice",
       "hp_best": {
-        "comp_mbs": 0.353,
-        "decomp_mbs": 63.97,
+        "comp_mbs": 1.752,
+        "decomp_mbs": 65.528,
         "method_byte": 128,
         "roundtrip": true,
         "size": 2084481
       },
       "hp_fast": {
-        "comp_mbs": 3.019,
-        "decomp_mbs": 62.408,
+        "comp_mbs": 16.934,
+        "decomp_mbs": 57.125,
         "method_byte": 128,
         "roundtrip": true,
-        "size": 2426770
+        "size": 2668618
       },
       "opponents": {
         "bz2-9": {
-          "comp_mbs": 21.094,
+          "comp_mbs": 21.436,
           "size": 2862526
         },
         "xz-9e": {
-          "comp_mbs": 4.36,
+          "comp_mbs": 4.176,
           "size": 2427224
         },
         "xz-raw-9e": {
-          "comp_mbs": 4.189,
+          "comp_mbs": 4.318,
           "size": 2427163
         },
         "zlib-9": {
-          "comp_mbs": 16.61,
+          "comp_mbs": 16.521,
           "size": 3092926
         },
         "zstd-19": {
-          "comp_mbs": 4.883,
+          "comp_mbs": 4.81,
           "size": 2598842
         }
       },
@@ -771,38 +771,38 @@
       "delta_vs_best": 15,
       "file": "osdb",
       "hp_best": {
-        "comp_mbs": 0.336,
-        "decomp_mbs": 41.052,
+        "comp_mbs": 2.889,
+        "decomp_mbs": 39.728,
         "method_byte": 180,
         "roundtrip": true,
         "size": 2802807
       },
       "hp_fast": {
-        "comp_mbs": 3.19,
-        "decomp_mbs": 40.976,
+        "comp_mbs": 21.77,
+        "decomp_mbs": 78.71,
         "method_byte": 180,
         "roundtrip": true,
-        "size": 2802807
+        "size": 3414061
       },
       "opponents": {
         "bz2-9": {
-          "comp_mbs": 23.025,
+          "comp_mbs": 23.0,
           "size": 2802792
         },
         "xz-9e": {
-          "comp_mbs": 3.741,
+          "comp_mbs": 3.736,
           "size": 2844556
         },
         "xz-raw-9e": {
-          "comp_mbs": 3.684,
+          "comp_mbs": 3.717,
           "size": 2844493
         },
         "zlib-9": {
-          "comp_mbs": 36.038,
+          "comp_mbs": 35.984,
           "size": 3673177
         },
         "zstd-19": {
-          "comp_mbs": 3.55,
+          "comp_mbs": 3.56,
           "size": 3098462
         }
       },
@@ -818,38 +818,38 @@
       "delta_vs_best": 15,
       "file": "reymont",
       "hp_best": {
-        "comp_mbs": 0.264,
-        "decomp_mbs": 46.864,
+        "comp_mbs": 0.688,
+        "decomp_mbs": 46.02,
         "method_byte": 130,
         "roundtrip": true,
         "size": 1246245
       },
       "hp_fast": {
-        "comp_mbs": 2.101,
-        "decomp_mbs": 46.926,
+        "comp_mbs": 23.358,
+        "decomp_mbs": 96.266,
         "method_byte": 130,
         "roundtrip": true,
-        "size": 1246245
+        "size": 1848131
       },
       "opponents": {
         "bz2-9": {
-          "comp_mbs": 21.75,
+          "comp_mbs": 22.323,
           "size": 1246230
         },
         "xz-9e": {
-          "comp_mbs": 2.965,
+          "comp_mbs": 2.825,
           "size": 1315592
         },
         "xz-raw-9e": {
-          "comp_mbs": 2.861,
+          "comp_mbs": 2.871,
           "size": 1315531
         },
         "zlib-9": {
-          "comp_mbs": 9.615,
+          "comp_mbs": 9.553,
           "size": 1823196
         },
         "zstd-19": {
-          "comp_mbs": 2.786,
+          "comp_mbs": 2.788,
           "size": 1347614
         }
       },
@@ -862,41 +862,41 @@
         "size": 3739464
       },
       "corpus": "silesia",
-      "delta_vs_best": -11474,
+      "delta_vs_best": 15,
       "file": "samba",
       "hp_best": {
-        "comp_mbs": 0.318,
-        "decomp_mbs": 133.915,
+        "comp_mbs": 2.714,
+        "decomp_mbs": 131.746,
         "method_byte": 128,
         "roundtrip": true,
-        "size": 3727990
+        "size": 3739479
       },
       "hp_fast": {
-        "comp_mbs": 4.112,
-        "decomp_mbs": 139.743,
+        "comp_mbs": 34.009,
+        "decomp_mbs": 116.49,
         "method_byte": 128,
         "roundtrip": true,
-        "size": 3787354
+        "size": 4542793
       },
       "opponents": {
         "bz2-9": {
-          "comp_mbs": 23.677,
+          "comp_mbs": 23.782,
           "size": 4549759
         },
         "xz-9e": {
-          "comp_mbs": 3.292,
+          "comp_mbs": 3.241,
           "size": 3739524
         },
         "xz-raw-9e": {
-          "comp_mbs": 3.266,
+          "comp_mbs": 3.277,
           "size": 3739464
         },
         "zlib-9": {
-          "comp_mbs": 31.645,
+          "comp_mbs": 31.599,
           "size": 5402710
         },
         "zstd-19": {
-          "comp_mbs": 4.035,
+          "comp_mbs": 4.001,
           "size": 3886776
         }
       },
@@ -909,41 +909,41 @@
         "size": 4425604
       },
       "corpus": "silesia",
-      "delta_vs_best": -11292,
+      "delta_vs_best": 15,
       "file": "sao",
       "hp_best": {
-        "comp_mbs": 0.376,
-        "decomp_mbs": 38.567,
+        "comp_mbs": 2.886,
+        "decomp_mbs": 38.366,
         "method_byte": 232,
         "roundtrip": true,
-        "size": 4414312
+        "size": 4425619
       },
       "hp_fast": {
-        "comp_mbs": 2.914,
-        "decomp_mbs": 39.046,
+        "comp_mbs": 11.783,
+        "decomp_mbs": 36.051,
         "method_byte": 232,
         "roundtrip": true,
-        "size": 4415026
+        "size": 4925391
       },
       "opponents": {
         "bz2-9": {
-          "comp_mbs": 18.522,
+          "comp_mbs": 18.585,
           "size": 4940524
         },
         "xz-9e": {
-          "comp_mbs": 3.984,
+          "comp_mbs": 4.052,
           "size": 4425664
         },
         "xz-raw-9e": {
-          "comp_mbs": 4.124,
+          "comp_mbs": 4.045,
           "size": 4425604
         },
         "zlib-9": {
-          "comp_mbs": 21.179,
+          "comp_mbs": 21.416,
           "size": 5325920
         },
         "zstd-19": {
-          "comp_mbs": 4.959,
+          "comp_mbs": 4.931,
           "size": 5000512
         }
       },
@@ -956,41 +956,41 @@
         "size": 8368609
       },
       "corpus": "silesia",
-      "delta_vs_best": -9802,
+      "delta_vs_best": 15,
       "file": "webster",
       "hp_best": {
-        "comp_mbs": 0.231,
-        "decomp_mbs": 118.933,
+        "comp_mbs": 0.543,
+        "decomp_mbs": 119.709,
         "method_byte": 143,
         "roundtrip": true,
-        "size": 8358807
+        "size": 8368624
       },
       "hp_fast": {
-        "comp_mbs": 2.347,
-        "decomp_mbs": 120.687,
+        "comp_mbs": 23.693,
+        "decomp_mbs": 100.324,
         "method_byte": 143,
         "roundtrip": true,
-        "size": 8628803
+        "size": 11271983
       },
       "opponents": {
         "bz2-9": {
-          "comp_mbs": 19.787,
+          "comp_mbs": 19.612,
           "size": 8644714
         },
         "xz-9e": {
-          "comp_mbs": 2.314,
+          "comp_mbs": 2.306,
           "size": 8368672
         },
         "xz-raw-9e": {
-          "comp_mbs": 2.308,
+          "comp_mbs": 2.268,
           "size": 8368609
         },
         "zlib-9": {
-          "comp_mbs": 23.612,
+          "comp_mbs": 23.691,
           "size": 12073475
         },
         "zstd-19": {
-          "comp_mbs": 2.54,
+          "comp_mbs": 2.59,
           "size": 8624124
         }
       },
@@ -1006,38 +1006,38 @@
       "delta_vs_best": 15,
       "file": "x-ray",
       "hp_best": {
-        "comp_mbs": 0.289,
-        "decomp_mbs": 35.727,
+        "comp_mbs": 1.603,
+        "decomp_mbs": 34.063,
         "method_byte": 128,
         "roundtrip": true,
         "size": 4051127
       },
       "hp_fast": {
-        "comp_mbs": 3.299,
-        "decomp_mbs": 35.725,
+        "comp_mbs": 11.835,
+        "decomp_mbs": 47.45,
         "method_byte": 128,
         "roundtrip": true,
-        "size": 4051127
+        "size": 4973387
       },
       "opponents": {
         "bz2-9": {
-          "comp_mbs": 24.025,
+          "comp_mbs": 23.809,
           "size": 4051112
         },
         "xz-9e": {
-          "comp_mbs": 4.443,
+          "comp_mbs": 4.2,
           "size": 4491264
         },
         "xz-raw-9e": {
-          "comp_mbs": 4.211,
+          "comp_mbs": 4.265,
           "size": 4491203
         },
         "zlib-9": {
-          "comp_mbs": 38.365,
+          "comp_mbs": 38.057,
           "size": 6045038
         },
         "zstd-19": {
-          "comp_mbs": 4.501,
+          "comp_mbs": 4.778,
           "size": 5155749
         }
       },
@@ -1050,41 +1050,41 @@
         "size": 434830
       },
       "corpus": "silesia",
-      "delta_vs_best": -999,
+      "delta_vs_best": 15,
       "file": "xml",
       "hp_best": {
-        "comp_mbs": 0.425,
-        "decomp_mbs": 268.824,
+        "comp_mbs": 3.038,
+        "decomp_mbs": 279.257,
         "method_byte": 128,
         "roundtrip": true,
-        "size": 433831
+        "size": 434845
       },
       "hp_fast": {
-        "comp_mbs": 4.994,
-        "decomp_mbs": 70.415,
+        "comp_mbs": 55.6,
+        "decomp_mbs": 232.182,
         "method_byte": 128,
         "roundtrip": true,
-        "size": 441201
+        "size": 560153
       },
       "opponents": {
         "bz2-9": {
-          "comp_mbs": 15.968,
+          "comp_mbs": 16.091,
           "size": 441186
         },
         "xz-9e": {
-          "comp_mbs": 4.919,
+          "comp_mbs": 4.825,
           "size": 434892
         },
         "xz-raw-9e": {
-          "comp_mbs": 4.887,
+          "comp_mbs": 4.907,
           "size": 434830
         },
         "zlib-9": {
-          "comp_mbs": 41.284,
+          "comp_mbs": 41.362,
           "size": 658905
         },
         "zstd-19": {
-          "comp_mbs": 3.672,
+          "comp_mbs": 3.667,
           "size": 454692
         }
       },
@@ -1099,16 +1099,16 @@
       "name": "per-file min",
       "size": 48012629
     },
-    "delta_vs_best": -533289,
+    "delta_vs_best": -530558,
     "hp_best": {
-      "comp_mbs": 0.263,
-      "decomp_mbs": 80.619,
-      "size": 47479340
+      "comp_mbs": 0.943,
+      "decomp_mbs": 47.773,
+      "size": 47482071
     },
     "hp_fast": {
-      "comp_mbs": 2.86,
-      "decomp_mbs": 78.71,
-      "size": 48773039
+      "comp_mbs": 24.649,
+      "decomp_mbs": 90.224,
+      "size": 58976335
     },
     "opponents": {
       "bz2-9": {

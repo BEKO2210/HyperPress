@@ -484,7 +484,7 @@ def _read_varint(data, offset):
 
 
 def _lzma_filters(method, size):
-    preset = (6 if method == 12 else 9 | lzma.PRESET_EXTREME)
+    preset = {12: 6, 16: 1}.get(method, 9 | lzma.PRESET_EXTREME)
     settings = {"id": lzma.FILTER_LZMA2, "preset": preset}
     if method == 1:
         settings["dict_size"] = max(4096, min(2 * size, 64 * 1024 * 1024))
@@ -494,6 +494,8 @@ def _lzma_filters(method, size):
         settings.update(lc=0, lp=2, pb=2)
     elif method == 10:
         settings.update(lc=1, lp=0, pb=0)
+    elif method == 15:
+        settings.update(lc=4, lp=0, pb=0)
     if method in (4, 5, 6):
         return [{"id": lzma.FILTER_DELTA, "dist": {4: 1, 5: 2, 6: 4}[method]}, settings]
     if method == 7:
@@ -501,10 +503,20 @@ def _lzma_filters(method, size):
     return [settings]
 
 
+def _looks_like_text(data):
+    if len(data) < 32:
+        return False
+    sample = data[:8192] if len(data) > 8192 else data
+    good = sum(1 for b in sample if 32 <= b <= 126 or b in (9, 10, 13))
+    if good * 100 // len(sample) < 85:
+        return False
+    return sample.count(0) == 0
+
+
 def _whole_compress(data, method):
     if method == 0:
         return data
-    if method in (1, 4, 5, 6, 7, 8, 9, 10, 12):
+    if method in (1, 4, 5, 6, 7, 8, 9, 10, 12, 16):
         return lzma.compress(data, format=lzma.FORMAT_RAW,
                              filters=_lzma_filters(method, len(data)))
     if method == 2:
@@ -514,61 +526,205 @@ def _whole_compress(data, method):
     if method == 11:
         obj = zlib.compressobj(9, zlib.DEFLATED, -15)
         return obj.compress(data) + obj.flush()
+    if method in (14, 15):
+        from hyperpress.textxf import encode
+        xf = encode(data)
+        if len(xf) > len(data):
+            # Decoder caps the inner stream at size to stay inside the budget.
+            raise ValueError("TEXT transform expands input")
+        if method == 14:
+            return bz2.compress(xf, compresslevel=9)
+        return lzma.compress(xf, format=lzma.FORMAT_RAW,
+                             filters=_lzma_filters(method, len(data)))
     raise HyperPressError("Unknown method")
 
 
-def _bounded_decode(payload, kind, limit, filters=None):
-    if kind == "lzma":
-        obj = lzma.LZMADecompressor(format=lzma.FORMAT_RAW, filters=filters)
-    elif kind == "bz2":
-        obj = bz2.BZ2Decompressor()
-    elif kind == "zstd":
-        obj = zstd.ZstdDecompressor()
-    else:
-        obj = zlib.decompressobj(-15 if kind == "raw-zlib" else 15)
-    out = bytearray()
-    pos = 0
-    while not obj.eof:
-        if kind in ("bz2", "zstd") and not obj.needs_input:
-            chunk = b""
-        elif kind == "lzma" and not obj.needs_input:
-            chunk = b""
-        elif pos < len(payload):
-            chunk = payload[pos:pos + 65536]
-            pos += len(chunk)
+# Output is pulled in small pieces so a bomb cannot pin a 64 KiB chunk next
+# to the capped buffer. LZMADecompressor(dict_size=N) traces about N + 34 KiB.
+_CHUNK = 4 * 1024
+_SLACK = 64 * 1024
+
+
+# xz preset -> LZMA2 dictionary size (xz(1), stable across liblzma versions).
+_PRESET_DICT = (256 << 10,) + tuple(n << 20 for n in (1, 2, 4, 4, 8, 8, 16, 32, 64))
+
+
+def _fit_lzma_filters(filters, hold):
+    """Size the LZMA2 dictionary to the decoded stream, never below it.
+
+    A valid stream that decodes to at most `hold` bytes has no match distance
+    >= hold, so dict_size = max(4096, hold) is lossless. Shrinking further
+    breaks valid streams; the 8 MiB / 64 MiB preset default is never needed.
+    Peak is therefore about 2 * hold + 40 KiB on LZMA paths.
+    """
+    if not filters:
+        return filters
+    fitted = []
+    for item in filters:
+        filt = dict(item)
+        if filt.get("id") == lzma.FILTER_LZMA2:
+            requested = filt.get("dict_size")
+            if requested is None:
+                requested = _PRESET_DICT[filt.get("preset", 6) & 0x1f]
+            filt["dict_size"] = min(requested, max(4096, hold))
+        fitted.append(filt)
+    return fitted
+
+
+class _PullDecoder:
+    """Stream one backend. Raises HyperPressError; codec errors propagate."""
+
+    def __init__(self, payload, kind, mem_budget, hold, filters=None, step_span=None):
+        if mem_budget is None:
+            mem_budget = hold + _SLACK
+        if step_span is None:
+            step_span = hold
+        self.payload = payload
+        self.kind = kind
+        self.pos = 0
+        self.steps = 0
+        self.empty_spins = 0
+        self.step_cap = len(payload) + step_span + 8
+        if kind == "lzma":
+            if filters is not None:
+                filters = _fit_lzma_filters(filters, hold)
+            self.obj = lzma.LZMADecompressor(format=lzma.FORMAT_RAW, filters=filters)
+        elif kind == "bz2":
+            self.obj = bz2.BZ2Decompressor()
+        elif kind == "zstd":
+            self.obj = zstd.ZstdDecompressor()
         else:
-            raise HyperPressError("Truncated compressed stream")
-        cap = min(65536, limit - len(out) + 1)
-        if cap <= 0:
+            self.obj = zlib.decompressobj(-15 if kind == "raw-zlib" else 15)
+
+    def _trailer(self):
+        unused = getattr(self.obj, "unused_data", b"")
+        if unused or self.pos != len(self.payload):
+            raise HyperPressError("Trailing garbage")
+
+    def _next_chunk(self):
+        kind = self.kind
+        if kind in ("bz2", "zstd", "lzma") and not self.obj.needs_input:
+            return b""
+        if self.pos < len(self.payload):
+            chunk = self.payload[self.pos:self.pos + _CHUNK]
+            self.pos += len(chunk)
+            if isinstance(chunk, memoryview):
+                return chunk.tobytes()
+            return chunk
+        if kind in ("raw-zlib", "zlib"):
+            # zlib can hold pending output after all input was consumed under
+            # max_length; an empty feed drains it. read() raises if nothing comes.
+            return b""
+        raise HyperPressError("Truncated compressed stream")
+
+    def read(self, max_length):
+        if max_length <= 0:
             raise HyperPressError("Output exceeds limit")
-        part = obj.decompress(chunk, cap)
+        obj = self.obj
+        if obj.eof:
+            self._trailer()
+            return b""
+        kind = self.kind
+        while not obj.eof:
+            self.steps += 1
+            if self.steps > self.step_cap:
+                raise HyperPressError("Truncated compressed stream")
+            chunk = self._next_chunk()
+            part = obj.decompress(chunk, max_length)
+            if kind in ("raw-zlib", "zlib") and obj.unconsumed_tail and not obj.eof:
+                # After eof, unconsumed_tail aliases unused_data and feeding it
+                # back grows unused_data forever (CPython issue 158169).
+                consumed = len(chunk) - len(obj.unconsumed_tail)
+                if consumed <= 0 and not part:
+                    raise HyperPressError("Truncated compressed stream")
+                self.pos -= len(obj.unconsumed_tail)
+                if self.pos < 0:
+                    self.pos = 0
+            if part:
+                return part
+            if obj.eof:
+                break
+            if not chunk and kind not in ("bz2", "zstd", "lzma"):
+                raise HyperPressError("Truncated compressed stream")
+            if not chunk and obj.needs_input:
+                # An empty drain can exhaust the codec's buffer with no output;
+                # only a stream with no input left is truncated.
+                if self.pos >= len(self.payload):
+                    raise HyperPressError("Truncated compressed stream")
+                continue
+            if not chunk:
+                self.empty_spins += 1
+                if self.empty_spins > 8:
+                    raise HyperPressError("Truncated compressed stream")
+            else:
+                self.empty_spins = 0
+        self._trailer()
+        return b""
+
+
+def _bounded_decode(payload, kind, limit, filters=None, mem_budget=None):
+    if mem_budget is None:
+        mem_budget = limit + _SLACK
+    dec = _PullDecoder(payload, kind, mem_budget, limit, filters)
+    # Exact size avoids bytearray overallocation, which on a 100 KiB cap
+    # sits on top of the zlib window and crosses the 64 KiB slack.
+    if limit <= 8 * 1024 * 1024:
+        out = bytearray(limit)
+        n = 0
+        while n <= limit:
+            room = limit - n
+            part = dec.read(1 if room <= 0 else min(_CHUNK, room + 1))
+            if len(part) > room:
+                raise HyperPressError("Output exceeds limit")
+            if not part:
+                break
+            out[n:n + len(part)] = part
+            n += len(part)
+        if n == limit:
+            return bytes(out)
+        with memoryview(out) as view:
+            return bytes(view[:n])
+    out = bytearray()
+    while len(out) <= limit:
+        room = limit - len(out)
+        part = dec.read(1 if room <= 0 else min(_CHUNK, room + 1))
+        if len(part) > room:
+            raise HyperPressError("Output exceeds limit")
+        if not part:
+            break
         out.extend(part)
-        if len(out) > limit:
-            raise HyperPressError("Output exceeds limit")
-        if kind in ("raw-zlib", "zlib") and obj.unconsumed_tail:
-            pos -= len(obj.unconsumed_tail)
-        if not chunk and not part and not obj.eof and (kind not in ("bz2", "zstd", "lzma") or obj.needs_input):
-            raise HyperPressError("Truncated compressed stream")
-    if obj.unused_data or pos != len(payload):
-        raise HyperPressError("Trailing garbage")
     return bytes(out)
 
 
-def _whole_decode(payload, method, size):
+def _whole_decode(payload, method, size, mem_budget=None):
+    if mem_budget is None:
+        mem_budget = size + _SLACK
     if method == 0:
         if len(payload) != size:
             raise HyperPressError("Stored size mismatch")
+        if isinstance(payload, memoryview):
+            return payload.tobytes()
         return payload
-    if method in (1, 4, 5, 6, 7, 8, 9, 10, 12):
-        return _bounded_decode(payload, "lzma", size, _lzma_filters(method, size))
+    if method in (1, 4, 5, 6, 7, 8, 9, 10, 12, 16):
+        return _bounded_decode(payload, "lzma", size, _lzma_filters(method, size), mem_budget)
     if method == 2:
-        return _bounded_decode(payload, "bz2", size)
+        return _bounded_decode(payload, "bz2", size, None, mem_budget)
     if method in (3, 13):
         if not HAVE_ZSTD:
             raise HyperPressError("Zstandard decoder unavailable")
-        return _bounded_decode(payload, "zstd", size)
+        return _bounded_decode(payload, "zstd", size, None, mem_budget)
     if method == 11:
-        return _bounded_decode(payload, "raw-zlib", size)
+        return _bounded_decode(payload, "raw-zlib", size, None, mem_budget)
+    if method in (14, 15):
+        from hyperpress.textxf import decode as textxf_decode
+        cap = size
+        if method == 14:
+            inner = _bounded_decode(payload, "bz2", cap, None, mem_budget)
+        else:
+            inner = _bounded_decode(payload, "lzma", cap, _lzma_filters(method, size), mem_budget)
+        if len(inner) >= 3 and inner[:3] == b"HPt":
+            return textxf_decode(inner, size)
+        raise HyperPressError("Invalid TEXT payload")
     raise HyperPressError("Unknown method")
 
 
@@ -596,6 +752,32 @@ def _blocks_compress(data, verbose):
     return bytes(out)
 
 
+def _probe_candidates(data):
+    """Rank optional whole methods and predict whether splitting helps."""
+    width = 32768
+    n = len(data)
+    offsets = (0, max(0, (n - width) // 2), n - width)
+    samples = [data[off:off + width] for off in offsets]
+    probe = b"".join(samples)
+    baseline = min(len(_whole_compress(probe, method)) for method in (1, 2))
+    optional = []
+    for method in (4, 5, 6, 7, 8, 9, 10, 11, 12, 13):
+        if method == 13 and not HAVE_ZSTD:
+            continue
+        try:
+            size = len(_whole_compress(probe, method))
+        except (lzma.LZMAError, OSError, ValueError):
+            continue
+        if size < baseline * 0.985:
+            optional.append((size, method))
+    optional.sort()
+    # Separate zlib streams expose abrupt changes without running block engine.
+    whole_zlib = len(zlib.compress(probe, 6))
+    split_zlib = sum(len(zlib.compress(sample, 6)) for sample in samples)
+    blocks_worth_trying = split_zlib < whole_zlib * 0.95
+    return [method for _, method in optional[:1]], blocks_worth_trying
+
+
 def compress(data, level="best", verbose=False):
     """Compress bytes to HPRX v2, selecting smallest candidate."""
     if not isinstance(data, bytes):
@@ -605,8 +787,19 @@ def compress(data, level="best", verbose=False):
     header = _v2_header(0, data)
     if not data:
         return header + b"\x00"
-    methods = ([0, 11, 2, 12, 13] if level == "fast" else
-               [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13])
+    if level == "fast":
+        methods = [0, 16, 13] if len(data) >= 131072 else [0, 11, 2, 12, 13]
+        try_blocks = False
+    elif len(data) >= 2 * 1024 * 1024:
+        optional, try_blocks = _probe_candidates(data)
+        methods = [0, 1, 2, 3] + optional
+        if _looks_like_text(data):
+            methods.append(14)
+    else:
+        methods = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+        try_blocks = True
+        if _looks_like_text(data):
+            methods.extend((14, 15))
     best = None
     for method in methods:
         if method in (3, 13) and not HAVE_ZSTD:
@@ -617,65 +810,198 @@ def compress(data, level="best", verbose=False):
             continue
         if best is None or len(candidate) < len(best):
             best = candidate
-    if level == "best":
+    if try_blocks:
         blocks = _blocks_compress(data, verbose)
         if len(blocks) < len(best):
             best = blocks
     return best
 
 
-def _decode_block(payload, pp, be, osz):
+def _pp_cap(pp, osz):
+    if pp == PreProc.NIBBLE or pp == PreProc.RLE:
+        return 2 * osz
+    if pp == PreProc.BWT_MTF:
+        return osz + 4
+    if pp == PreProc.TRANSPOSE:
+        return osz + 1
+    return osz
+
+
+def _iter_stored(payload, cap):
+    if len(payload) > cap:
+        raise HyperPressError("Block exceeds limit")
+    view = payload if isinstance(payload, memoryview) else memoryview(payload)
+    for off in range(0, len(view), _CHUNK):
+        yield view[off:off + _CHUNK]
+
+
+def _iter_codec(payload, kind, filters, cap, mem_budget, hold):
+    dec = _PullDecoder(payload, kind, mem_budget, hold, filters, step_span=cap)
+    produced = 0
+    while produced <= cap:
+        space = cap - produced
+        part = dec.read(min(_CHUNK, space + 1))
+        if not part:
+            return
+        if len(part) > space:
+            raise HyperPressError("Output exceeds limit")
+        produced += len(part)
+        yield part
+
+
+def _iter_zlib_lzma(payload, cap, mem_budget, hold):
+    # Count the LZMA intermediate; do not keep it. The zlib output is what
+    # the preprocessor sees, and that count stays at `cap`.
+    # The zlib intermediate can be slightly longer than the block, so the
+    # dictionary must cover lz_limit, not just hold.
+    dec = _PullDecoder(
+        payload, "lzma", mem_budget, cap + _SLACK,
+        [{"id": lzma.FILTER_LZMA2}], step_span=cap + _SLACK,
+    )
+    zobj = zlib.decompressobj(15)
+    produced = 0
+    lz_count = 0
+    lz_limit = cap + _SLACK
+    pending = b""
+    while produced <= cap:
+        if not pending:
+            room = lz_limit - lz_count
+            if room <= 0:
+                raise HyperPressError("Output exceeds limit")
+            part = dec.read(min(_CHUNK, room + 1))
+            if len(part) > room:
+                raise HyperPressError("Output exceeds limit")
+            if not part:
+                break
+            lz_count += len(part)
+            pending = part
+        space = cap - produced
+        if space < 0:
+            raise HyperPressError("Output exceeds limit")
+        zpart = zobj.decompress(pending, min(_CHUNK, space + 1))
+        used = len(pending) - len(zobj.unconsumed_tail)
+        if used <= 0 and not zpart and not zobj.eof:
+            raise HyperPressError("Truncated compressed stream")
+        pending = b"" if zobj.eof else zobj.unconsumed_tail
+        if len(zpart) > space:
+            raise HyperPressError("Output exceeds limit")
+        if zpart:
+            produced += len(zpart)
+            yield zpart
+        elif not pending and zobj.eof:
+            break
+    while not zobj.eof and produced <= cap:
+        space = cap - produced
+        zpart = zobj.decompress(pending, min(_CHUNK, space + 1))
+        pending = b"" if zobj.eof else zobj.unconsumed_tail
+        if not zpart:
+            break
+        if len(zpart) > space:
+            raise HyperPressError("Output exceeds limit")
+        produced += len(zpart)
+        yield zpart
+    if not zobj.eof:
+        raise HyperPressError("Truncated compressed stream")
+    if zobj.unused_data or pending:
+        raise HyperPressError("Trailing garbage")
+    # The LZMA stream must end with the zlib stream; read() checks its trailer.
+    if dec.read(1):
+        raise HyperPressError("Trailing garbage")
+
+
+def _iter_backend(payload, be, cap, mem_budget, hold):
+    if be == Backend.STORED:
+        yield from _iter_stored(payload, cap)
+        return
+    if be == Backend.ZLIB_LZMA:
+        yield from _iter_zlib_lzma(payload, cap, mem_budget, hold)
+        return
+    if be == Backend.ZLIB9:
+        kind, filters = "zlib", None
+    elif be == Backend.LZMA:
+        kind, filters = "lzma", [{"id": lzma.FILTER_LZMA2}]
+    elif be == Backend.BZ2:
+        kind, filters = "bz2", None
+    else:
+        raise HyperPressError("Unknown block codec")
+    yield from _iter_codec(payload, kind, filters, cap, mem_budget, hold)
+
+
+def _nibble_from_iter(parts, osz):
+    need = 2 * osz
+    out = bytearray(osz)
+    got = 0
+    for part in parts:
+        if got + len(part) > need:
+            raise HyperPressError("Output exceeds limit")
+        for b in part:
+            if got < osz:
+                out[got] = b
+            else:
+                i = got - osz
+                out[i] = (out[i] << 4) | b
+            got += 1
+    if got != need:
+        raise HyperPressError("Invalid nibble block")
+    return bytes(out)
+
+
+def _rle_from_iter(parts, osz):
+    out = bytearray(osz)
+    n = 0
+    pending = False
+    for part in parts:
+        for b in part:
+            if pending:
+                if n + b > osz:
+                    raise HyperPressError("Invalid RLE block")
+                if b:
+                    out[n:n + b] = b"\x00" * b
+                n += b
+                pending = False
+            elif b == 0:
+                pending = True
+            else:
+                if n >= osz:
+                    raise HyperPressError("Block exceeds limit")
+                out[n] = b
+                n += 1
+    if pending:
+        raise HyperPressError("Invalid RLE block")
+    if n != osz:
+        raise HyperPressError("Block size mismatch")
+    return bytes(out)
+
+
+def _decode_block(payload, pp, be, osz, mem_budget=None):
     if pp not in PREPROC_DEC or be not in Backend._value2member_map_:
         raise HyperPressError("Unknown block codec")
+    if mem_budget is None:
+        mem_budget = osz + _SLACK
+    # Inverse BWT keeps one Python int per symbol (~48 B traced).
+    if pp == PreProc.BWT_MTF and osz * 48 > mem_budget - osz:
+        raise HyperPressError("Output exceeds limit")
+    cap = _pp_cap(pp, osz)
+    hold = osz if pp in (PreProc.NIBBLE, PreProc.RLE) else cap
     if pp == PreProc.NIBBLE:
-        cap = 2 * osz
+        result = _nibble_from_iter(_iter_backend(payload, be, cap, mem_budget, hold), osz)
     elif pp == PreProc.RLE:
-        cap = 2 * osz
-    elif pp == PreProc.BWT_MTF:
-        cap = osz + 4
-    elif pp == PreProc.TRANSPOSE:
-        cap = osz + 1
+        result = _rle_from_iter(_iter_backend(payload, be, cap, mem_budget, hold), osz)
     else:
-        cap = osz
-    if be == Backend.STORED:
-        decoded = payload
-        if len(decoded) > cap:
+        if be == Backend.STORED and len(payload) > cap:
             raise HyperPressError("Block exceeds limit")
-    elif be == Backend.ZLIB9:
-        decoded = _bounded_decode(payload, "zlib", cap)
-    elif be == Backend.LZMA:
-        decoded = _bounded_decode(payload, "lzma", cap,
-                                  [{"id": lzma.FILTER_LZMA2}])
-    elif be == Backend.BZ2:
-        decoded = _bounded_decode(payload, "bz2", cap)
-    else:
-        # Legacy backend: zlib-1 then raw LZMA2-6.
-        inner = _bounded_decode(payload, "lzma", cap + 65536,
-                                [{"id": lzma.FILTER_LZMA2}])
-        decoded = _bounded_decode(inner, "zlib", cap)
-    if pp == PreProc.RLE:
-        result_buf = bytearray()
-        i = 0
-        while i < len(decoded):
-            if decoded[i] == 0:
-                if i + 1 >= len(decoded) or len(result_buf) + decoded[i + 1] > osz:
-                    raise HyperPressError("Invalid RLE block")
-                result_buf.extend(b"\x00" * decoded[i + 1])
-                i += 2
-            else:
-                if len(result_buf) >= osz:
-                    raise HyperPressError("Block exceeds limit")
-                result_buf.append(decoded[i])
-                i += 1
-        result = bytes(result_buf)
-    else:
+        if be == Backend.STORED:
+            decoded = payload
+        else:
+            buf = bytearray()
+            for part in _iter_backend(payload, be, cap, mem_budget, hold):
+                buf.extend(part)
+            decoded = bytes(buf)
         if pp == PreProc.BWT_MTF and (len(decoded) < 4 or
                 struct.unpack_from("<I", decoded)[0] >= len(decoded) - 4):
             raise HyperPressError("Invalid BWT block")
         if pp == PreProc.TRANSPOSE and (not decoded or decoded[0] == 0):
             raise HyperPressError("Invalid transpose block")
-        if pp == PreProc.NIBBLE and len(decoded) != 2 * osz:
-            raise HyperPressError("Invalid nibble block")
         result = PREPROC_DEC[PreProc(pp)](decoded)
     if len(result) != osz:
         raise HyperPressError("Block size mismatch")
@@ -696,7 +1022,8 @@ def _decode_v2(data, max_output_size):
     if mode == 0:
         if off >= len(data):
             raise HyperPressError("Missing method")
-        result = _whole_decode(data[off + 1:], data[off], size)
+        result = _whole_decode(memoryview(data)[off + 1:], data[off], size,
+                               max_output_size + _SLACK)
     elif mode == 1:
         count, off = _read_varint(data, off)
         if count > size or (count == 0) != (size == 0):
@@ -711,7 +1038,8 @@ def _decode_v2(data, max_output_size):
                 raise HyperPressError("Truncated block")
             pp, be = data[off], data[off + 1]
             off += 2
-            out.extend(_decode_block(data[off:off + csz], pp, be, osz))
+            out.extend(_decode_block(memoryview(data)[off:off + csz], pp, be, osz,
+                                     max_output_size + _SLACK))
             off += csz
         if off != len(data):
             raise HyperPressError("Trailing garbage")
@@ -742,7 +1070,8 @@ def _decode_v1(data, max_output_size):
         off += bsz
         if osz == 0 or osz > 131072 or osz > size - len(out) or csz > len(data) - off:
             raise HyperPressError("Invalid v1 block size")
-        block = _decode_block(data[off:off + csz], pp, be, osz)
+        block = _decode_block(memoryview(data)[off:off + csz], pp, be, osz,
+                              max_output_size + _SLACK)
         if zlib.crc32(block) & 0xffffffff != crc:
             raise HyperPressError("v1 block CRC mismatch")
         out.extend(block)

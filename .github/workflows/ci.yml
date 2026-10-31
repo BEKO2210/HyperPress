@@ -64,6 +64,9 @@ jobs:
       - name: Fair benchmark (Canterbury, never worse than best stdlib opponent + 16 B)
         run: python benchmarks/fair_bench.py --quick --check
 
+      - name: Large roundtrip (14 MiB, every xz method, exact max_output_size)
+        run: python benchmarks/large_roundtrip.py
+
       - name: Upload results
         if: always()
         uses: actions/upload-artifact@v4

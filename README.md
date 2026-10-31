@@ -5,7 +5,7 @@
 <h1 align="center">HyperPress</h1>
 <p align="center"><strong>Adaptive Meta-Compressor</strong></p>
 <p align="center">
-  Never larger than the best of xz-9e / bz2-9 / zstd-19 (+ at most 16 header bytes) &middot; Pure Python &middot; Zero dependencies
+  Default level: never larger than the best of xz-9e / bz2-9 / zstd-19 (+ at most 16 header bytes) &middot; Pure Python &middot; Zero dependencies
 </p>
 
 <p align="center">
@@ -39,13 +39,13 @@ An independent audit showed that the v1 marketing numbers were wrong: they came 
 
 ## Guarantee
 
-For every input `d`:
+For every input `d` with the default `level="best"`:
 
 ```
 len(compress(d)) <= min(xz-raw-9e, bz2-9, zstd-19*) + 16
 ```
 
-`*` zstd-19 only counts when the standard library provides zstd (Python 3.14+, `compression.zstd`). The guarantee is enforced by construction (the plain xz-9e, bz2-9 and zstd-19 results are always candidates, plus a STORED fallback) and checked by the test suite. Output is deterministic for the same input and the same Python/library versions.
+`*` zstd-19 only counts when the standard library provides zstd (Python 3.14+, `compression.zstd`). The guarantee is enforced by construction (the plain xz-9e, bz2-9 and zstd-19 results are always candidates, plus a STORED fallback) and checked by the test suite. `level="fast"` trades size for speed and has no size guarantee (it never expands beyond STORED + header). Output is deterministic for the same input and the same Python/library versions.
 
 ## Benchmarks
 
@@ -54,32 +54,32 @@ Results are produced by `benchmarks/fair_bench.py` on real files, with the **ful
 <!-- BENCH:START -->
 | Corpus | File | Original | HyperPress | Best stdlib opponent | vs best | vs xz -9e | vs zstd -19 |
 |---|---|---:|---:|---|---:|---:|---:|
-| canterbury | alice29.txt | 152,089 | 43,216 | bz2-9 43,202 | +14 B (+0.03 %) | -10.9 % | -12.2 % |
+| canterbury | alice29.txt | 152,089 | 43,177 | bz2-9 43,202 | -25 B (-0.06 %) | -11.0 % | -12.3 % |
 | canterbury | asyoulik.txt | 125,179 | 39,583 | bz2-9 39,569 | +14 B (+0.04 %) | -11.2 % | -12.3 % |
 | canterbury | cp.html | 24,603 | 7,602 | xz-raw-9e 7,596 | +6 B (+0.08 %) | -0.7 % | -1.5 % |
 | canterbury | fields.c | 11,150 | 2,956 | xz-raw-9e 2,973 | -17 B (-0.57 %) | -2.5 % | -2.0 % |
 | canterbury | grammar.lsp | 3,721 | 1,222 | zlib-9 1,222 | +0 B (+0.00 %) | -5.4 % | +0.7 % |
 | canterbury | kennedy.xls | 1,029,744 | 47,973 | xz-raw-9e 51,811 | -3838 B (-7.41 %) | -7.5 % | -31.2 % |
-| canterbury | lcet10.txt | 426,754 | 107,720 | bz2-9 107,706 | +14 B (+0.01 %) | -9.8 % | -11.2 % |
-| canterbury | plrabn12.txt | 481,861 | 145,591 | bz2-9 145,577 | +14 B (+0.01 %) | -12.0 % | -13.0 % |
+| canterbury | lcet10.txt | 426,754 | 107,665 | bz2-9 107,706 | -41 B (-0.04 %) | -9.9 % | -11.3 % |
+| canterbury | plrabn12.txt | 481,861 | 145,566 | bz2-9 145,577 | -11 B (-0.01 %) | -12.0 % | -13.1 % |
 | canterbury | ptt5 | 513,216 | 39,012 | xz-raw-9e 39,801 | -789 B (-1.98 %) | -2.1 % | -10.2 % |
 | canterbury | sum | 38,240 | 9,409 | xz-raw-9e 9,443 | -34 B (-0.36 %) | -1.0 % | -15.1 % |
 | canterbury | xargs.1 | 4,227 | 1,738 | zlib-9 1,736 | +2 B (+0.12 %) | -4.1 % | +0.5 % |
-| silesia | dickens | 10,192,446 | 2,799,535 | bz2-9 2,799,520 | +15 B (+0.00 %) | -1.1 % | -1.8 % |
+| silesia | dickens | 10,192,446 | 2,759,608 | bz2-9 2,799,520 | -39912 B (-1.43 %) | -2.5 % | -3.2 % |
 | silesia | mozilla | 51,220,480 | 13,232,814 | xz-raw-9e 13,376,180 | -143366 B (-1.07 %) | -1.1 % | -12.0 % |
 | silesia | mr | 9,970,564 | 2,441,295 | bz2-9 2,441,280 | +15 B (+0.00 %) | -11.3 % | -21.6 % |
-| silesia | nci | 33,553,445 | 1,440,074 | xz-raw-9e 1,449,209 | -9135 B (-0.63 %) | -0.6 % | -12.3 % |
+| silesia | nci | 33,553,445 | 1,449,224 | xz-raw-9e 1,449,209 | +15 B (+0.00 %) | -0.0 % | -11.7 % |
 | silesia | ooffice | 6,152,192 | 2,084,481 | xz-raw-9e 2,427,163 | -342682 B (-14.12 %) | -14.1 % | -19.8 % |
 | silesia | osdb | 10,085,684 | 2,802,807 | bz2-9 2,802,792 | +15 B (+0.00 %) | -1.5 % | -9.5 % |
 | silesia | reymont | 6,627,202 | 1,246,245 | bz2-9 1,246,230 | +15 B (+0.00 %) | -5.3 % | -7.5 % |
-| silesia | samba | 21,606,400 | 3,727,990 | xz-raw-9e 3,739,464 | -11474 B (-0.31 %) | -0.3 % | -4.1 % |
-| silesia | sao | 7,251,944 | 4,414,312 | xz-raw-9e 4,425,604 | -11292 B (-0.26 %) | -0.3 % | -11.7 % |
-| silesia | webster | 41,458,703 | 8,358,807 | xz-raw-9e 8,368,609 | -9802 B (-0.12 %) | -0.1 % | -3.1 % |
+| silesia | samba | 21,606,400 | 3,739,479 | xz-raw-9e 3,739,464 | +15 B (+0.00 %) | -0.0 % | -3.8 % |
+| silesia | sao | 7,251,944 | 4,425,619 | xz-raw-9e 4,425,604 | +15 B (+0.00 %) | -0.0 % | -11.5 % |
+| silesia | webster | 41,458,703 | 8,368,624 | xz-raw-9e 8,368,609 | +15 B (+0.00 %) | -0.0 % | -3.0 % |
 | silesia | x-ray | 8,474,240 | 4,051,127 | bz2-9 4,051,112 | +15 B (+0.00 %) | -9.8 % | -21.4 % |
-| silesia | xml | 5,345,280 | 433,831 | xz-raw-9e 434,830 | -999 B (-0.23 %) | -0.2 % | -4.6 % |
-| **Total** | 23 files | **214,749,364** | **47,479,340** | per-file best 48,012,629 | **-1.11 %** | **-3.00 %** | **-10.97 %** |
+| silesia | xml | 5,345,280 | 434,845 | xz-raw-9e 434,830 | +15 B (+0.00 %) | -0.0 % | -4.4 % |
+| **Total** | 23 files | **214,749,364** | **47,482,071** | per-file best 48,012,629 | **-1.11 %** | **-3.00 %** | **-10.97 %** |
 
-Sizes are full HPRX containers (header included). Speed on this run: `best` compresses at 0.26 MB/s and `fast` at 2.86 MB/s; decompression runs at about 81 MB/s. Python 3.12.3, zstd opponent: CLI: zstd -19 --ultra --long=27, 0 violations of the guarantee. Reproduce with `python benchmarks/fair_bench.py`.
+Sizes are full HPRX containers (header included). Speed on this run: `best` compresses at 0.94 MB/s and `fast` at 24.65 MB/s, but `fast` output is +24.2 % larger than `best`; decompression runs at about 48 MB/s. Python 3.12.3, zstd opponent: CLI: zstd -19 --ultra --long=27, 0 violations of the guarantee. Reproduce with `python benchmarks/fair_bench.py`.
 <!-- BENCH:END -->
 
 ## How It Works (v2)
