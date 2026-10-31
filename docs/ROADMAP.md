@@ -14,6 +14,10 @@ Every find goes in the same day with an acceptance criterion. Done items get a p
 
 ## Backlog
 
+- [ ] Flaky test seen once under `python -O` (memcap/robustness, 1 of 19 runs, 2026-10-31, not reproduced). *Acceptance:* 100 consecutive `-O` runs green, or the test identified and made deterministic.
+- [ ] Command-line tool `hyperpress c/d FILE` (external audit 2026-10-31). *Acceptance:* `python -m hyperpress` packs/unpacks files, streams to stdout, exit codes documented, tested in CI.
+- [ ] Brotli (CLI, max quality + large window) as a further reference opponent next to zstd -22. *Acceptance:* columns in results.json/docs, clearly marked as non-stdlib reference.
+- [ ] Full Silesia in CI (currently Canterbury only). *Acceptance:* scheduled weekly job with `--check`, cached corpus, < 60 min.
 - [ ] Add `zstd --ultra -22 --long=27` as a reference opponent in `fair_bench.py` (external review 2026-10-31: -19 is not zstd's strongest setting). *Acceptance:* column in results.json and docs; totals reported against it.
 - [ ] Optional parallel candidates: `compress(..., threads=1)` default stays sequential (memory: each xz-9e candidate needs ~700 MB at 64 MiB dict); `threads=N`/`-1` runs candidates concurrently with identical output. *Acceptance:* byte-identical output for all thread counts; Silesia `best` ≥ 2.5 MB/s at threads=4; peak RAM documented.
 - [ ] Compression memory: all candidates run on the whole input; peak RAM on 51 MB mozilla not measured. *Acceptance:* peak documented in README, ≤ 6× input for `best` (external review 2026-10-31).
@@ -26,6 +30,7 @@ Every find goes in the same day with an acceptance criterion. Done items get a p
 
 ## Done
 
+- [x] 2026-10-31 **Third external audit** (22 M mutated inputs, 0 wrong outputs; grades 6/7/8/6/5). Four findings, all verified and fixed: `fast` described wrongly in SPEC/README/site (code uses STORED + xz preset 1 above 128 KiB); "strongest settings" claim without zstd -22/Brotli; dead `rle_dec`/`decomp_backend` (unbounded, unreachable) removed; site linked a v2.0.1 release that did not exist yet. Speed-vs-size and missing-zstd-below-3.14 notes added to README.
 - [x] 2026-10-31 **External review of v2.0.0** (5 areas, grades 6/8/8/6/5): one real bug — v1's `bench()`/`gen_data()` with "netto" header subtraction still shipped in `core.py`. Removed in 2.0.1; `tests/test_benchmark.py` now checks the guarantee on the synthetic sets instead of "beats LZMA"/"> 85 %", plus a guard test that `bench` is gone.
 - [x] 2026-10-31 **Website redesign** (`feat/website`): animated hero (one file through the candidates in sequence), interactive per-file chart with ties shown as ties, speed/size scatter, HPRX byte layout from real `compress()` output, memory-bound visual. All numbers load from `docs/bench-data.json`, written by `benchmarks/fill_docs.py`; screenshots checked at 390 px and 1440 px, 0 console errors.
 - [x] 2026-10-31 **v2.1 speed** (probe + method 16): Silesia `best` 0.26 → **1.01 MB/s**, size +2 850 B (+0.006 %); `fast` 2.86 → **24.7 MB/s** (cost: +24 % size). Full run `benchmarks/results.json`, 0 violations.

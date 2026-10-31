@@ -190,22 +190,6 @@ def rle_enc(d):
     return bytes(o)
 
 
-def rle_dec(d):
-    if not d:
-        return b""
-    o = bytearray()
-    i = 0
-    n = len(d)
-    while i < n:
-        if d[i] == 0 and i + 1 < n:
-            o.extend(b"\x00" * d[i + 1])
-            i += 2
-        else:
-            o.append(d[i])
-            i += 1
-    return bytes(o)
-
-
 def nibble_enc(d):
     n = len(d)
     h = bytearray(n)
@@ -266,9 +250,9 @@ PREPROC_DEC = {
     PreProc.DELTA: delta_dec,
     PreProc.DELTA16: delta16_dec,
     PreProc.BWT_MTF: bwt_mtf_dec,
-    PreProc.RLE: rle_dec,
+    PreProc.RLE: None,  # streamed with a cap in _rle_from_iter
     PreProc.TRANSPOSE: transpose_dec,
-    PreProc.NIBBLE: nibble_dec,
+    PreProc.NIBBLE: None,  # streamed with a cap in _nibble_from_iter
 }
 
 
@@ -294,27 +278,6 @@ def comp_backend(d, b):
             s1, format=lzma.FORMAT_RAW,
             filters=[{"id": lzma.FILTER_LZMA2, "preset": 6}],
         )
-    if b == Backend.STORED:
-        return d
-    raise ValueError("Unknown backend: %s" % b)
-
-
-def decomp_backend(d, b, sz):
-    if b == Backend.ZLIB9:
-        return zlib.decompress(d)
-    if b == Backend.LZMA:
-        return lzma.decompress(
-            d, format=lzma.FORMAT_RAW,
-            filters=[{"id": lzma.FILTER_LZMA2}],
-        )
-    if b == Backend.BZ2:
-        return bz2.decompress(d)
-    if b == Backend.ZLIB_LZMA:
-        s1 = lzma.decompress(
-            d, format=lzma.FORMAT_RAW,
-            filters=[{"id": lzma.FILTER_LZMA2}],
-        )
-        return zlib.decompress(s1)
     if b == Backend.STORED:
         return d
     raise ValueError("Unknown backend: %s" % b)

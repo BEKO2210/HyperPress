@@ -103,7 +103,9 @@ Input Data
  smallest stream wins → HPRX v2 output
 ```
 
-`level="fast"` tries only whole-stream zlib-9, bz2-9, xz preset 6 and zstd-3 (if available) — at most 4 candidates, no block path.
+`level="fast"` uses no block path and few whole-stream candidates: below 128 KiB STORED, zlib-9, bz2-9, xz preset 6 and zstd-3 (if available); from 128 KiB on only STORED, xz preset 1 and zstd-3 (if available).
+
+Speed depends on input size: on the large Silesia files `best` reaches about 1 MB/s, on the small Canterbury files only about 0.14 MB/s, because every candidate has a fixed start-up cost. Without Python 3.14 there is no zstd in the standard library, so zstd is not a candidate and data that zstd packs best can come out larger than `zstd -19` (the guarantee then covers xz-9e and bz2-9 only).
 
 ## Installation
 

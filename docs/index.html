@@ -433,7 +433,7 @@ footer { border-top: 1px solid var(--line); padding: 48px 0 56px; }
 <section id="bench">
   <div class="wrap">
     <h2 id="benchTitle">Measured on 23 real files</h2>
-    <p class="lede" id="benchIntro">The Canterbury and Silesia corpora, pinned by SHA256. Sizes are full HPRX containers with the header included, compared with the strongest settings of each opponent.</p>
+    <p class="lede" id="benchIntro">The Canterbury and Silesia corpora, pinned by SHA256. Sizes are full HPRX containers with the header included, compared with strong settings of each opponent (xz -9e, bz2 -9, zstd -19 --long=27; zstd -22 and Brotli are not in this run).</p>
 
     <div class="totals js-only" id="totals" aria-live="polite">
       <div class="total"><div class="big" data-count="best">&nbsp;</div><p class="what">total size versus the best single codec, chosen per file</p></div>
@@ -503,7 +503,7 @@ footer { border-top: 1px solid var(--line); padding: 48px 0 56px; }
 <section id="speed">
   <div class="wrap">
     <h2>Smaller costs time</h2>
-    <p class="lede">HyperPress runs many candidates in sequence, so at the best level it compresses slower than <code>xz -9e</code> or <code>zstd -19</code> alone. The fast level tries at most five cheap candidates and is quicker, but its output is noticeably larger and carries no size guarantee.</p>
+    <p class="lede">HyperPress runs many candidates in sequence, so at the best level it compresses slower than <code>xz -9e</code> or <code>zstd -19</code> alone. The fast level tries only a few cheap whole-stream candidates (above 128 KiB just xz preset 1 and STORED, plus zstd-3 on Python 3.14) and is quicker, but its output is noticeably larger and carries no size guarantee.</p>
     <div class="speed-grid">
       <figure class="plot js-only" id="plot" style="margin:0">
         <svg id="scatter" viewBox="0 0 360 290" role="img" aria-labelledby="scTitle scDesc"><title id="scTitle">Compression speed against total output size</title><desc id="scDesc">Scatter plot over all 23 files. Lower and further right is better.</desc></svg>
@@ -693,7 +693,7 @@ quick = <span class="tk-f">compress</span>(data, level=<span class="tk-s">"fast"
     var zstdLabel = zstdCli ? 'zstd -19 --ultra --long=27 (command-line tool)' : 'zstd -19';
     $('#zstdWhat').innerHTML = 'versus <code>' + (zstdCli ? 'zstd -19 --long=27' : 'zstd -19') + '</code>' + (zstdCli ? ', a reference only: not a candidate on Python ' + D.env.python : '');
     $('#zstdNote').textContent = zstdCli ? 'zstd is the command-line tool (Python ' + D.env.python + ' has no zstd module)' : 'zstd from compression.zstd';
-    $('#benchIntro').textContent = 'The Canterbury and Silesia corpora, pinned by SHA256: ' + D.totals.files + ' files, ' + mb(D.totals.size) + ' in total. Sizes are full HPRX containers with the header included, compared with the strongest settings of each opponent. ' + D.violations.length + ' violations of the guarantee.';
+    $('#benchIntro').textContent = 'The Canterbury and Silesia corpora, pinned by SHA256: ' + D.totals.files + ' files, ' + mb(D.totals.size) + ' in total. Sizes are full HPRX containers with the header included, compared with strong settings of each opponent (xz -9e, bz2 -9, zstd -19 --long=27; zstd -22 and Brotli are not in this run). ' + D.violations.length + ' violations of the guarantee.';
 
     $('#benchTitle').textContent = 'Measured on ' + D.totals.files + ' real files';
     hero(D, byName, H);
