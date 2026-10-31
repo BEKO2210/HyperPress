@@ -392,3 +392,15 @@ def test_text_crlf_newline_bomb_within_budget():
         tracemalloc.stop()
     # TEXT holds the inner stream and the growing output (bytearray slack).
     assert peak <= 2.25 * n + 64 * 1024, peak
+
+
+@pytest.mark.parametrize("preset", range(10))
+def test_fit_keeps_preset_dictionary_for_large_streams(preset):
+    # A missing dict_size used to mean 8 MiB; preset 9 is 64 MiB, so xz
+    # streams above 8 MiB failed with "Corrupt input data" (Silesia mozilla).
+    from hyperpress.core import _fit_lzma_filters
+    props = lzma._encode_filter_properties({"id": lzma.FILTER_LZMA2, "preset": preset})
+    real = lzma._decode_filter_properties(lzma.FILTER_LZMA2, props)["dict_size"]
+    filters = [{"id": lzma.FILTER_LZMA2, "preset": preset | lzma.PRESET_EXTREME}]
+    assert _fit_lzma_filters(filters, 1 << 30)[0]["dict_size"] == real
+    assert _fit_lzma_filters(filters, 5000)[0]["dict_size"] == min(real, 5000)

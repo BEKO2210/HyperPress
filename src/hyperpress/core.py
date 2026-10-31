@@ -545,6 +545,10 @@ _CHUNK = 4 * 1024
 _SLACK = 64 * 1024
 
 
+# xz preset -> LZMA2 dictionary size (xz(1), stable across liblzma versions).
+_PRESET_DICT = (256 << 10,) + tuple(n << 20 for n in (1, 2, 4, 4, 8, 8, 16, 32, 64))
+
+
 def _fit_lzma_filters(filters, hold):
     """Size the LZMA2 dictionary to the decoded stream, never below it.
 
@@ -559,7 +563,9 @@ def _fit_lzma_filters(filters, hold):
     for item in filters:
         filt = dict(item)
         if filt.get("id") == lzma.FILTER_LZMA2:
-            requested = filt.get("dict_size", 8 * 1024 * 1024)
+            requested = filt.get("dict_size")
+            if requested is None:
+                requested = _PRESET_DICT[filt.get("preset", 6) & 0x1f]
             filt["dict_size"] = min(requested, max(4096, hold))
         fitted.append(filt)
     return fitted
