@@ -10,5 +10,5 @@ Usage:
 
 from hyperpress.core import compress, decompress, HyperPressError, FORMAT_VERSION
 
-__version__ = "2.0.0"
+__version__ = "2.0.1"
 __all__ = ["compress", "decompress", "HyperPressError", "FORMAT_VERSION"]

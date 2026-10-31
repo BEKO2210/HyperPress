@@ -14,6 +14,8 @@ Every find goes in the same day with an acceptance criterion. Done items get a p
 
 ## Backlog
 
+- [ ] Compression memory: all candidates run on the whole input; peak RAM on 51 MB mozilla not measured. *Acceptance:* peak documented in README, ≤ 6× input for `best` (external review 2026-10-31).
+- [ ] Document the probe (`_probe_candidates`): which variants it can skip and what it costs; the guarantee is unaffected (baselines always run). *Acceptance:* section in SPEC + a test that the baselines always run on ≥ 2 MiB inputs.
 - [ ] **PyPI 2.0.0 upload failed** (workflow "Publish to PyPI" red on the v2.0.0 release, `pypi.org/pypi/hyperpress/json` = 404). The website installs from the Git tag until then. *Acceptance:* `pip install hyperpress==2.0.0` works, then switch the site snippet and add the PyPI link.
 - [ ] `fair_bench.py` stores `method_byte = out[6]`, which is the first varint byte, not the method. *Acceptance:* store the real method id (or mode + method) so the site can show which candidate won per file.
 - [ ] Beat xz on large structured JSON/CSV by more than 1 % (column/field-aware transform). *Acceptance:* ≥ 3 % on Silesia `xml` / `nci`.
@@ -22,19 +24,20 @@ Every find goes in the same day with an acceptance criterion. Done items get a p
 
 ## Done
 
+- [x] 2026-10-31 **External review of v2.0.0** (5 areas, grades 6/8/8/6/5): one real bug — v1's `bench()`/`gen_data()` with "netto" header subtraction still shipped in `core.py`. Removed in 2.0.1; `tests/test_benchmark.py` now checks the guarantee on the synthetic sets instead of "beats LZMA"/"> 85 %", plus a guard test that `bench` is gone.
 - [x] 2026-10-31 **Website redesign** (`feat/website`): animated hero (one file through the candidates in sequence), interactive per-file chart with ties shown as ties, speed/size scatter, HPRX byte layout from real `compress()` output, memory-bound visual. All numbers load from `docs/bench-data.json`, written by `benchmarks/fill_docs.py`; screenshots checked at 390 px and 1440 px, 0 console errors.
-- [x] 2026-10-31 **v2.1 speed** (Codex probe + Claude method 16): Silesia `best` 0.26 → **1.01 MB/s**, size +2 850 B (+0.006 %); `fast` 2.86 → **24.7 MB/s** (cost: +24 % size). Full run `benchmarks/results.json`, 0 violations.
-- [x] 2026-10-31 **v2.1 text transform** (Cursor, methods 14/15): dickens **−1.43 %** vs bz2-9 (−39 912 B), alice29 −25 B, lcet10 −41 B.
-- [x] 2026-10-31 **Decoder memory cap** (Grok + Claude): rejected bombs ≤ cap + 64 KiB; LZMA paths ≤ 2·cap + 64 KiB, TEXT ≤ 2.25·cap + 64 KiB (strictly lower is impossible without breaking valid streams). 55 memcap tests.
+- [x] 2026-10-31 **v2.1 speed** (probe + method 16): Silesia `best` 0.26 → **1.01 MB/s**, size +2 850 B (+0.006 %); `fast` 2.86 → **24.7 MB/s** (cost: +24 % size). Full run `benchmarks/results.json`, 0 violations.
+- [x] 2026-10-31 **v2.1 text transform** (methods 14/15): dickens **−1.43 %** vs bz2-9 (−39 912 B), alice29 −25 B, lcet10 −41 B.
+- [x] 2026-10-31 **Decoder memory cap**: rejected bombs ≤ cap + 64 KiB; LZMA paths ≤ 2·cap + 64 KiB, TEXT ≤ 2.25·cap + 64 KiB (strictly lower is impossible without breaking valid streams). 55 memcap tests.
 - [x] 2026-10-31 **Three decoder bugs found by the full benchmark, not by tests**, all fixed with red→green tests: LZMA dict shrunk to the budget (13/28 Canterbury streams failed at `max_output_size = size`), empty drain read as truncation (Silesia mozilla), missing `dict_size` assumed 8 MiB instead of the preset's 64 MiB (`28eb36c`). New CI step `benchmarks/large_roundtrip.py` (14 MiB, every xz method) is red on the old code.
-- [x] 2026-10-31 **agy review of v2.1**: 10 findings, 3 real (TEXT literal run > 64 KiB undecodable, CRLF bomb peaked at 4.1× cap, double copy on return), 5 false, 2 partly; all verified by hand (`67bf42b`).
-- [x] 2026-10-31 **Format v2 + WHOLE candidates** (Codex, `2b23f36`): 0 guarantee violations on Canterbury + Silesia (23 files, 214.7 MB). Total −1.11 % vs per-file best stdlib opponent, −3.00 % vs xz -9e, −10.97 % vs zstd -19 --long=27. Biggest win: ooffice −14.1 % (x86 BCJ).
+- [x] 2026-10-31 **Review of v2.1**: 10 findings, 3 real (TEXT literal run > 64 KiB undecodable, CRLF bomb peaked at 4.1× cap, double copy on return), 5 false, 2 partly; all verified by hand (`67bf42b`).
+- [x] 2026-10-31 **Format v2 + WHOLE candidates** (`2b23f36`): 0 guarantee violations on Canterbury + Silesia (23 files, 214.7 MB). Total −1.11 % vs per-file best stdlib opponent, −3.00 % vs xz -9e, −10.97 % vs zstd -19 --long=27. Biggest win: ooffice −14.1 % (x86 BCJ).
 - [x] 2026-10-31 **Integrity**: `HyperPressError` only, no `assert`; bit-flip/truncation fuzz under `python -O`: 21 025 errors raised, 5 harmless flips returned the original, 0 silent wrong outputs; 500 MB bomb with lying header rejected at 0 MB peak.
-- [x] 2026-10-31 **Contract tests** (Grok, `4c4e343`) written blind against SPEC: 144 tests, all green against Codex' core; total suite 204 passed.
-- [x] 2026-10-31 **Fair benchmark + CI gate** (Claude subagent, `3cf499d`): SHA256-pinned corpora, `--check`; repaired `ci.yml` that was invalid YAML since 2026-02-28 (every run failed after 0 s).
-- [x] 2026-10-31 **Honest docs** (Copilot, `2963794`): removed 92.3 % / +23 % / "parallel racing"; tables generated by `benchmarks/fill_docs.py`.
+- [x] 2026-10-31 **Contract tests** (`4c4e343`) written blind against SPEC: 144 tests, all green against the independently written core; total suite 204 passed.
+- [x] 2026-10-31 **Fair benchmark + CI gate** (`3cf499d`): SHA256-pinned corpora, `--check`; repaired `ci.yml` that was invalid YAML since 2026-02-28 (every run failed after 0 s).
+- [x] 2026-10-31 **Honest docs** (`2963794`): removed 92.3 % / +23 % / "parallel racing"; tables generated by `benchmarks/fill_docs.py`.
 - [x] 2026-10-31 **CI green on GitHub** (PR #16, `65413c2`): 3.8–3.14 + `fair-benchmark`. Canterbury host returned 403 to runners → archive vendored (739 KB, SHA256-pinned).
-- [x] 2026-10-31 `fast` level lacked STORED → random data grew 21 B (agy review, verified; fixed `d88a29a`).
+- [x] 2026-10-31 `fast` level lacked STORED → random data grew 21 B (review, verified; fixed `d88a29a`).
 
 - [x] 2026-10-30 Independent audit of v1: 55/55 own tests green, 400/400 fuzz roundtrips OK; fair benchmark: v1 loses to xz -9e by 20 % on real files (validusage.json +144 %), `python -O` returns silently wrong data on a corrupted stored block.
 - [x] 2026-10-30 Prototype "whole-file candidates": never worse than best opponent on 8 real files, −0.9 % total.
@@ -47,8 +50,8 @@ Every find goes in the same day with an acceptance criterion. Done items get a p
 - **A meta-compressor must include the best plain tools as candidates on the whole input**, otherwise it can lose to them.
 - **`assert` is not validation.** `python -O` strips it; integrity checks must raise.
 - **No compressor wins on all data** (counting argument). The honest promise: never worse than the best candidate + a few header bytes.
-- **Contract first, then parallel agents.** A binding SPEC let four tools build core, tests, benchmark and docs at the same time; blind-written tests passed against independently written code on the first merge.
-- **Verify every reviewer finding.** Of 10 findings by an AI reviewer, 3 were false (lc/lp/pb "invalid", hash-seed "nondeterminism", "broken" bench), 1 was a real bug.
+- **Contract first, then parallel work.** A binding SPEC let core, tests, benchmark and docs be built at the same time; blind-written tests passed against independently written code on the first merge.
+- **Verify every reviewer finding.** Of 10 review findings, 3 were false (lc/lp/pb "invalid", hash-seed "nondeterminism", "broken" bench), 1 was a real bug.
 - **Benchmarks in CI must not depend on third-party hosts** (Canterbury: 403 for GitHub runners). Vendor small pinned data.
 - **A red CI that nobody looks at is no CI.** v1's workflow was invalid YAML for 8 months.
 - **Check the shell before sending prompts through it:** unquoted heredocs execute backticks inside prompt text.
