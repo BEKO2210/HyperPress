@@ -494,11 +494,30 @@ def _lzma_filters(method, size):
         settings.update(lc=0, lp=2, pb=2)
     elif method == 10:
         settings.update(lc=1, lp=0, pb=0)
+    elif method == 15:
+        settings.update(lc=4, lp=0, pb=0)
     if method in (4, 5, 6):
         return [{"id": lzma.FILTER_DELTA, "dist": {4: 1, 5: 2, 6: 4}[method]}, settings]
     if method == 7:
         return [{"id": lzma.FILTER_X86}, settings]
     return [settings]
+
+
+def _looks_like_text(data):
+    if len(data) < 32:
+        return False
+    sample = data[:8192] if len(data) > 8192 else data
+    good = sum(1 for b in sample if 32 <= b <= 126 or b in (9, 10, 13))
+    if good * 100 // len(sample) < 85:
+        return False
+    return sample.count(0) == 0
+
+
+def _textxf_intermediate_cap(size, max_output_size):
+    cap = size + (size >> 1) + 262144
+    if cap > max_output_size + 65536:
+        cap = max_output_size + 65536
+    return cap
 
 
 def _whole_compress(data, method):
@@ -514,6 +533,13 @@ def _whole_compress(data, method):
     if method == 11:
         obj = zlib.compressobj(9, zlib.DEFLATED, -15)
         return obj.compress(data) + obj.flush()
+    if method in (14, 15):
+        from hyperpress.textxf import encode
+        xf = encode(data)
+        if method == 14:
+            return bz2.compress(xf, compresslevel=9)
+        return lzma.compress(xf, format=lzma.FORMAT_RAW,
+                             filters=_lzma_filters(method, len(data)))
     raise HyperPressError("Unknown method")
 
 
@@ -554,7 +580,7 @@ def _bounded_decode(payload, kind, limit, filters=None):
     return bytes(out)
 
 
-def _whole_decode(payload, method, size):
+def _whole_decode(payload, method, size, max_output_size=1 << 30):
     if method == 0:
         if len(payload) != size:
             raise HyperPressError("Stored size mismatch")
@@ -569,6 +595,16 @@ def _whole_decode(payload, method, size):
         return _bounded_decode(payload, "zstd", size)
     if method == 11:
         return _bounded_decode(payload, "raw-zlib", size)
+    if method in (14, 15):
+        from hyperpress.textxf import decode as textxf_decode
+        cap = _textxf_intermediate_cap(size, max_output_size)
+        if method == 14:
+            inner = _bounded_decode(payload, "bz2", cap)
+        else:
+            inner = _bounded_decode(payload, "lzma", cap, _lzma_filters(method, size))
+        if len(inner) >= 3 and inner[:3] == b"HPt":
+            return textxf_decode(inner, size)
+        raise HyperPressError("Invalid TEXT payload")
     raise HyperPressError("Unknown method")
 
 
@@ -637,9 +673,13 @@ def compress(data, level="best", verbose=False):
     elif len(data) >= 2 * 1024 * 1024:
         optional, try_blocks = _probe_candidates(data)
         methods = [0, 1, 2, 3] + optional
+        if _looks_like_text(data):
+            methods.append(14)
     else:
         methods = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
         try_blocks = True
+        if _looks_like_text(data):
+            methods.extend((14, 15))
     best = None
     for method in methods:
         if method in (3, 13) and not HAVE_ZSTD:
@@ -729,7 +769,7 @@ def _decode_v2(data, max_output_size):
     if mode == 0:
         if off >= len(data):
             raise HyperPressError("Missing method")
-        result = _whole_decode(data[off + 1:], data[off], size)
+        result = _whole_decode(data[off + 1:], data[off], size, max_output_size)
     elif mode == 1:
         count, off = _read_varint(data, off)
         if count > size or (count == 0) != (size == 0):
