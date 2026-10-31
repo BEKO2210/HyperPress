@@ -596,6 +596,32 @@ def _blocks_compress(data, verbose):
     return bytes(out)
 
 
+def _probe_candidates(data):
+    """Rank optional whole methods and predict whether splitting helps."""
+    width = 32768
+    n = len(data)
+    offsets = (0, max(0, (n - width) // 2), n - width)
+    samples = [data[off:off + width] for off in offsets]
+    probe = b"".join(samples)
+    baseline = min(len(_whole_compress(probe, method)) for method in (1, 2))
+    optional = []
+    for method in (4, 5, 6, 7, 8, 9, 10, 11, 12, 13):
+        if method == 13 and not HAVE_ZSTD:
+            continue
+        try:
+            size = len(_whole_compress(probe, method))
+        except (lzma.LZMAError, OSError, ValueError):
+            continue
+        if size < baseline * 0.985:
+            optional.append((size, method))
+    optional.sort()
+    # Separate zlib streams expose abrupt changes without running block engine.
+    whole_zlib = len(zlib.compress(probe, 6))
+    split_zlib = sum(len(zlib.compress(sample, 6)) for sample in samples)
+    blocks_worth_trying = split_zlib < whole_zlib * 0.95
+    return [method for _, method in optional[:1]], blocks_worth_trying
+
+
 def compress(data, level="best", verbose=False):
     """Compress bytes to HPRX v2, selecting smallest candidate."""
     if not isinstance(data, bytes):
@@ -605,8 +631,15 @@ def compress(data, level="best", verbose=False):
     header = _v2_header(0, data)
     if not data:
         return header + b"\x00"
-    methods = ([0, 11, 2, 12, 13] if level == "fast" else
-               [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13])
+    if level == "fast":
+        methods = [0, 11, 13] if len(data) >= 131072 else [0, 11, 2, 12, 13]
+        try_blocks = False
+    elif len(data) >= 2 * 1024 * 1024:
+        optional, try_blocks = _probe_candidates(data)
+        methods = [0, 1, 2, 3] + optional
+    else:
+        methods = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+        try_blocks = True
     best = None
     for method in methods:
         if method in (3, 13) and not HAVE_ZSTD:
@@ -617,7 +650,7 @@ def compress(data, level="best", verbose=False):
             continue
         if best is None or len(candidate) < len(best):
             best = candidate
-    if level == "best":
+    if try_blocks:
         blocks = _blocks_compress(data, verbose)
         if len(blocks) < len(best):
             best = blocks
