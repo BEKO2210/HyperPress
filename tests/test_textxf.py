@@ -38,11 +38,18 @@ def test_malformed_payloads_hyperpress_error():
 
 
 def test_whole_method_14_roundtrip():
-    data = open(
-        "benchmarks/.corpus/canterbury/alice29.txt", "rb"
-    ).read()
+    # Vendored archive: the downloaded corpus cache does not exist in CI.
+    import os
+    import tarfile
+    from hyperpress.core import _read_varint
+    archive = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                           "benchmarks", "data", "cantrbry.tar.gz")
+    with tarfile.open(archive) as tar:
+        data = tar.extractfile("alice29.txt").read()
     blob = compress(data, level="best")
     assert decompress(blob) == data
+    size, off = _read_varint(blob, 6)
+    assert blob[5] == 0 and blob[off + 4] in (14, 15)
 
 
 def test_corrupted_textxf_payload():
