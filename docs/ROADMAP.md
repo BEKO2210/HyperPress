@@ -14,12 +14,15 @@ Every find goes in the same day with an acceptance criterion. Done items get a p
 
 ## Backlog
 
+- [ ] **PyPI 2.0.0 upload failed** (workflow "Publish to PyPI" red on the v2.0.0 release, `pypi.org/pypi/hyperpress/json` = 404). The website installs from the Git tag until then. *Acceptance:* `pip install hyperpress==2.0.0` works, then switch the site snippet and add the PyPI link.
+- [ ] `fair_bench.py` stores `method_byte = out[6]`, which is the first varint byte, not the method. *Acceptance:* store the real method id (or mode + method) so the site can show which candidate won per file.
 - [ ] Beat xz on large structured JSON/CSV by more than 1 % (column/field-aware transform). *Acceptance:* ≥ 3 % on Silesia `xml` / `nci`.
 - [ ] Block path: block boundaries lose context (validusage.json 2.4× worse than xz in v1). Idea: preprocess per block, compress all blocks as one stream.
 - [ ] Speed of pure-Python transforms (1–2 MB/s). *Acceptance:* ≥ 5 MB/s on best level.
 
 ## Done
 
+- [x] 2026-10-31 **Website redesign** (`feat/website`): animated hero (one file through the candidates in sequence), interactive per-file chart with ties shown as ties, speed/size scatter, HPRX byte layout from real `compress()` output, memory-bound visual. All numbers load from `docs/bench-data.json`, written by `benchmarks/fill_docs.py`; screenshots checked at 390 px and 1440 px, 0 console errors.
 - [x] 2026-10-31 **v2.1 speed** (Codex probe + Claude method 16): Silesia `best` 0.26 → **1.01 MB/s**, size +2 850 B (+0.006 %); `fast` 2.86 → **24.7 MB/s** (cost: +24 % size). Full run `benchmarks/results.json`, 0 violations.
 - [x] 2026-10-31 **v2.1 text transform** (Cursor, methods 14/15): dickens **−1.43 %** vs bz2-9 (−39 912 B), alice29 −25 B, lcet10 −41 B.
 - [x] 2026-10-31 **Decoder memory cap** (Grok + Claude): rejected bombs ≤ cap + 64 KiB; LZMA paths ≤ 2·cap + 64 KiB, TEXT ≤ 2.25·cap + 64 KiB (strictly lower is impossible without breaking valid streams). 55 memcap tests.

@@ -81,6 +81,17 @@ else:
     ZSTD_SOURCE = "skipped (no compression.zstd, no zstd CLI)"
 
 
+def _method_byte(out):
+    """WHOLE method id of an HPRX v2 stream, or None for BLOCKS / v1."""
+    if len(out) < 7 or out[4] != 2 or out[5] != 0:
+        return None
+    off = 6
+    while out[off] & 0x80:
+        off += 1
+    off += 1 + 4  # last varint byte, CRC32
+    return out[off] if off < len(out) else None
+
+
 def _timed(fn, arg):
     t0 = time.perf_counter()
     out = fn(arg)
@@ -101,7 +112,7 @@ def bench_file(name, data, log):
         back, dt = _timed(decompress, out)
         if back != data:
             raise SystemExit("ROUNDTRIP FAILED: %s level=%s" % (name, level))
-        row["hp_" + level] = {"size": len(out), "method_byte": out[6] if len(out) > 6 else None,
+        row["hp_" + level] = {"size": len(out), "method_byte": _method_byte(out),
                               "comp_mbs": _mbs(len(data), ct),
                               "decomp_mbs": _mbs(len(data), dt), "roundtrip": True}
     checked = [(o, row["opponents"][o]["size"]) for o, _, c in OPPONENTS if c]
