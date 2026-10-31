@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="description" content="HyperPress is an adaptive meta-compressor: it tries many LZMA2/bz2/zlib/zstd configurations and keeps the smallest result — never larger than the best of xz-9e, bz2-9 and zstd-19 plus a 16-byte header.">
+<meta name="description" content="HyperPress is an adaptive meta-compressor: it tries many LZMA2/bz2/zlib/zstd configurations and keeps the smallest result — at the default level never larger than the best of xz-9e, bz2-9 and zstd-19 plus a 16-byte header.">
 <title>HyperPress — Adaptive Meta-Compressor</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1146,7 +1146,7 @@ noscript .reveal-fix, .no-js .reveal { opacity: 1 !important; transform: none !i
     <h1 class="hero-title reveal" data-text="HyperPress">HyperPress</h1>
     <p class="hero-subtitle reveal reveal-d1">Adaptive Meta-Compressor</p>
     <div class="hero-stats reveal reveal-d2">
-      <span class="hero-stat-badge">Never larger than best of xz-9e / bz2-9 / zstd-19 + 16 B</span>
+      <span class="hero-stat-badge">Level best: never larger than best of xz-9e / bz2-9 / zstd-19 + 16 B</span>
       <span class="hero-stat-badge">Pure Python &middot; stdlib only</span>
     </div>
     <a href="#pipeline" class="hero-cta reveal reveal-d3">
@@ -1325,32 +1325,32 @@ noscript .reveal-fix, .no-js .reveal { opacity: 1 !important; transform: none !i
 <!-- BENCH:START -->
 <table class="bench-table">
 <thead><tr><th>File</th><th>Original</th><th>HyperPress</th><th>Best stdlib opponent</th><th>vs best</th><th>vs xz -9e</th></tr></thead><tbody>
-<tr><td>canterbury/alice29.txt</td><td>152,089</td><td>43,216</td><td>bz2-9 43,202</td><td>+0.03&nbsp;%</td><td>-10.9&nbsp;%</td></tr>
+<tr><td>canterbury/alice29.txt</td><td>152,089</td><td>43,177</td><td>bz2-9 43,202</td><td>-0.06&nbsp;%</td><td>-11.0&nbsp;%</td></tr>
 <tr><td>canterbury/asyoulik.txt</td><td>125,179</td><td>39,583</td><td>bz2-9 39,569</td><td>+0.04&nbsp;%</td><td>-11.2&nbsp;%</td></tr>
 <tr><td>canterbury/cp.html</td><td>24,603</td><td>7,602</td><td>xz-raw-9e 7,596</td><td>+0.08&nbsp;%</td><td>-0.7&nbsp;%</td></tr>
 <tr><td>canterbury/fields.c</td><td>11,150</td><td>2,956</td><td>xz-raw-9e 2,973</td><td>-0.57&nbsp;%</td><td>-2.5&nbsp;%</td></tr>
 <tr><td>canterbury/grammar.lsp</td><td>3,721</td><td>1,222</td><td>zlib-9 1,222</td><td>+0.00&nbsp;%</td><td>-5.4&nbsp;%</td></tr>
 <tr><td>canterbury/kennedy.xls</td><td>1,029,744</td><td>47,973</td><td>xz-raw-9e 51,811</td><td>-7.41&nbsp;%</td><td>-7.5&nbsp;%</td></tr>
-<tr><td>canterbury/lcet10.txt</td><td>426,754</td><td>107,720</td><td>bz2-9 107,706</td><td>+0.01&nbsp;%</td><td>-9.8&nbsp;%</td></tr>
-<tr><td>canterbury/plrabn12.txt</td><td>481,861</td><td>145,591</td><td>bz2-9 145,577</td><td>+0.01&nbsp;%</td><td>-12.0&nbsp;%</td></tr>
+<tr><td>canterbury/lcet10.txt</td><td>426,754</td><td>107,665</td><td>bz2-9 107,706</td><td>-0.04&nbsp;%</td><td>-9.9&nbsp;%</td></tr>
+<tr><td>canterbury/plrabn12.txt</td><td>481,861</td><td>145,566</td><td>bz2-9 145,577</td><td>-0.01&nbsp;%</td><td>-12.0&nbsp;%</td></tr>
 <tr><td>canterbury/ptt5</td><td>513,216</td><td>39,012</td><td>xz-raw-9e 39,801</td><td>-1.98&nbsp;%</td><td>-2.1&nbsp;%</td></tr>
 <tr><td>canterbury/sum</td><td>38,240</td><td>9,409</td><td>xz-raw-9e 9,443</td><td>-0.36&nbsp;%</td><td>-1.0&nbsp;%</td></tr>
 <tr><td>canterbury/xargs.1</td><td>4,227</td><td>1,738</td><td>zlib-9 1,736</td><td>+0.12&nbsp;%</td><td>-4.1&nbsp;%</td></tr>
-<tr><td>silesia/dickens</td><td>10,192,446</td><td>2,799,535</td><td>bz2-9 2,799,520</td><td>+0.00&nbsp;%</td><td>-1.1&nbsp;%</td></tr>
+<tr><td>silesia/dickens</td><td>10,192,446</td><td>2,759,608</td><td>bz2-9 2,799,520</td><td>-1.43&nbsp;%</td><td>-2.5&nbsp;%</td></tr>
 <tr><td>silesia/mozilla</td><td>51,220,480</td><td>13,232,814</td><td>xz-raw-9e 13,376,180</td><td>-1.07&nbsp;%</td><td>-1.1&nbsp;%</td></tr>
 <tr><td>silesia/mr</td><td>9,970,564</td><td>2,441,295</td><td>bz2-9 2,441,280</td><td>+0.00&nbsp;%</td><td>-11.3&nbsp;%</td></tr>
-<tr><td>silesia/nci</td><td>33,553,445</td><td>1,440,074</td><td>xz-raw-9e 1,449,209</td><td>-0.63&nbsp;%</td><td>-0.6&nbsp;%</td></tr>
+<tr><td>silesia/nci</td><td>33,553,445</td><td>1,449,224</td><td>xz-raw-9e 1,449,209</td><td>+0.00&nbsp;%</td><td>-0.0&nbsp;%</td></tr>
 <tr><td>silesia/ooffice</td><td>6,152,192</td><td>2,084,481</td><td>xz-raw-9e 2,427,163</td><td>-14.12&nbsp;%</td><td>-14.1&nbsp;%</td></tr>
 <tr><td>silesia/osdb</td><td>10,085,684</td><td>2,802,807</td><td>bz2-9 2,802,792</td><td>+0.00&nbsp;%</td><td>-1.5&nbsp;%</td></tr>
 <tr><td>silesia/reymont</td><td>6,627,202</td><td>1,246,245</td><td>bz2-9 1,246,230</td><td>+0.00&nbsp;%</td><td>-5.3&nbsp;%</td></tr>
-<tr><td>silesia/samba</td><td>21,606,400</td><td>3,727,990</td><td>xz-raw-9e 3,739,464</td><td>-0.31&nbsp;%</td><td>-0.3&nbsp;%</td></tr>
-<tr><td>silesia/sao</td><td>7,251,944</td><td>4,414,312</td><td>xz-raw-9e 4,425,604</td><td>-0.26&nbsp;%</td><td>-0.3&nbsp;%</td></tr>
-<tr><td>silesia/webster</td><td>41,458,703</td><td>8,358,807</td><td>xz-raw-9e 8,368,609</td><td>-0.12&nbsp;%</td><td>-0.1&nbsp;%</td></tr>
+<tr><td>silesia/samba</td><td>21,606,400</td><td>3,739,479</td><td>xz-raw-9e 3,739,464</td><td>+0.00&nbsp;%</td><td>-0.0&nbsp;%</td></tr>
+<tr><td>silesia/sao</td><td>7,251,944</td><td>4,425,619</td><td>xz-raw-9e 4,425,604</td><td>+0.00&nbsp;%</td><td>-0.0&nbsp;%</td></tr>
+<tr><td>silesia/webster</td><td>41,458,703</td><td>8,368,624</td><td>xz-raw-9e 8,368,609</td><td>+0.00&nbsp;%</td><td>-0.0&nbsp;%</td></tr>
 <tr><td>silesia/x-ray</td><td>8,474,240</td><td>4,051,127</td><td>bz2-9 4,051,112</td><td>+0.00&nbsp;%</td><td>-9.8&nbsp;%</td></tr>
-<tr><td>silesia/xml</td><td>5,345,280</td><td>433,831</td><td>xz-raw-9e 434,830</td><td>-0.23&nbsp;%</td><td>-0.2&nbsp;%</td></tr>
-<tr><td><strong>Total (23 files)</strong></td><td>214,749,364</td><td><strong>47,479,340</strong></td><td>48,012,629</td><td><strong>-1.11&nbsp;%</strong></td><td><strong>-3.00&nbsp;%</strong></td></tr>
+<tr><td>silesia/xml</td><td>5,345,280</td><td>434,845</td><td>xz-raw-9e 434,830</td><td>+0.00&nbsp;%</td><td>-0.0&nbsp;%</td></tr>
+<tr><td><strong>Total (23 files)</strong></td><td>214,749,364</td><td><strong>47,482,071</strong></td><td>48,012,629</td><td><strong>-1.11&nbsp;%</strong></td><td><strong>-3.00&nbsp;%</strong></td></tr>
 </tbody></table>
-<p>Header included. Compression speed: best 0.26 MB/s, fast 2.86 MB/s. Total vs zstd -19 --long=27: -10.97&nbsp;%. Python 3.12.3. Reproduce with <code>python benchmarks/fair_bench.py</code>.</p>
+<p>Header included. Compression speed: best 0.94 MB/s, fast 24.65 MB/s (fast output +24.2&nbsp;% larger than best). Total vs zstd -19 --long=27: -10.97&nbsp;%. Python 3.12.3. Reproduce with <code>python benchmarks/fair_bench.py</code>.</p>
 <!-- BENCH:END -->
     </div>
   </div>
@@ -1389,7 +1389,7 @@ noscript .reveal-fix, .no-js .reveal { opacity: 1 !important; transform: none !i
       <div class="arch-arrow reveal reveal-d4"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg></div>
       <div class="arch-node reveal reveal-d4">
         <div class="node-title">Guarantee</div>
-        <div class="node-desc">Never larger than best of xz-9e / bz2-9 / zstd-19* + 16 B</div>
+        <div class="node-desc">Level best: never larger than best of xz-9e / bz2-9 / zstd-19* + 16 B</div>
         <div class="node-detail">Whole-file CRC32; decompress raises only HyperPressError</div>
       </div>
       <div class="arch-arrow reveal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg></div>

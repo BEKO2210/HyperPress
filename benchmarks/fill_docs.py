@@ -50,10 +50,12 @@ def markdown(res):
     lines += [
         "",
         "Sizes are full HPRX containers (header included). Speed on this run: `best` compresses at "
-        "%.2f MB/s and `fast` at %.2f MB/s; decompression runs at about %.0f MB/s. "
+        "%.2f MB/s and `fast` at %.2f MB/s, but `fast` output is %+.1f %% larger than `best`; "
+        "decompression runs at about %.0f MB/s. "
         "Python %s, zstd opponent: %s, %d violations of the guarantee. "
         "Reproduce with `python benchmarks/fair_bench.py`." % (
-            t["hp_best"]["comp_mbs"], t["hp_fast"]["comp_mbs"], t["hp_best"]["decomp_mbs"],
+            t["hp_best"]["comp_mbs"], t["hp_fast"]["comp_mbs"],
+            pct(t["hp_fast"]["size"], t["hp_best"]["size"]), t["hp_best"]["decomp_mbs"],
             env["python"], env["zstd"], len(res["violations"])),
     ]
     return "\n" + "\n".join(lines) + "\n"
@@ -75,10 +77,12 @@ def html_table(res, cls):
                    len(res["files"]), format(t["size"], ","), format(hp, ","), format(t["sum_best_stdlib"], ","),
                    pct(hp, t["sum_best_stdlib"]), pct(hp, t["opponents"]["xz-9e"]["size"])))
     out.append("</tbody></table>")
-    out.append("<p>Header included. Compression speed: best %.2f MB/s, fast %.2f MB/s. "
+    out.append("<p>Header included. Compression speed: best %.2f MB/s, fast %.2f MB/s "
+               "(fast output %+.1f&nbsp;%% larger than best). "
                "Total vs zstd -19 --long=27: %+.2f&nbsp;%%. Python %s. Reproduce with "
                "<code>python benchmarks/fair_bench.py</code>.</p>" % (
                    t["hp_best"]["comp_mbs"], t["hp_fast"]["comp_mbs"],
+                   pct(t["hp_fast"]["size"], t["hp_best"]["size"]),
                    pct(hp, t["opponents"]["zstd-19"]["size"]), e(res["env"]["python"])))
     return "\n" + "\n".join(out) + "\n"
 
