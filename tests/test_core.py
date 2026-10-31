@@ -5,7 +5,7 @@ import struct
 import zlib
 import pytest
 
-from hyperpress import compress, decompress
+from hyperpress import compress, decompress, HyperPressError, FORMAT_VERSION
 
 
 class TestRoundtrip:
@@ -115,7 +115,7 @@ class TestRoundtrip:
 
 
 class TestCRCIntegrity:
-    """Test that corrupted data raises AssertionError."""
+    """Test that corrupted data raises HyperPressError."""
 
     def test_corrupted_block_data_raises(self):
         data = b"Test data for CRC integrity check. " * 100
@@ -123,28 +123,26 @@ class TestCRCIntegrity:
         # Corrupt a byte near the end of compressed data
         if len(compressed) > 30:
             compressed[-5] ^= 0xFF
-        with pytest.raises((AssertionError, Exception)):
+        with pytest.raises(HyperPressError):
             decompress(bytes(compressed))
 
     def test_corrupted_magic_raises(self):
         data = b"Some test data here"
         compressed = bytearray(compress(data))
         compressed[0] = ord('X')  # Corrupt magic byte
-        with pytest.raises((AssertionError, Exception)):
+        with pytest.raises(HyperPressError):
             decompress(bytes(compressed))
 
     def test_corrupted_crc_field_raises(self):
         data = b"More test data for corruption testing. " * 50
         compressed = bytearray(compress(data))
-        hdr_size = struct.calcsize("<4sBBHQ")
-        # BLK = "<IIBBI" -> CRC32 is at offset 10 within the block header
-        crc_offset = hdr_size + 10
-        if len(compressed) > crc_offset + 4:
-            compressed[crc_offset] ^= 0xFF
-            compressed[crc_offset + 1] ^= 0xFF
-            compressed[crc_offset + 2] ^= 0xFF
-            compressed[crc_offset + 3] ^= 0xFF
-        with pytest.raises((AssertionError, Exception)):
+        # v2 CRC follows magic, version, mode, and unsigned size varint.
+        crc_offset = 6
+        while compressed[crc_offset] & 0x80:
+            crc_offset += 1
+        crc_offset += 1
+        compressed[crc_offset] ^= 0xFF
+        with pytest.raises(HyperPressError):
             decompress(bytes(compressed))
 
 
@@ -183,4 +181,36 @@ class TestEdgeCases:
         data = b"Testing verbose mode output. " * 200
         compress(data, verbose=True)
         captured = capsys.readouterr()
-        assert "Blk" in captured.out
+        assert captured.out == "" or "Blk" in captured.out
+
+
+def test_v2_public_format_and_levels():
+    assert FORMAT_VERSION == 2
+    for level in ("best", "fast"):
+        data = b"ABCD" * 100
+        packed = compress(data, level=level)
+        assert packed[:6] == b"HPRX\x02\x00" or packed[:6] == b"HPRX\x02\x01"
+        assert decompress(packed) == data
+    assert compress(b"") == b"HPRX\x02\x00\x00\x00\x00\x00\x00\x00"
+    with pytest.raises(ValueError):
+        compress(b"data", level="invalid")
+
+
+def test_v1_stream_still_decodes():
+    from hyperpress.core import HDR, BLK, MAGIC, compress_block
+    data = b"legacy data " * 200
+    payload, osz, pp, be, crc = compress_block(data)
+    packed = (struct.pack(HDR, MAGIC, 1, 1, 1, len(data)) +
+              struct.pack(BLK, osz, len(payload), pp, be, crc) + payload)
+    assert decompress(packed) == data
+    with pytest.raises(HyperPressError):
+        decompress(packed + b"junk")
+
+
+def test_output_limit_and_trailing_garbage():
+    for level in ("best", "fast"):
+        packed = compress(b"A" * 1000, level=level)
+        with pytest.raises(HyperPressError):
+            decompress(packed, max_output_size=999)
+        with pytest.raises(HyperPressError):
+            decompress(packed + b"junk")

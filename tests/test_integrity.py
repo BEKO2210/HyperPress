@@ -130,3 +130,20 @@ class TestEdgeCasePatterns:
             records.append(struct.pack("<IHBf", i, i % 1000, i % 256, float(i) * 0.1))
         data = b"".join(records)
         assert decompress(compress(data)) == data
+
+
+def test_each_whole_method_roundtrips_and_rejects_corruption():
+    import struct
+    import zlib
+    from hyperpress import HyperPressError
+    from hyperpress.core import HAVE_ZSTD, _whole_compress, _varint
+    data = b"The quick brown fox 12345\n" * 32
+    methods = [0, 1, 2, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+    if HAVE_ZSTD:
+        methods += [3, 13]
+    header = b"HPRX\x02\x00" + _varint(len(data)) + struct.pack("<I", zlib.crc32(data))
+    for method in methods:
+        packed = header + bytes((method,)) + _whole_compress(data, method)
+        assert decompress(packed) == data
+        with pytest.raises(HyperPressError):
+            decompress(packed + b"x")

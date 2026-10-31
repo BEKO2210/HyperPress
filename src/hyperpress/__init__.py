@@ -8,7 +8,7 @@ Usage:
     restored = decompress(compressed)
 """
 
-from hyperpress.core import compress, decompress
+from hyperpress.core import compress, decompress, HyperPressError, FORMAT_VERSION
 
-__version__ = "1.0.0"
-__all__ = ["compress", "decompress"]
+__version__ = "2.0.0"
+__all__ = ["compress", "decompress", "HyperPressError", "FORMAT_VERSION"]
